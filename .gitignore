@@ -6,3 +6,4 @@ prisma/generated
 .DS_Store
 .idea
 *.tsbuildinfo
+.tmp
