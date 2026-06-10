@@ -18,6 +18,8 @@ Telegram Mini App for organization feedback, suggestions, complaints, staff-targ
 ```bash
 npm install
 npm run setup
+npm run deploy:prepare
+npm run deploy
 npm run dev:all
 npm run dev
 npm run dev:api
@@ -35,6 +37,15 @@ next free port when needed.
 database schema without resetting data. Use `npm run setup:verify` when you also
 want typecheck and tests. Use `npm run dev:all` to start both the Mini App and
 API.
+
+`npm run deploy:prepare` performs one-time deployment preparation: Prisma
+generation and migrations (or `prisma db push` fallback when migration files are
+absent). Use `npm run deploy:prepare:verify` when you also want preflight
+checks (`typecheck` + `test`).
+
+`npm run deploy` runs preparation and then starts the API in production mode using
+`npm run start`. This is the recommended script to wire into Railway/CI deploy
+commands.
 
 ## Environment
 
