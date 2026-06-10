@@ -8,6 +8,7 @@ describe("Telegram submission notifications", () => {
       locale: "RU",
       submission: {
         body_text: "Кофе был холодный <script>",
+        customer_display_name: "Анонимный клиент",
         customer_contact_phone: "@guest",
         kind: "REVIEW",
         metadata: {
@@ -40,6 +41,7 @@ describe("Telegram submission notifications", () => {
       locale: "UZ",
       submission: {
         body_text: "Juda uzoq kutdik",
+        customer_display_name: null,
         customer_contact_phone: null,
         kind: "COMPLAINT",
         metadata: {
@@ -66,6 +68,7 @@ describe("Telegram submission notifications", () => {
       locale: "RU",
       submission: {
         body_text: "Не понял, кто отвечал за заказ",
+        customer_display_name: null,
         customer_contact_phone: null,
         kind: "COMPLAINT",
         metadata: {
@@ -90,6 +93,7 @@ describe("Telegram submission notifications", () => {
       locale: "RU",
       submission: {
         body_text: "Спасибо за помощь",
+        customer_display_name: null,
         customer_contact_phone: null,
         kind: "REVIEW",
         metadata: {
@@ -120,6 +124,7 @@ describe("Telegram submission notifications", () => {
       maxLength: 1000,
       submission: {
         body_text: "a".repeat(4000),
+        customer_display_name: null,
         customer_contact_phone: null,
         kind: "SUGGESTION",
         metadata: {
