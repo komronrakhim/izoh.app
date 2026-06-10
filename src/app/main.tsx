@@ -8,7 +8,10 @@ import { AdminOrganizationProvider } from "~/shared/admin";
 import { I18nProvider } from "~/shared/i18n/react";
 import { AppQueryProvider } from "~/shared/query";
 import { TmaProvider } from "~/shared/tma";
+import { installApiFetchShim } from "~/shared/api";
 import { router } from "./router";
+
+installApiFetchShim();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
