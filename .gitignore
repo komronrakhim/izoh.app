@@ -1,0 +1,8 @@
+node_modules
+dist
+coverage
+prisma/generated
+.env
+.DS_Store
+.idea
+*.tsbuildinfo

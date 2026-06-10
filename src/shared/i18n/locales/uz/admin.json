@@ -1,0 +1,482 @@
+{
+  "back": "Joyga",
+  "title": "Izoh",
+  "organization": "Joy",
+  "organizations": {
+    "title": "Joylar",
+    "hubTitle": "Joylaringiz",
+    "hubHint": "Sozlamalar va murojaatlarni ochish uchun joyni tanlang.",
+    "listTitle": "Joylar",
+    "listHint": "Har bir joyning formasi, havolasi va bildirishnomalari alohida.",
+    "select": "Joyni tanlash",
+    "introTitle": "Izoh’ga xush kelibsiz",
+    "introHint": "Mehmonlar nima yoqqani va nimani yaxshilash mumkinligini tez ayta oladi.",
+    "introPoints": [
+      {
+        "title": "Oddiy kirish oching",
+        "hint": "QR qo‘ying yoki havolani mehmon uchun qulay joyda ulashing."
+      },
+      {
+        "title": "Mehmon mavzuni tanlaydi",
+        "hint": "Fikr, shikoyat yoki g‘oya uzun formasiz yuboriladi."
+      },
+      {
+        "title": "Siz asosiy narsani ko‘rasiz",
+        "hint": "Baho, matn, rasm va xodim ismi vaziyatni tez tushunishga yordam beradi."
+      },
+      {
+        "title": "O‘zingizga moslang",
+        "hint": "Mehmon uchun kerakli variantlarni qoldiring, forma sodda va tushunarli bo‘ladi."
+      }
+    ],
+    "introAction": "Joy qo‘shish",
+    "emptyTitle": "Joy qo‘shing",
+    "emptyHint": "Yaratilgandan keyin formalari, mehmon havolasi va bildirishnomalarini sozlash mumkin.",
+    "openHint": "Admin panelni ochish",
+    "back": "Joylarga",
+    "createTitle": "Yangi joy",
+    "createHeroTitle": "Yangi joy",
+    "createHint": "Nom va logotip mehmon qayerga yozayotganini tushunishga yordam beradi.",
+    "namePlaceholder": "Joy nomi",
+    "contactPlaceholder": "Telefon yoki @username",
+    "contactHint": "Mehmon siz bilan bog‘lanishi kerak bo‘lsa ko‘rsatamiz.",
+    "presetTitle": "Format",
+    "presetHint": "Yaqin formatni tanlang, mos formalarni o‘zimiz tanlaymiz.",
+    "presets": {
+      "cafe": "Kafe",
+      "retail": "Do‘kon",
+      "services": "Xizmat",
+      "other": "Boshqa"
+    },
+    "createAction": "Yaratish",
+    "creating": "Yaratilmoqda...",
+    "savingLogo": "Logotip saqlanmoqda...",
+    "error": "Amal bajarilmadi. Qayta urinib ko‘ring.",
+    "createError": "Joy yaratilmadi. Qayta urinib ko‘ring.",
+    "logoTitle": "Logotip",
+    "logoAlt": "Joy logotipi",
+    "logoHint": "Oson taniladigan oddiy rasm yaxshiroq.",
+    "logoAction": "Logotip tanlash",
+    "logoSelected": "Logotip tayyor",
+    "logoRemove": "Logotipni olib tashlash",
+    "logoErrors": {
+      "type": "Bu rasmni qo‘shib bo‘lmadi. Boshqa rasmni sinab ko‘ring.",
+      "size": "Rasm juda og‘ir. Yengilroq rasmni sinab ko‘ring."
+    }
+  },
+  "hints": {
+    "organization": "Joyning asosiy sozlamalari.",
+    "feedback": "Yangi murojaatlarni darhol Telegramda olish mumkin.",
+    "system": "Bu yerda interfeys tilini almashtirish mumkin."
+  },
+  "language": {
+    "action": "Tilni tanlash",
+    "listTitle": "Interfeys tili",
+    "listHint": "Bildirishnomalar ham tanlangan tilda keladi."
+  },
+  "blocks": {
+    "capabilities": {
+      "title": "Formalar",
+      "hint": "Mehmon havolani ochganda kerak bo‘ladigan formalarnigina yoqing."
+    },
+    "staff": {
+      "title": "Xodimlar",
+      "hint": "Mehmon kim haqida yozayotganini bilish uchun xodimlarni qo‘shing."
+    },
+    "inbox": {
+      "title": "Murojaatlar",
+      "hint": "Barcha izoh, shikoyat va takliflar shu yerda yig‘iladi."
+    },
+    "print": {
+      "title": "QR",
+      "hint": "Stol, stoyka va stikerlar uchun."
+    },
+    "team": {
+      "title": "Sozlamalar",
+      "hint": "Mehmon havolasi, chop etiladigan QR, Telegram bildirishnomalari va interfeys tili."
+    }
+  },
+  "capabilities": {
+    "review": {
+      "title": "Izohlar",
+      "hint": "Mehmonga nima yoqishini bilish."
+    },
+    "complaint": {
+      "title": "Shikoyatlar",
+      "hint": "Muammoni tezroq ko‘rish."
+    },
+    "suggestion": {
+      "title": "Takliflar",
+      "hint": "Foydali g‘oyalarni yig‘ish."
+    },
+    "staff": {
+      "title": "Xodimlar",
+      "hint": "Mehmon kim haqida yozayotganini bilish."
+    }
+  },
+  "rows": {
+    "overview": "Joy",
+    "review": "Izohlar",
+    "complaint": "Shikoyatlar",
+    "suggestion": "Takliflar",
+    "staff": "Xodimlar",
+    "feed": "Murojaatlar",
+    "feedHint": "Izohlar, shikoyatlar va takliflar.",
+    "analytics": "Analitika",
+    "analyticsHint": "Reyting va dinamika.",
+    "qr": "QR-kod",
+    "qrHint": "Mehmon kirishini bezash va yuklab olish.",
+    "notifications": "Bildirishnomalar",
+    "locale": "Til"
+  },
+  "values": {
+    "enabled": "Yoqilgan",
+    "disabled": "O‘chirilgan",
+    "setup": "Sozlash",
+    "download": "Yuklab olish",
+    "required": "Majburiy",
+    "optional": "Ixtiyoriy"
+  },
+  "feed": {
+    "title": "Murojaatlar",
+    "hint": "Izoh, shikoyat va takliflar bitta joyda, mehmonlarda nima bo‘layotganini tez tushunish uchun.",
+    "loading": "Murojaatlar yuklanmoqda...",
+    "emptyTitle": "Hozircha bo‘sh",
+    "emptyHint": "Mehmonlar havola yoki QR orqali yozsa, xabarlar shu yerda chiqadi.",
+    "emptyAction": "Havola va QR",
+    "emptyFilteredTitle": "Bu yer hozircha bo‘sh",
+    "emptyFilteredHint": "Bu filtrda murojaat yo‘q. Barcha xabarlarni ochish mumkin.",
+    "loadErrorTitle": "Murojaatlar ochilmadi",
+    "loadErrorHint": "Ulanishni tekshirib, qayta urinib ko‘ring.",
+    "retry": "Qayta urinish",
+    "emptyMessage": {
+      "REVIEW": "Mehmon izohni matnsiz qoldirdi.",
+      "COMPLAINT": "Mehmon shikoyatni tavsifsiz yubordi.",
+      "SUGGESTION": "Mehmon taklifni matnsiz yubordi."
+    },
+    "photoCount": "{{count}} ta rasm",
+    "photoAlt": "{{index}}-rasm",
+    "date": {
+      "today": "Bugun",
+      "yesterday": "Kecha"
+    },
+    "gallery": {
+      "close": "Rasmni yopish",
+      "next": "Keyingi rasm",
+      "previous": "Oldingi rasm"
+    },
+    "meta": {
+      "contact": "Mehmon kontakti",
+      "target": "Kimga: {{value}}",
+      "targetTeam": "Kimga: butun jamoa",
+      "targetUnknown": "Kimga: aniq emas"
+    },
+    "text": {
+      "showLess": "Yig‘ish",
+      "showMore": "To‘liq ko‘rsatish"
+    },
+    "signals": {
+      "important": "E’tibor kerak",
+      "contact": "Kontakt bor"
+    },
+    "kind": {
+      "REVIEW": "Izoh",
+      "COMPLAINT": "Shikoyat",
+      "SUGGESTION": "Taklif"
+    },
+    "filters": {
+      "ALL": "Hammasi",
+      "REVIEW": "Izohlar",
+      "COMPLAINT": "Shikoyatlar",
+      "SUGGESTION": "Takliflar"
+    }
+  },
+  "moduleSettings": {
+    "title": "Sozlamalar",
+    "review": {
+      "hint": "Mehmon qanday baho qoldirishi va qachon tafsilot so‘ralishini sozlang.",
+      "guestInput": {
+        "title": "Mehmon nima qoldiradi",
+        "hint": "Matn majburiy bo‘lmasa, mehmon faqat baho qo‘yib yuborishi mumkin."
+      },
+      "lowRatingGroup": {
+        "title": "Qachon tafsilot so‘raladi",
+        "hintOptional": "Baho past bo‘lsa, batafsilroq yozishni so‘raymiz. Mehmon baho bilan birga kontakt qoldirishi mumkin.",
+        "hintRequired": "Past bahoda savol aniqroq bo‘ladi. Mehmon baho bilan birga kontakt qoldirishi mumkin."
+      },
+      "photos": {
+        "title": "Foto qo‘shish"
+      },
+      "comment": {
+        "title": "Bahoga izoh"
+      },
+      "lowRating": {
+        "titleOptional": "Matn so‘rash",
+        "titleRequired": "Sababni aniqlashtirish"
+      },
+      "contact": {
+        "title": "Bahoga kontakt"
+      },
+      "threshold": "Baho bo‘lsa",
+      "thresholdValue": "{{value}} va past",
+      "thresholdDecrease": "Baho qiymatini pasaytirish",
+      "thresholdIncrease": "Baho qiymatini oshirish"
+    },
+    "complaint": {
+      "hint": "Mehmon muammoni qanday tasvirlashi va tafsilot qoldirishini sozlang.",
+      "form": {
+        "title": "Shikoyatga nimalar qo‘shiladi",
+        "hint": "Vaziyatni tezroq tushunishga yordam beradigan narsalarni qoldiring."
+      },
+      "reply": {
+        "title": "Mehmon bilan aloqa",
+        "hint": "Yoqilsa, mehmon shikoyat bilan birga kontakt qoldirishi mumkin."
+      },
+      "photos": {
+        "title": "Shikoyatga rasm"
+      },
+      "comment": {
+        "title": "Tavsif"
+      },
+      "categories": {
+        "title": "Mavzular"
+      },
+      "categoryList": {
+        "title": "Mehmon uchun mavzular",
+        "hint": "Tez-tez uchraydigan sabablarni qoldiring. Mehmon oson tanlaydi, siz esa mazmunini tezroq tushunasiz."
+      },
+      "categoryOptions": {
+        "service": {
+          "title": "Xizmat",
+          "subtitle": "Jamoa va e’tibor"
+        },
+        "quality": {
+          "title": "Sifat",
+          "subtitle": "Xizmat, mahsulot, natija"
+        },
+        "cleanliness": {
+          "title": "Tozalik",
+          "subtitle": "Tartib va ko‘rinish"
+        },
+        "wait": {
+          "title": "Kutish",
+          "subtitle": "Tezlik va kechikish"
+        },
+        "payment": {
+          "title": "To‘lov",
+          "subtitle": "Narx, chek, qaytarish"
+        },
+        "conditions": {
+          "title": "Sharoit",
+          "subtitle": "Makoni va qulayligi"
+        },
+        "other": {
+          "title": "Boshqa",
+          "subtitle": "Boshqa holatlar uchun"
+        }
+      },
+      "contact": {
+        "title": "Mehmon kontakt qoldiradi"
+      },
+      "contactRequired": {
+        "title": "Kontakt majburiy"
+      }
+    },
+    "suggestion": {
+      "hint": "Mehmon g‘oya yoki istagini qanday yuborishini sozlang.",
+      "form": {
+        "title": "G‘oyaga nimalar qo‘shiladi",
+        "hint": "G‘oya matni doim kerak. Rasm va mavzular yordamchi bo‘lib qoladi."
+      },
+      "reply": {
+        "title": "Mehmon bilan aloqa",
+        "hint": "Yoqilsa, mehmon g‘oya bilan birga kontakt qoldirishi mumkin."
+      },
+      "photos": {
+        "title": "G‘oyaga rasm"
+      },
+      "topics": {
+        "title": "Mavzular"
+      },
+      "topicList": {
+        "title": "Mehmon uchun mavzular",
+        "hint": "Sizga haqiqatan kerak bo‘lgan g‘oya yo‘nalishlarini qoldiring."
+      },
+      "topicOptions": {
+        "service": {
+          "title": "Xizmat",
+          "subtitle": "Jamoa va e’tibor"
+        },
+        "product": {
+          "title": "Mahsulot",
+          "subtitle": "Tovar, xizmat, natija"
+        },
+        "comfort": {
+          "title": "Sharoit",
+          "subtitle": "Makoni va qulayligi"
+        },
+        "price": {
+          "title": "Narxlar",
+          "subtitle": "Qiymat va foyda"
+        },
+        "speed": {
+          "title": "Tezlik",
+          "subtitle": "Vaqt va kutish"
+        },
+        "events": {
+          "title": "Aksiyalar",
+          "subtitle": "Tadbirlar va takliflar"
+        },
+        "other": {
+          "title": "Boshqa",
+          "subtitle": "Boshqa g‘oyalar uchun"
+        }
+      },
+      "contact": {
+        "title": "Mehmon kontakt qoldiradi"
+      },
+      "contactRequired": {
+        "title": "Kontakt majburiy"
+      }
+    },
+    "staff": {
+      "hint": "Kimni maqtash yoki qayerda vaziyatni ko‘rish kerakligini tushunishga yordam beradi.",
+      "people": {
+        "title": "Xodimlar",
+        "hint": "Izoh va shikoyatlarda tanlash mumkin bo‘lgan odamlarni qo‘shing."
+      },
+      "add": {
+        "title": "Xodim qo‘shish"
+      },
+      "empty": {
+        "title": "Hozircha xodim yo‘q"
+      },
+      "inactive": "Ko‘rsatilmaydi",
+      "avatar": {
+        "title": "Foto",
+        "hint": "Foto mehmon odamni tezroq tanishiga yordam beradi.",
+        "action": "Foto tanlash",
+        "removed": "Foto olib tashlanadi.",
+        "remove": "Fotoni olib tashlash"
+      },
+      "avatarErrors": {
+        "type": "Bu fotoni qo‘shib bo‘lmadi.",
+        "size": "Foto juda og‘ir. Boshqasini sinab ko‘ring."
+      },
+      "selection": {
+        "title": "Mehmon kimni tanlay oladi",
+        "hint": "Mehmon kim haqida yozayotganini qanday ko‘rsatishini tanlang. Bitta variant doim yoqilgan qoladi."
+      },
+      "guestSelection": {
+        "title": "Aniq xodim"
+      },
+      "teamReview": {
+        "title": "Butun jamoa"
+      },
+      "dialog": {
+        "createTitle": "Yangi xodim",
+        "editTitle": "Xodim",
+        "description": "Rolni bo‘sh qoldirish mumkin.",
+        "namePlaceholder": "Ism",
+        "rolePlaceholder": "Rol, masalan Kassir",
+        "roleHint": "Rol mehmon odamni osonroq tanishiga yordam beradi.",
+        "activeTitle": "Mehmonga ko‘rsatish",
+        "create": "Qo‘shish",
+        "save": "Saqlash"
+      },
+      "createPage": {
+        "title": "Xodim qo‘shing",
+        "heroTitle": "Xodim qo‘shing",
+        "hint": "Ismni kiriting. Rol va fotoni bo‘sh qoldirish mumkin.",
+        "avatarAlt": "Xodim",
+        "error": "Xodim qo‘shilmadi. Qayta urinib ko‘ring.",
+        "savingAvatar": "Foto saqlanmoqda"
+      },
+      "editPage": {
+        "title": "Xodim",
+        "loading": "Xodim ochilmoqda",
+        "heroHint": "O‘zgarishlar mehmonlarga ko‘rinadi. Murojaatlar tarixi o‘zgarmaydi.",
+        "loadError": "Xodim ochilmadi.",
+        "error": "Saqlanmadi. Qayta urinib ko‘ring.",
+        "saved": "Saqlandi",
+        "visibilityTitle": "Mehmon formasida",
+        "visibilityHint": "O‘chirilsa, yangi mehmonlar bu xodimni ko‘rmaydi.",
+        "dangerTitle": "O‘chirish",
+        "dangerHint": "Murojaatlar tarixi o‘zgarmaydi.",
+        "delete": "Xodimni o‘chirish",
+        "deletePopup": {
+          "title": "Xodimni o‘chirasizmi?",
+          "message": "U mehmon formasidan yo‘qoladi. Murojaatlar tarixi o‘zgarmaydi.",
+          "confirm": "O‘chirish"
+        },
+        "deleteError": "Xodim o‘chirilmadi."
+      }
+    }
+  },
+  "notificationSettings": {
+    "mode": {
+      "title": "Qachon yuboriladi",
+      "hint": "Bot qanchalik tez-tez yozishini tanlang. Muhimlari — shikoyatlar va 3 yoki undan past baholi izohlar.",
+      "ALL": {
+        "title": "Barcha murojaatlar"
+      },
+      "IMPORTANT_ONLY": {
+        "title": "Faqat muhimlari"
+      },
+      "OFF": {
+        "title": "Yubormaslik"
+      }
+    },
+    "delivery": {
+      "title": "Qayerga keladi",
+      "hint": "Odatda bildirishnomalar sizga shaxsiy xabarga keladi. Guruh ulansa, u yerga ham yuborish mumkin.",
+      "owner": {
+        "title": "Shaxsiy xabarga"
+      },
+      "group": {
+        "title": "Telegram guruhga",
+        "empty": "Ulanmagan",
+        "fallbackTitle": "guruh"
+      }
+    }
+  },
+  "sections": {
+    "show": "Mehmonlarga ko‘rsatish",
+    "showHint": "O‘chirilsa, mehmon bu bo‘limni formada ko‘rmaydi.",
+    "analytics": {
+      "hint": "Reyting va dinamika.",
+      "rows": ["O‘rtacha reyting", "Kunlar bo‘yicha", "Bo‘limlar bo‘yicha"]
+    },
+    "feed": {
+      "hint": "Izohlar, shikoyatlar va takliflar bitta ro‘yxatda.",
+      "rows": ["Izohlar", "Shikoyatlar", "Takliflar"]
+    },
+    "review": {
+      "hint": "Mehmonlarga nima yoqishini va nimani yaxshilash mumkinligini ko‘rsatadi.",
+      "rows": ["Baho", "Izoh", "Rasm"]
+    },
+    "complaint": {
+      "hint": "Muammoni tez ko‘rish va tafsilotlarni ortiqcha yozishmasiz olishga yordam beradi.",
+      "rows": ["Matn", "Rasm", "Oluvchilar"]
+    },
+    "suggestion": {
+      "hint": "Mehmon g‘oyalarini yig‘ib, servisni taxminlarsiz yaxshilashga yordam beradi.",
+      "rows": ["Matn", "Rasm", "Oluvchilar"]
+    },
+    "notifications": {
+      "hint": "Bot qaysi murojaatlarni darhol yuborishi va qayerga kelishini sozlang.",
+      "rows": ["Barcha murojaatlar", "Faqat muhimlari", "Shaxsiy xabar"]
+    },
+    "qr": {
+      "hint": "Mehmon havolasi avtomatik yaratiladi. QR uni stol, stoyka yoki stikerda chiroyli joylashtirish uchun kerak.",
+      "rows": ["Havola", "A4 poster", "Stiker"]
+    },
+    "staff": {
+      "show": "Xodim tanlovi",
+      "showHint": "Yoqilsa, izoh va shikoyatlarda xodim tanlovi chiqadi.",
+      "hint": "Mehmon kim haqida yozayotganini bilib, izoh va shikoyatlarni aniqroq ko‘rishga yordam beradi.",
+      "rows": ["Xodimlar", "Formalarda"]
+    }
+  },
+  "sectionShellHint": "Bo‘lim tayyor bo‘lganda sozlamalar shu yerda chiqadi."
+}

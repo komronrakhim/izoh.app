@@ -1,0 +1,283 @@
+{
+  "title": "Qanday o‘tdi?",
+  "subtitle": "Fikringiz jamoaga yaxshilanishga yordam beradi.",
+  "qrContext": "{{context}}",
+  "back": "Orqaga",
+  "next": "Keyingi",
+  "actions": {
+    "review": "Baholash",
+    "complaint": "Xabar berish",
+    "suggestion": "Taklif"
+  },
+  "placeholders": {
+    "review": "Nima yoqdi? Nimani yaxshilash kerak?",
+    "complaint": "Nima bo‘ldi?",
+    "suggestion": "Qanday g‘oya bor? Nimani qo‘shish yoki yaxshilash mumkin?"
+  },
+  "topicOptions": {
+    "complaint": {
+      "service": "Xizmat",
+      "quality": "Sifat",
+      "cleanliness": "Tozalik",
+      "wait": "Kutish",
+      "payment": "To‘lov",
+      "conditions": "Sharoit",
+      "other": "Boshqa"
+    },
+    "suggestion": {
+      "service": "Xizmat",
+      "product": "Mahsulot",
+      "comfort": "Sharoit",
+      "price": "Narxlar",
+      "speed": "Tezlik",
+      "events": "Aksiyalar",
+      "other": "Boshqa"
+    }
+  },
+  "staffTarget": {
+    "title": "Kimga tegishli?",
+    "teamTitle": "Butun jamoa",
+    "teamSubtitle": "Aniq xodim tanlanmaydi.",
+    "unknownTitle": "Aniq emas",
+    "unknownSubtitle": "Xodim tanlamayman.",
+    "employeeSubtitle": "Xodim"
+  },
+  "wizard": {
+    "choice": {
+      "title": "Nimani aytmoqchisiz?",
+      "subtitle": "Variantni tanlang, keyin faqat keraklisini so‘raymiz."
+    },
+    "choices": {
+      "great": {
+        "title": "Hammasi yaxshi",
+        "subtitle": "Baho bering, xohlasangiz qisqa fikr yozing."
+      },
+      "ok": {
+        "title": "Yaxshilash mumkin",
+        "subtitle": "Nimani yaxshilash mumkinligini ayting."
+      },
+      "issue": {
+        "title": "Muammo bor",
+        "subtitle": "Nima noto‘g‘ri ekanini yozing."
+      },
+      "idea": {
+        "title": "G‘oya bor",
+        "subtitle": "Nimani yaxshilash mumkinligini ayting."
+      }
+    },
+    "rating": {
+      "title": "Qanday baholaysiz?",
+      "subtitle": "Hozir qanday tuyulayotganini tanlang.",
+      "labels": {
+        "1": "Yomon",
+        "2": "Unchalik emas",
+        "3": "O‘rtacha",
+        "4": "Yaxshi",
+        "5": "Ajoyib"
+      },
+      "hints": {
+        "1": "Nimani tuzatish kerakligini yozing.",
+        "2": "Nimani yaxshilash kerakligini ayting.",
+        "3": "Nima yaxshiroq bo‘lishini yozing.",
+        "4": "Nima yoqqanini yozishingiz mumkin.",
+        "5": "Lahza, xodim yoki jamoani maqtashingiz mumkin.",
+        "5_noSpecificTargets": "Eng yoqqanini va nima yaxshi bo‘lganini yozing."
+      }
+    },
+    "details": {
+      "title": "Tafsilotlarni aniqlaymiz",
+      "subtitle": "Foydali bo‘lsa, kerakli tafsilotlarni belgilang."
+    },
+    "topics": {
+      "complaint": {
+        "title": "Nima haqida?",
+        "subtitle": "Bir nechtasini tanlash mumkin."
+      },
+      "suggestion": {
+        "title": "G‘oya nima haqida?",
+        "subtitle": "Mos yo‘nalishni tanlang."
+      }
+    },
+    "staff": {
+      "title": "Kimga tegishli?",
+      "subtitle": "Aniq bilmasangiz, neytral variantni tanlang.",
+      "review": {
+        "1": {
+          "title": "Kimga tegishli?",
+          "subtitle": "Xodim esingizda bo‘lsa, tanlang. Jamoani qoldirish ham mumkin."
+        },
+        "2": {
+          "title": "Kimga tegishli?",
+          "subtitle": "Aniqlashga yordam bersa, xodimni tanlang."
+        },
+        "3": {
+          "title": "Fikr kimga tegishli?",
+          "subtitle": "Xodimni yoki butun jamoani tanlash mumkin."
+        },
+        "4": {
+          "title": "Kimni maqtaysiz?",
+          "subtitle": "Kimdir ayniqsa yordam bergan bo‘lsa, belgilang."
+        },
+        "5": {
+          "title": "Kimga rahmat aytasiz?",
+          "subtitle": "Xodimni yoki butun jamoani tanlang."
+        }
+      }
+    },
+    "comment": {
+      "review": {
+        "title": "Qo‘shimcha yozasizmi?",
+        "subtitle": "Nima yoqdi yoki nimani yaxshilash kerak?"
+      },
+      "reviewByRating": {
+        "1": {
+          "title": "Nima noto‘g‘ri ketdi?",
+          "subtitle": "Eng muhimini qisqa yozing.",
+          "placeholder": "Nima bo‘ldi? Nimani tuzatish kerak?",
+          "optional": "Qisqa yozish ham yetarli."
+        },
+        "2": {
+          "title": "Nima xafa qildi?",
+          "subtitle": "Nimani tuzatish mumkinligini yozing.",
+          "placeholder": "Nima yoqmadi? Qayerda noqulay bo‘ldi?",
+          "optional": "Bir-ikki gap ham yetarli."
+        },
+        "3": {
+          "title": "Nimani yaxshilash mumkin?",
+          "subtitle": "Yaxshiroq bo‘lishi uchun nima kerak?",
+          "placeholder": "Nima normal edi, nimani yaxshilash kerak?",
+          "optional": "Agar baho yetarli bo‘lsa, davom etish mumkin."
+        },
+        "4": {
+          "title": "Nima yoqdi?",
+          "subtitle": "Yaxshi jihatni yoki xodimni aytishingiz mumkin.",
+          "placeholder": "Nima yaxshi bo‘ldi? Kimni maqtaysiz?",
+          "optional": "Agar baho yetarli bo‘lsa, davom etish mumkin."
+        },
+        "5": {
+          "title": "Eng yoqqani nima?",
+          "subtitle": "Xohlasangiz, jamoani yoki xodimni maqtang.",
+          "placeholder": "Kimni maqtaysiz? Nima ayniqsa yoqdi?",
+          "optional": "Agar baho yetarli bo‘lsa, davom etish mumkin."
+        }
+      },
+      "complaint": {
+        "title": "Nima bo‘ldi?",
+        "subtitle": "Vaziyatni tushunishga yordam beradiganini yozing."
+      },
+      "suggestion": {
+        "title": "Qanday g‘oya?",
+        "subtitle": "Nimani qo‘shish yoki yaxshilash mumkin?"
+      },
+      "optional": {
+        "review": "Izohsiz ham davom etish mumkin.",
+        "complaint": "Qisqa tavsif vaziyatni tushunishga yordam beradi.",
+        "complaintTopic": "Tanlangan mavzu yetarli bo‘lsa, davom etish mumkin.",
+        "complaintPhoto": "Rasm vaziyatni ko‘rsatsa, davom etish mumkin.",
+        "complaintTopicPhoto": "Mavzu yoki rasm yetarli bo‘lsa, davom etish mumkin.",
+        "suggestion": "Taklif yuborish uchun g‘oya kerak."
+      },
+      "required": {
+        "review": "Davom etish uchun qisqa izoh yozing.",
+        "reviewLow": "Nimani tuzatish kerakligini yozing.",
+        "complaint": "Davom etish uchun muammoni yozing.",
+        "suggestion": "Davom etish uchun g‘oyani yozing."
+      },
+      "detailRequired": {
+        "complaintText": "Davom etish uchun muammoni yozing.",
+        "complaintTextTopic": "Tavsif qo‘shing yoki mavzuni tanlang.",
+        "complaintTextPhoto": "Tavsif yoki rasm qo‘shing.",
+        "complaintTextTopicPhoto": "Tavsif, mavzu yoki rasm qo‘shing."
+      },
+      "filled": {
+        "review": "Izoh qo‘shildi. Davom etish mumkin.",
+        "complaint": "Tavsif qo‘shildi. Davom etish mumkin.",
+        "suggestion": "G‘oya yozildi. Davom etish mumkin."
+      }
+    },
+    "contact": {
+      "titleOptional": "Kontakt qoldirasizmi?",
+      "subtitleOptional": "Javob olishni istasangiz, telefon yoki Telegram yozing.",
+      "titleRequired": "Siz bilan qanday bog‘lanish mumkin?",
+      "subtitleRequired": "Jamoa javob bera olishi uchun telefon yoki Telegram yozing.",
+      "placeholder": "Telefon yoki @username",
+      "skip": "O‘tkazib yuborish"
+    },
+    "summary": {
+      "title": "Yuborishga tayyor",
+      "subtitle": "Hammasi to‘g‘riligini tekshiring.",
+      "kind": "Nima yuboriladi",
+      "rating": "Baho",
+      "staff": "Kimga tegishli",
+      "topics": "Mavzular",
+      "comment": "Izoh",
+      "contact": "Kontakt",
+      "photos": "Rasmlar",
+      "photosValue": "{{value}} ta",
+      "noText": "Izohsiz.",
+      "contactPrivateHint": "Kontaktni faqat jamoa ko‘radi.",
+      "contactOptionalHint": "Kontakt qoldirish shart emas."
+    },
+    "done": {
+      "default": {
+        "title": "Rahmat",
+        "subtitle": "Xabar jamoaga yetib bordi."
+      },
+      "reviewByRating": {
+        "1": {
+          "title": "Yozganingiz uchun rahmat",
+          "subtitle": "Jamoaga yetkazdik. Nima noto‘g‘ri ketganini tezroq ko‘rishga yordam beradi."
+        },
+        "2": {
+          "title": "Aytganingiz uchun rahmat",
+          "subtitle": "Jamoa fikringizni ko‘radi va vaziyatni aniqroq tushunadi."
+        },
+        "3": {
+          "title": "Fikringiz uchun rahmat",
+          "subtitle": "Bu nimani yaxshilash mumkinligini tushunishga yordam beradi."
+        },
+        "4": {
+          "title": "Fikringiz uchun rahmat",
+          "subtitle": "Jamoa nima yaxshi chiqqanini ko‘radi va shu darajani saqlashga harakat qiladi."
+        },
+        "5": {
+          "title": "Rahmat, juda yoqimli",
+          "subtitle": "Iliq so‘zlaringizni jamoaga yetkazdik. Bunday fikrlar rostdan quvontiradi."
+        }
+      },
+      "complaint": {
+        "title": "Xabar berganingiz uchun rahmat",
+        "subtitle": "Xabar jamoaga yetib bordi. Ular tafsilotlarni ko‘rib, vaziyatni tushunishadi."
+      },
+      "suggestion": {
+        "title": "G‘oyangiz uchun rahmat",
+        "subtitle": "Uni jamoaga yetkazdik. Bunday g‘oyalar yaxshiroq bo‘lishga yordam beradi."
+      }
+    }
+  },
+  "photos": {
+    "add": "Rasm",
+    "hints": {
+      "review": "Tafsilotni ko‘rsatish osonroq bo‘lsa, rasm qo‘shing.",
+      "complaint": "Rasm vaziyatni tezroq tushunishga yordam beradi.",
+      "suggestion": "G‘oya misolda aniqroq bo‘lsa, rasm qo‘shing."
+    },
+    "remove": "Rasmni olib tashlash",
+    "errors": {
+      "limit": "4 tagacha rasm qo‘shish mumkin.",
+      "size": "Rasm hajmi juda katta.",
+      "type": "Bu rasm qo‘shilmadi.",
+      "upload": "Rasm yuklanmadi."
+    }
+  },
+  "attachPhoto": "Rasm",
+  "attachPhotoSlot": "{{index}}-rasm",
+  "submit": "Yuborish",
+  "submitSuccess": "Rahmat, yuborildi",
+  "submitError": "Yuborilmadi. Qayta urinib ko‘ring.",
+  "loading": "Forma ochilmoqda...",
+  "errorTitle": "Forma ochilmadi",
+  "errorSubtitle": "Qayta urinib ko‘ring yoki yangi havola so‘rang.",
+  "emptyTitle": "Forma mavjud emas",
+  "emptySubtitle": "Bu joy mehmon formasini hali yoqmagan."
+}

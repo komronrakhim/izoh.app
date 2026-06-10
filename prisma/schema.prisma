@@ -1,0 +1,407 @@
+generator client {
+  provider   = "prisma-client-js"
+  output     = "./generated/prisma"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AppLocale {
+  RU
+  UZ
+}
+
+enum LocaleSource {
+  TELEGRAM
+  MANUAL
+}
+
+enum UserSystemRole {
+  USER
+  ADMIN
+}
+
+enum OrganizationStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum OrganizationModule {
+  REVIEW
+  COMPLAINT
+  SUGGESTION
+  STAFF
+}
+
+enum SubmissionKind {
+  REVIEW
+  COMPLAINT
+  SUGGESTION
+}
+
+enum MediaOwnerType {
+  USER
+  ORGANIZATION
+  STAFF_MEMBER
+  SUBMISSION
+}
+
+enum MediaAssetKind {
+  ORGANIZATION_LOGO
+  STAFF_AVATAR
+  SUBMISSION_PHOTO
+  SUBMISSION_THUMBNAIL
+}
+
+enum MediaAssetStatus {
+  UPLOADING
+  PROCESSING
+  READY
+  FAILED
+  DELETED
+}
+
+enum MediaUploadSessionStatus {
+  PENDING
+  UPLOADED
+  PROCESSING
+  READY
+  FAILED
+  CANCELED
+  EXPIRED
+}
+
+enum OrganizationNotificationMode {
+  ALL
+  IMPORTANT_ONLY
+  OFF
+}
+
+enum TelegramDeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+enum TelegramNotificationTargetType {
+  OWNER_DM
+  TELEGRAM_GROUP
+}
+
+enum BroadcastTargetKind {
+  ALL_USERS
+  ORGANIZATION_OWNERS
+  SYSTEM_ADMINS
+}
+
+enum BroadcastStatus {
+  DRAFT
+  SENDING
+  SENT
+  FAILED
+  CANCELED
+}
+
+enum BroadcastRecipientStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+model User {
+  id            String         @id @default(cuid())
+  telegram_id   BigInt         @unique
+  first_name    String
+  last_name     String?
+  username      String?
+  language_code String?
+  photo_url     String?
+  locale        AppLocale      @default(RU)
+  locale_source LocaleSource   @default(TELEGRAM)
+  system_role   UserSystemRole @default(USER)
+
+  owned_organizations     Organization[]                 @relation("OwnedOrganizations")
+  customer_submissions    Submission[]                   @relation("CustomerSubmissions")
+  media_upload_sessions   MediaUploadSession[]
+  notification_deliveries TelegramNotificationDelivery[] @relation("RecipientUserDeliveries")
+  created_broadcasts      Broadcast[]                    @relation("CreatedBroadcasts")
+  broadcast_recipients    BroadcastRecipient[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([username])
+  @@index([locale])
+  @@index([locale_source])
+  @@index([system_role])
+}
+
+model Organization {
+  id                  String             @id @default(cuid())
+  owner_user_id       String
+  status              OrganizationStatus @default(ACTIVE)
+  name                String
+  slug                String             @unique
+  description         String             @default("")
+  contact_text        String             @default("")
+  logo_media_asset_id String?
+  locale              AppLocale          @default(RU)
+
+  owner                User                             @relation("OwnedOrganizations", fields: [owner_user_id], references: [id], onDelete: Cascade)
+  module_settings      OrganizationModuleSetting[]
+  notification_setting OrganizationNotificationSetting?
+  guest_contexts       OrganizationGuestContext[]
+  staff_members        StaffMember[]
+  submissions          Submission[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([owner_user_id, status])
+  @@index([status, created_at])
+}
+
+model OrganizationNotificationSetting {
+  id                     String                       @id @default(cuid())
+  organization_id        String                       @unique
+  mode                   OrganizationNotificationMode @default(ALL)
+  owner_dm_enabled       Boolean                      @default(true)
+  telegram_group_enabled Boolean                      @default(false)
+  telegram_group_chat_id BigInt?
+  telegram_group_title   String?
+
+  organization Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([mode])
+  @@index([telegram_group_enabled])
+}
+
+model OrganizationModuleSetting {
+  id              String             @id @default(cuid())
+  organization_id String
+  module          OrganizationModule
+  enabled         Boolean            @default(true)
+  config          Json?
+
+  organization Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([organization_id, module])
+  @@index([module, enabled])
+}
+
+model OrganizationGuestContext {
+  id              String @id @default(cuid())
+  organization_id String
+  code            String
+  label           String
+
+  organization Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([organization_id, code])
+  @@unique([organization_id, label])
+  @@index([organization_id, created_at])
+}
+
+model StaffMember {
+  id                    String  @id @default(cuid())
+  organization_id       String
+  display_name          String
+  role_title            String  @default("")
+  avatar_media_asset_id String?
+  is_active             Boolean @default(true)
+  sort_order            Int     @default(0)
+
+  organization Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  submissions  Submission[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([organization_id, is_active, sort_order])
+}
+
+model Submission {
+  id                     String         @id @default(cuid())
+  organization_id        String
+  customer_user_id       String?
+  target_staff_member_id String?
+  kind                   SubmissionKind
+  rating                 Int?
+  body_text              String         @default("")
+  customer_allows_reply  Boolean        @default(false)
+  customer_contact_phone String?
+  customer_display_name  String?
+  qr_context             String?
+  locale                 AppLocale      @default(RU)
+  metadata               Json?
+
+  organization            Organization                   @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  customer_user           User?                          @relation("CustomerSubmissions", fields: [customer_user_id], references: [id], onDelete: SetNull)
+  target_staff_member     StaffMember?                   @relation(fields: [target_staff_member_id], references: [id], onDelete: SetNull)
+  attachments             SubmissionAttachment[]
+  notification_deliveries TelegramNotificationDelivery[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([organization_id, created_at])
+  @@index([kind, created_at])
+  @@index([target_staff_member_id, created_at])
+  @@index([customer_user_id, created_at])
+}
+
+model SubmissionAttachment {
+  id             String @id @default(cuid())
+  submission_id  String
+  media_asset_id String
+  sort_order     Int    @default(0)
+
+  submission  Submission @relation(fields: [submission_id], references: [id], onDelete: Cascade)
+  media_asset MediaAsset @relation(fields: [media_asset_id], references: [id], onDelete: Restrict)
+
+  created_at DateTime @default(now())
+
+  @@unique([submission_id, media_asset_id])
+  @@index([submission_id, sort_order])
+  @@index([media_asset_id])
+}
+
+model MediaUploadSession {
+  id                String                   @id @default(cuid())
+  user_id           String?
+  owner_type        MediaOwnerType
+  owner_id          String
+  kind              MediaAssetKind
+  status            MediaUploadSessionStatus @default(PENDING)
+  bucket            String
+  temp_storage_key  String                   @unique
+  final_storage_key String?
+  file_name         String
+  content_type      String
+  size_limit_bytes  Int
+  expires_at        DateTime
+  uploaded_at       DateTime?
+  processed_at      DateTime?
+  failed_at         DateTime?
+  last_error        String?
+  metadata          Json?
+
+  user         User?        @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  media_assets MediaAsset[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([user_id, status, created_at])
+  @@index([owner_type, owner_id, status, created_at])
+  @@index([status, expires_at])
+  @@index([kind, status, created_at])
+}
+
+model MediaAsset {
+  id                String           @id @default(cuid())
+  upload_session_id String?
+  owner_type        MediaOwnerType
+  owner_id          String
+  kind              MediaAssetKind
+  status            MediaAssetStatus @default(PROCESSING)
+  bucket            String
+  storage_key       String           @unique
+  public_url        String
+  content_type      String
+  size_bytes        Int?
+  width             Int?
+  height            Int?
+  checksum          String?
+  metadata          Json?
+
+  upload_session         MediaUploadSession?    @relation(fields: [upload_session_id], references: [id], onDelete: SetNull)
+  submission_attachments SubmissionAttachment[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([upload_session_id])
+  @@index([owner_type, owner_id, kind, created_at])
+  @@index([kind, status, created_at])
+}
+
+model TelegramNotificationDelivery {
+  id                   String                         @id @default(cuid())
+  submission_id        String
+  target_type          TelegramNotificationTargetType @default(OWNER_DM)
+  recipient_user_id    String?
+  status               TelegramDeliveryStatus         @default(PENDING)
+  telegram_chat_id     BigInt?
+  telegram_message_ids Json?
+  error                String?
+  sent_at              DateTime?
+
+  submission     Submission @relation(fields: [submission_id], references: [id], onDelete: Cascade)
+  recipient_user User?      @relation("RecipientUserDeliveries", fields: [recipient_user_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([submission_id, status])
+  @@index([recipient_user_id, status, created_at])
+  @@index([target_type, status, created_at])
+}
+
+model Broadcast {
+  id                 String              @id @default(cuid())
+  created_by_user_id String?
+  target_kind        BroadcastTargetKind @default(ALL_USERS)
+  status             BroadcastStatus     @default(DRAFT)
+  locale             AppLocale?
+  text               String
+  metadata           Json?
+  started_at         DateTime?
+  sent_at            DateTime?
+  failed_at          DateTime?
+  error              String?
+
+  created_by_user User?                @relation("CreatedBroadcasts", fields: [created_by_user_id], references: [id], onDelete: SetNull)
+  recipients      BroadcastRecipient[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([created_by_user_id, created_at])
+  @@index([target_kind, status])
+  @@index([status, created_at])
+}
+
+model BroadcastRecipient {
+  id                  String                   @id @default(cuid())
+  broadcast_id        String
+  user_id             String
+  status              BroadcastRecipientStatus @default(PENDING)
+  telegram_chat_id    BigInt?
+  telegram_message_id Int?
+  error               String?
+  sent_at             DateTime?
+
+  broadcast Broadcast @relation(fields: [broadcast_id], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([broadcast_id, user_id])
+  @@index([user_id, status, created_at])
+  @@index([status, created_at])
+}

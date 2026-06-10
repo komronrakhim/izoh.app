@@ -1,0 +1,44 @@
+{
+  "notifications": {
+    "headline": {
+      "review": "Yangi izoh",
+      "lowReview": "Past baho",
+      "complaint": "Yangi shikoyat",
+      "suggestion": "Yangi taklif"
+    },
+    "sections": {
+      "summary": "Qisqacha",
+      "place": "Joy",
+      "guest": "Mijoz",
+      "details": "Tafsilotlar",
+      "message": "Xabar"
+    },
+    "fields": {
+      "kind": "Turi",
+      "customer": "Mijoz",
+      "type": "Turi",
+      "organization": "Joy",
+      "source": "Qayerdan",
+      "rating": "Baho",
+      "attachments": "Foto",
+      "signal": "Signal",
+      "topics": "Mavzular",
+      "staff": "Kimga tegishli",
+      "contact": "Kontakt"
+    },
+    "staffTarget": {
+      "team": "butun jamoa",
+      "unknown": "aniq emas"
+    },
+    "signals": {
+      "lowRating": "e'tibor kerak",
+      "important": "muhim murojaat"
+    },
+    "emptyText": "Izohsiz",
+    "kind": {
+      "review": "Izoh",
+      "complaint": "Shikoyat",
+      "suggestion": "Taklif"
+    }
+  }
+}

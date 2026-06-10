@@ -1,0 +1,19 @@
+{
+  "brand": "Izoh",
+  "appType": "Mini App",
+  "loading": "Загружаем...",
+  "poweredBy": "Powered by Izoh",
+  "actions": {
+    "clear": "Очистить"
+  },
+  "locales": {
+    "ru": {
+      "label": "Русский",
+      "short": "RU"
+    },
+    "uz": {
+      "label": "O‘zbekcha",
+      "short": "UZ"
+    }
+  }
+}
