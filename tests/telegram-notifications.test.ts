@@ -32,7 +32,7 @@ describe("Telegram submission notifications", () => {
 
     expect(normalized).toContain("Низкая оценка");
     expect(normalized).toContain("Тип: Отзыв");
-    expect(normalized).toContain("Оценка: 2/5");
+    expect(normalized).toContain("(2/5)");
     expect(normalized).toContain("Сигнал: нужна внимательность");
     expect(normalized).toContain("Откуда: Стол 4");
     expect(normalized).toContain("Кого касается: Komron · Кассир");
