@@ -11,7 +11,11 @@ const isRelativeApiPath = (url: ApiRequestInput) => {
     return url.startsWith("/api/");
   }
 
-  return url.pathname.startsWith("/api/");
+  if (url instanceof URL) {
+    return url.pathname.startsWith("/api/");
+  }
+
+  return new URL(url.url).pathname.startsWith("/api/");
 };
 
 const resolveApiUrl = (url: ApiRequestInput) => {
@@ -23,7 +27,9 @@ const resolveApiUrl = (url: ApiRequestInput) => {
     return `${apiBaseUrl}${url}`;
   }
 
-  return new URL(`${apiBaseUrl}${url.pathname}${url.search}${url.hash}`);
+  const requestUrl = url instanceof URL ? url : new URL(url.url);
+
+  return `${apiBaseUrl}${requestUrl.pathname}${requestUrl.search}${requestUrl.hash}`;
 };
 
 const rawFetch: typeof fetch = globalThis.fetch.bind(globalThis);
