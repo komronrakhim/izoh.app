@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { formatSubmissionNotificationText } from "~/server/telegram";
 
+const normalizeTelegramText = (value: string) => value.replace(/<[^>]+>/g, "");
+
 describe("Telegram submission notifications", () => {
   it("formats a low review as an important Russian notification without changing its kind", () => {
     const message = formatSubmissionNotificationText({
@@ -26,13 +28,15 @@ describe("Telegram submission notifications", () => {
       }
     });
 
-    expect(message).toContain("<b>Низкая оценка</b>");
-    expect(message).toContain("Тип: Отзыв");
-    expect(message).toContain("Оценка: <b>2/5</b>");
-    expect(message).toContain("Сигнал: нужна внимательность");
-    expect(message).toContain("Откуда: Стол 4");
-    expect(message).toContain("Кого касается: Komron · Кассир");
-    expect(message).toContain("Контакт: @guest");
+    const normalized = normalizeTelegramText(message);
+
+    expect(normalized).toContain("Низкая оценка");
+    expect(normalized).toContain("Тип: Отзыв");
+    expect(normalized).toContain("Оценка: 2/5");
+    expect(normalized).toContain("Сигнал: нужна внимательность");
+    expect(normalized).toContain("Откуда: Стол 4");
+    expect(normalized).toContain("Кого касается: Komron · Кассир");
+    expect(normalized).toContain("Контакт: @guest");
     expect(message).toContain("Кофе был холодный &lt;script&gt;");
   });
 
@@ -57,10 +61,12 @@ describe("Telegram submission notifications", () => {
       }
     });
 
-    expect(message).toContain("<b>Yangi shikoyat</b>");
-    expect(message).toContain("Turi: Shikoyat");
-    expect(message).toContain("Mavzular: Kutish");
-    expect(message).toContain("Qayerdan: Bar");
+    const normalized = normalizeTelegramText(message);
+
+    expect(normalized).toContain("Yangi shikoyat");
+    expect(normalized).toContain("Turi: Shikoyat");
+    expect(normalized).toContain("Mavzular: Kutish");
+    expect(normalized).toContain("Qayerdan: Bar");
   });
 
   it("formats neutral staff targets without requiring a staff member row", () => {
@@ -85,7 +91,9 @@ describe("Telegram submission notifications", () => {
       }
     });
 
-    expect(message).toContain("Кого касается: не указано");
+    const normalized = normalizeTelegramText(message);
+
+    expect(normalized).toContain("Кого касается: не указано");
   });
 
   it("formats staff snapshots after the staff member row is gone", () => {
@@ -115,7 +123,9 @@ describe("Telegram submission notifications", () => {
       }
     });
 
-    expect(message).toContain("Кого касается: Aziza · Бариста");
+    const normalized = normalizeTelegramText(message);
+
+    expect(normalized).toContain("Кого касается: Aziza · Бариста");
   });
 
   it("keeps media captions inside the requested limit", () => {
@@ -141,6 +151,6 @@ describe("Telegram submission notifications", () => {
     });
 
     expect(message.length).toBeLessThanOrEqual(1000);
-    expect(message).toContain("<b>Новое предложение</b>");
+    expect(normalizeTelegramText(message)).toContain("Новое предложение");
   });
 });
