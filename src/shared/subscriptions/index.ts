@@ -26,7 +26,7 @@ export type SubscriptionPlan = {
 
 export const SUBSCRIPTION_PLANS = {
   MONTHLY: {
-    amountStars: 10,
+    amountStars: 500,
     code: "MONTHLY",
     period: "month",
     recurring: true
