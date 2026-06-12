@@ -1,0 +1,722 @@
+{
+  "back": "To the place",
+  "title": "Izoh",
+  "organization": "Place",
+  "organizations": {
+    "title": "Places",
+    "hubTitle": "Your places",
+    "hubHint": "Select a location to open Settings and Cases.",
+    "listTitle": "Places",
+    "listHint": "You can drive up to {{count}} places. Each has its own forms, link and notifications.",
+    "listLimitHint": "Now you can lead to {{count}} places. The limit has already been reached.",
+    "select": "Choose a place",
+    "introTitle": "Welcome to Izoh",
+    "introHint": "Help guests quickly say what they liked and what could be improved.",
+    "introPoints": [
+      {
+        "title": "Open a simple login",
+        "hint": "Put QR or share the link where it is convenient for the guest."
+      },
+      {
+        "title": "Guest selects a topic",
+        "hint": "Feedback, complaint or idea is sent without lengthy forms."
+      },
+      {
+        "title": "You see the main thing",
+        "hint": "The rating, text, photo and name of the employee help you quickly understand the situation."
+      }
+    ],
+    "introAction": "Add a place",
+    "emptyTitle": "Add a place",
+    "emptyHint": "Once created, you can customize your forms, guest link, and notifications.",
+    "openHint": "Open admin panel",
+    "back": "To the places",
+    "createTitle": "New place",
+    "createHeroTitle": "New place",
+    "createHint": "The name and logo help guests understand where they are writing.",
+    "namePlaceholder": "Place name",
+    "contactPlaceholder": "Phone or @username",
+    "contactHint": "We will show the guest if he needs to contact you.",
+    "presetTitle": "Format",
+    "presetHint": "Choose a similar format, and we will select suitable forms.",
+    "presets": {
+      "cafe": "Cafe",
+      "retail": "Store",
+      "services": "Services",
+      "other": "Other"
+    },
+    "createAction": "Create",
+    "creating": "We create...",
+    "savingLogo": "Saving the logo...",
+    "error": "It didn't work out. Try again.",
+    "createError": "It was not possible to create a place. Try again.",
+    "logoTitle": "Logo",
+    "logoAlt": "Place logo",
+    "logoHint": "A simple picture that is easy to recognize is better.",
+    "logoAction": "Select logo",
+    "logoSelected": "The logo is ready",
+    "logoRemove": "Remove logo",
+    "logoUpdateError": "Failed to update the logo. Try again.",
+    "openGuestForm": "Guest form",
+    "dangerTitle": "Removal",
+    "dangerHint": "The deletion cannot be undone.",
+    "delete": "Delete place",
+    "deleteError": "Failed to delete location. Try again.",
+    "deletePopup": {
+      "title": "Delete place?",
+      "message": "“{{name}}” and all location data will be deleted: requests, employees, media, QR contexts, notifications and settings. This cannot be undone.",
+      "confirm": "Delete"
+    },
+    "logoErrors": {
+      "type": "This image could not be added. Try something else.",
+      "size": "The image is too heavy. Try a lighter picture."
+    }
+  },
+  "hints": {
+    "organization": "Basic location settings.",
+    "feedback": "New requests can be received immediately in Telegram.",
+    "system": "Here you can switch the interface language."
+  },
+  "language": {
+    "action": "Select language",
+    "listTitle": "Interface language",
+    "listHint": "Notifications will also be sent in the selected language."
+  },
+  "blocks": {
+    "capabilities": {
+      "title": "Forms",
+      "hint": "Include only what guests actually need after opening the link."
+    },
+    "staff": {
+      "title": "Staff",
+      "hint": "Add people if you want to understand who the guest is writing about."
+    },
+    "inbox": {
+      "title": "Submissions",
+      "hint": "All reviews, complaints and suggestions are collected here."
+    },
+    "print": {
+      "title": "QR",
+      "hint": "For tables, counters and stickers."
+    },
+    "team": {
+      "title": "Settings",
+      "hint": "Guest link, printed QR, Telegram notifications and interface language."
+    }
+  },
+  "capabilities": {
+    "review": {
+      "title": "Reviews",
+      "hint": "Understand what guests like."
+    },
+    "complaint": {
+      "title": "Complaints",
+      "hint": "Spot the problem faster."
+    },
+    "suggestion": {
+      "title": "Suggestions",
+      "hint": "Collect useful ideas."
+    },
+    "staff": {
+      "title": "Staff",
+      "hint": "Understand who the guest is writing about."
+    }
+  },
+  "rows": {
+    "overview": "Place",
+    "review": "Reviews",
+    "complaint": "Complaints",
+    "suggestion": "Suggestions",
+    "staff": "Staff",
+    "feed": "Submissions",
+    "feedHint": "Reviews, complaints, and suggestions.",
+    "analytics": "Analytics",
+    "analyticsHint": "Rating and dynamics.",
+    "qr": "QR-code",
+    "qrHint": "Style the guest entry and download.",
+    "notifications": "Notifications",
+    "subscription": "Subscription",
+    "locale": "Language",
+    "faq": "Questions",
+    "support": "Support"
+  },
+  "faq": {
+    "title": "Questions",
+    "subtitle": "Briefly about how the Izoh works and what is best to configure first.",
+    "items": {
+      "guestEntry": {
+        "title": "How do guests open the form?",
+        "body": "Via QR code or link. You can create separate QR codes for tables, the counter, or other spots, and the context will be saved with the guest message."
+      },
+      "setup": {
+        "title": "What should you configure first?",
+        "body": "Leave only the necessary forms, add a logo and check the text for guests. This will make the shape feel like part of your space."
+      },
+      "staff": {
+        "title": "When is staff needed?",
+        "body": "If it is important for guests to choose an employee or team. This helps you quickly understand who was thanked or where help is needed."
+      },
+      "notifications": {
+        "title": "How do notifications arrive?",
+        "body": "You can receive requests in a personal chat or group Telegram. It is better not to lose important complaints and low ratings."
+      }
+    },
+    "support": {
+      "title": "Need help?",
+      "body": "Write to Telegram if something doesn’t open, looks strange, or you want to discuss the setup."
+    }
+  },
+  "values": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "enabled": "Included",
+    "disabled": "Disabled",
+    "setup": "Customize",
+    "open": "Open",
+    "download": "Download",
+    "required": "Required",
+    "optional": "Not required"
+  },
+  "feed": {
+    "title": "Submissions",
+    "hint": "Reviews, complaints and suggestions in one place to quickly understand what is happening with guests.",
+    "loading": "Loading requests...",
+    "emptyTitle": "Empty for now",
+    "emptyHint": "When guests start writing via the link or QR, messages will appear here.",
+    "emptyAction": "Link and QR",
+    "emptyFilteredTitle": "It's empty here yet",
+    "emptyFilteredHint": "There are no hits in this filter. You can open all messages.",
+    "loadErrorTitle": "Failed to open requests",
+    "loadErrorHint": "Check your connection and try again.",
+    "retry": "Repeat",
+    "emptyMessage": {
+      "REVIEW": "The guest left a review without text.",
+      "COMPLAINT": "The guest submitted a complaint without a description.",
+      "SUGGESTION": "The guest sent a suggestion without text."
+    },
+    "photoCount": "{{count}} photo",
+    "photoAlt": "Photo {{index}}",
+    "date": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    },
+    "gallery": {
+      "close": "Close photo",
+      "next": "Next photo",
+      "previous": "Previous photo"
+    },
+    "meta": {
+      "contact": "Guest contact",
+      "target": "To: {{value}}",
+      "targetTeam": "To: the whole team",
+      "targetUnknown": "To: not sure"
+    },
+    "text": {
+      "showLess": "Collapse",
+      "showMore": "Show in full"
+    },
+    "signals": {
+      "important": "Need attention",
+      "contact": "I have contact"
+    },
+    "kind": {
+      "REVIEW": "Review",
+      "COMPLAINT": "Complaint",
+      "SUGGESTION": "Suggestion"
+    },
+    "filters": {
+      "ALL": "All",
+      "REVIEW": "Reviews",
+      "COMPLAINT": "Complaints",
+      "SUGGESTION": "Suggestions"
+    }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "loadErrorTitle": "Failed to open analytics",
+    "loadErrorHint": "Check your connection and try again.",
+    "retry": "Repeat",
+    "periods": {
+      "7D": "7 days",
+      "30D": "30 days",
+      "90D": "90 days"
+    },
+    "tabs": {
+      "overview": "Review",
+      "mood": "Mood",
+      "topics": "Topics",
+      "team": "Team",
+      "contexts": "Places",
+      "time": "Time"
+    },
+    "trend": {
+      "up": "+{{count}} to the previous period",
+      "down": "-{{count}} to the previous period",
+      "flat": "No changes"
+    },
+    "overview": {
+      "total": "Total requests",
+      "summaryTitle": "The main thing",
+      "detailsTitle": "How guests write"
+    },
+    "summary": {
+      "emptyTitle": "It's quiet for now",
+      "emptyText": "When guests start writing, a short picture will appear here.",
+      "totalTitle": "{{count}} requests",
+      "totalText": "For the selected period.",
+      "moodEmptyTitle": "The mood will come later",
+      "moodEmptyText": "We need reviews with ratings.",
+      "moodGoodTitle": "Good mood",
+      "moodGoodText": "Average rating {{rating}}.",
+      "moodMixedTitle": "The mood is different",
+      "moodMixedText": "There are good reviews and individual signals.",
+      "moodAttentionTitle": "There are signals",
+      "moodAttentionText": "Low ratings: {{count}}.",
+      "contextTitle": "Most often they write: {{context}}",
+      "contextText": "{{count}} calls from this context.",
+      "peakTitle": "Active time: {{time}}",
+      "peakText": "{{count}} calls around this time."
+    },
+    "attention": {
+      "title": "Worth a look",
+      "allGoodTitle": "No serious signals",
+      "allGoodText": "So far everything looks calm.",
+      "complaintTopicTitle": "Subject of complaints: {{topic}}",
+      "complaintTopicText": "{{count}} times per period.",
+      "contextTitle": "{{context}}",
+      "contextText": "{{count}} signals: complaints or low ratings.",
+      "lowRatingsTitle": "Low ratings",
+      "lowRatingsText": "{{count}} ratings require attention."
+    },
+    "metrics": {
+      "reviews": "Reviews",
+      "complaints": "Complaints",
+      "suggestions": "Suggestions",
+      "mood": "Average mood"
+    },
+    "engagement": {
+      "withText": "With text",
+      "withPhotos": "With photo",
+      "withContact": "With contact"
+    },
+    "mood": {
+      "positive": "Positive",
+      "neutral": "Neutral",
+      "negative": "Low",
+      "average": "Average",
+      "distribution": "Estimated"
+    },
+    "topics": {
+      "complaints": "In complaints",
+      "suggestions": "In sentences"
+    },
+    "team": {
+      "thanks": "Acknowledgments",
+      "mentions": "Mentions",
+      "teamThanks": "Team",
+      "attention": "Signals",
+      "people": "Who are they thanking?",
+      "personMeta": "{{mentions}} mentions, {{complaints}} signals",
+      "personMetaWithRole": "{{role}} {{mentions}} mentions, {{complaints}} signals"
+    },
+    "contexts": {
+      "title": "Where do they write from?",
+      "quietMeta": "Mostly calm",
+      "attentionMeta": "{{count}} signals to attention"
+    },
+    "time": {
+      "peak": "More often they write about",
+      "noPeak": "No data yet",
+      "weekdays": "By day of the week"
+    },
+    "empty": {
+      "reviews": "There are no reviews with ratings yet.",
+      "complaint": "Complaint topics will appear as guests start selecting them.",
+      "suggestion": "Suggestion topics will appear as guests begin to select them.",
+      "team": "When guests start selecting employees, thanks and mentions will appear here.",
+      "contexts": "Contexts will appear when a link or QR is created for a table, counter, or another spot."
+    }
+  },
+  "moduleSettings": {
+    "title": "Settings",
+    "review": {
+      "hint": "Customize how a guest leaves a rating and when to ask for details.",
+      "guestInput": {
+        "title": "What can a guest leave?",
+        "hint": "If text is optional, the guest can simply rate it."
+      },
+      "lowRatingGroup": {
+        "title": "When to ask for details",
+        "hintOptional": "If the score is low, please write in more detail. The guest will be able to leave a contact along with a rating.",
+        "hintRequired": "For a low score, the question will become more precise. The guest will be able to leave a contact along with a rating."
+      },
+      "photos": {
+        "title": "Photo from guest"
+      },
+      "comment": {
+        "title": "Text for evaluation"
+      },
+      "lowRating": {
+        "titleOptional": "Request text",
+        "titleRequired": "Specify the reason"
+      },
+      "contact": {
+        "title": "Contact for evaluation"
+      },
+      "threshold": "When assessing",
+      "thresholdValue": "{{value}} and below",
+      "thresholdDecrease": "Reduce rating value",
+      "thresholdIncrease": "Increase rating value"
+    },
+    "complaint": {
+      "hint": "Set up how the guest can describe the problem and leave details.",
+      "form": {
+        "title": "What to add to the complaint",
+        "hint": "Leave only what will help you understand the situation faster."
+      },
+      "reply": {
+        "title": "Guest communication",
+        "hint": "If enabled, the guest will be able to leave a contact along with the complaint."
+      },
+      "photos": {
+        "title": "Photo for the complaint"
+      },
+      "comment": {
+        "title": "Description"
+      },
+      "categories": {
+        "title": "Topics"
+      },
+      "categoryList": {
+        "title": "Guest Topics",
+        "hint": "Leave the common reasons. This makes it easier for the guest to choose, and easier for you to understand the essence."
+      },
+      "categoryOptions": {
+        "service": {
+          "title": "Service",
+          "subtitle": "Team and attention"
+        },
+        "quality": {
+          "title": "Quality",
+          "subtitle": "Service, product, result"
+        },
+        "cleanliness": {
+          "title": "Cleanliness",
+          "subtitle": "Order and appearance"
+        },
+        "wait": {
+          "title": "Waiting",
+          "subtitle": "Speed and latency"
+        },
+        "payment": {
+          "title": "Payment",
+          "subtitle": "Price, check, return"
+        },
+        "conditions": {
+          "title": "Terms",
+          "subtitle": "Space and convenience"
+        },
+        "other": {
+          "title": "Other",
+          "subtitle": "For other cases"
+        }
+      },
+      "contact": {
+        "title": "Guest will leave contact"
+      },
+      "contactRequired": {
+        "title": "Contact required"
+      }
+    },
+    "suggestion": {
+      "hint": "Set up how a guest can submit an idea or wish.",
+      "form": {
+        "title": "What to add to the idea",
+        "hint": "The text of the idea is always needed. Photos and topics can be left as help."
+      },
+      "reply": {
+        "title": "Guest communication",
+        "hint": "If enabled, the guest will be able to leave a contact along with an idea."
+      },
+      "photos": {
+        "title": "Photo for idea"
+      },
+      "topics": {
+        "title": "Topics"
+      },
+      "topicList": {
+        "title": "Guest Topics",
+        "hint": "Leave the areas where you really need ideas."
+      },
+      "topicOptions": {
+        "service": {
+          "title": "Service",
+          "subtitle": "Team and attention"
+        },
+        "product": {
+          "title": "Product",
+          "subtitle": "Product, service, result"
+        },
+        "comfort": {
+          "title": "Terms",
+          "subtitle": "Space and convenience"
+        },
+        "price": {
+          "title": "Prices",
+          "subtitle": "Cost and benefit"
+        },
+        "speed": {
+          "title": "Speed",
+          "subtitle": "Time and waiting"
+        },
+        "events": {
+          "title": "Promotions",
+          "subtitle": "Promotions and ideas"
+        },
+        "other": {
+          "title": "Other",
+          "subtitle": "For other ideas"
+        }
+      },
+      "contact": {
+        "title": "Guest will leave contact"
+      },
+      "contactRequired": {
+        "title": "Contact required"
+      }
+    },
+    "staff": {
+      "hint": "Helps you understand who to thank or where to figure things out.",
+      "people": {
+        "title": "Employees",
+        "hint": "Add people who can be selected in reviews and complaints."
+      },
+      "add": {
+        "title": "Add an employee"
+      },
+      "empty": {
+        "title": "No employees yet"
+      },
+      "inactive": "Not shown",
+      "avatar": {
+        "title": "Photo",
+        "hint": "A photo helps a guest recognize a person faster.",
+        "action": "Select photo",
+        "removed": "The photo will be removed.",
+        "remove": "Remove photo"
+      },
+      "avatarErrors": {
+        "type": "Failed to add this photo.",
+        "size": "The photo is too heavy. Try something else."
+      },
+      "selection": {
+        "title": "Who can the guest choose?",
+        "hint": "Choose how the guest can indicate who they are writing about. One option is always left on."
+      },
+      "guestSelection": {
+        "title": "Specific employee"
+      },
+      "teamReview": {
+        "title": "The whole team"
+      },
+      "dialog": {
+        "createTitle": "New employee",
+        "editTitle": "Employee",
+        "description": "The role can be left empty.",
+        "namePlaceholder": "Name",
+        "rolePlaceholder": "Role, for example Cashier",
+        "roleHint": "You can specify a role to make it easier for the guest to recognize the person.",
+        "activeTitle": "Show to guests",
+        "create": "Add",
+        "save": "Save"
+      },
+      "createPage": {
+        "title": "Add an employee",
+        "heroTitle": "Add an employee",
+        "hint": "Add a name. The role and photo can be left blank.",
+        "avatarAlt": "Employee",
+        "error": "Failed to add employee. Try again.",
+        "savingAvatar": "I save the photo"
+      },
+      "editPage": {
+        "title": "Employee",
+        "loading": "Opening an employee",
+        "heroHint": "Changes will be visible to guests. The request history will not change.",
+        "loadError": "Failed to open employee.",
+        "error": "Failed to save. Try again.",
+        "saved": "Saved",
+        "visibilityTitle": "In guest uniform",
+        "visibilityHint": "If turned off, new guests will not see the employee.",
+        "dangerTitle": "Removal",
+        "dangerHint": "The request history will not change.",
+        "delete": "Remove employee",
+        "deletePopup": {
+          "title": "Delete an employee?",
+          "message": "It will disappear from the guest form. The request history will not change.",
+          "confirm": "Delete"
+        },
+        "deleteError": "Failed to delete employee."
+      }
+    }
+  },
+  "notificationSettings": {
+    "mode": {
+      "ALL": {
+        "title": "All requests"
+      },
+      "IMPORTANT_ONLY": {
+        "title": "Only important"
+      },
+      "OFF": {
+        "title": "Do not send"
+      }
+    },
+    "types": {
+      "review": "Reviews",
+      "complaint": "Complaints",
+      "suggestion": "Suggestions"
+    },
+    "owner": {
+      "title": "Personal messages",
+      "hint": "Personally, you can receive everything, only important ones, or turn them off. The important ones are complaints and low ratings."
+    },
+    "group": {
+      "title": "Group",
+      "hintEmpty": "Select a group. The bot will be added there and enable notifications itself.",
+      "hintConnected": "Select which requests should be sent to the group.",
+      "hintDisconnected": "The bot was removed from the group. Connect the group again when convenient.",
+      "connect": "Select group",
+      "connected": "Connected",
+      "disconnect": "Disable group",
+      "fallbackTitle": "group"
+    }
+  },
+  "subscription": {
+    "title": "Subscription",
+    "heroTitle": "Away kit is always at hand",
+    "heroSubtitle": "Collect requests, receive notifications, and keep the guest login active.",
+    "trialBadge": "7 days free",
+    "activeBadge": "Access active",
+    "activeUntil": "up to {{date}}",
+    "activeNoPeriod": "No deadline",
+    "activeHeroTitle": "Subscription active",
+    "activeHeroSubtitle": "The link and QR work, guests can leave requests, and notifications will continue to arrive.",
+    "activePlanLabel": "Tariff",
+    "activePeriodLabel": "Deadline",
+    "from": "from",
+    "heroChips": {
+      "form": "Form",
+      "notifications": "Notifications",
+      "entry": "Link and QR"
+    },
+    "statusTitle": "Access",
+    "statuses": {
+      "TRIALING": "Trial period",
+      "ACTIVE": "Active",
+      "EXPIRED": "Expired",
+      "CANCELED": "Stopped",
+      "GRANTED": "Issued"
+    },
+    "statusHints": {
+      "TRIALING": "The trial period is valid until {{date}}.",
+      "ACTIVE": "The guest form is active until {{date}}.",
+      "EXPIRED": "The guest form is currently unavailable. Please pay for your subscription to receive requests again.",
+      "CANCELED": "Subscription has been stopped. You can pay again at any time.",
+      "GRANTED": "Access was granted manually and is valid until {{date}}."
+    },
+    "statusHintsNoDate": {
+      "TRIALING": "The trial period is active.",
+      "ACTIVE": "The guest form is active.",
+      "EXPIRED": "The guest form is currently unavailable. Please pay for your subscription to receive requests again.",
+      "CANCELED": "Subscription has been stopped. You can pay again at any time.",
+      "GRANTED": "Access was granted manually."
+    },
+    "currentPlanFallback": "Active access",
+    "plansTitle": "Tariff",
+    "plans": {
+      "MONTHLY": {
+        "title": "Month",
+        "subtitle": "Convenient to start"
+      },
+      "ANNUAL": {
+        "title": "Year",
+        "subtitle": "For permanent work",
+        "badge": "More profitable at"
+      }
+    },
+    "benefits": {
+      "activeTitle": "What's available",
+      "activeHint": "All this already works for this place.",
+      "previewTitle": "What's included",
+      "previewHint": "After payment, all items will be available for this location.",
+      "items": {
+        "entry": {
+          "title": "Link and QR",
+          "subtitle": "Guests open the form using the link or QR and immediately select the desired section."
+        },
+        "notifications": {
+          "title": "Notifications",
+          "subtitle": "New requests are sent to a personal or connected group according to your settings."
+        },
+        "feed": {
+          "title": "Feed of requests",
+          "subtitle": "Reviews, complaints and suggestions are saved in one convenient list."
+        },
+        "media": {
+          "title": "Photo",
+          "subtitle": "The guest can add pictures if they help to quickly understand the situation."
+        },
+        "staff": {
+          "title": "Staff",
+          "subtitle": "If you enable staff, the guest will be able to select an employee or team."
+        },
+        "languages": {
+          "title": "Languages",
+          "subtitle": "The form and notifications will be tailored to the guest and owner's language."
+        }
+      }
+    },
+    "plansHint": "The first 7 days are already included. Payment is required so that the form does not stop after the trial period.",
+    "payAction": "Pay {{amount}}",
+    "payError": "Failed to open payment. Try again."
+  },
+  "sections": {
+    "show": "Show to guests",
+    "showHint": "If disabled, the guest will not see this section on the form.",
+    "analytics": {
+      "hint": "Rating and dynamics.",
+      "rows": ["Average rating", "By day", "Point by point"]
+    },
+    "feed": {
+      "hint": "Reviews, complaints and suggestions in one list.",
+      "rows": ["Reviews", "Complaints", "Suggestions"]
+    },
+    "review": {
+      "hint": "They help you understand what makes guests happy and where you can improve.",
+      "rows": ["Evaluation", "Comment", "Photo"]
+    },
+    "complaint": {
+      "hint": "They help you quickly see the problem and get details without lengthy correspondence.",
+      "rows": ["Text", "Photo", "Recipients"]
+    },
+    "suggestion": {
+      "hint": "Helps gather guest ideas and improve service without guesswork.",
+      "rows": ["Text", "Photo", "Recipients"]
+    },
+    "notifications": {
+      "hint": "Configure which requests the bot sends immediately and where they go.",
+      "rows": ["Personal messages", "Group", "Types of requests"]
+    },
+    "qr": {
+      "hint": "The guest link is created automatically. QR helps place it neatly on a table, counter, or sticker.",
+      "rows": ["Link", "Poster A4", "Sticker"]
+    },
+    "staff": {
+      "show": "Personnel selection",
+      "showHint": "If enabled, employee selection will appear in reviews and complaints.",
+      "hint": "Helps you understand who the guest is writing about and more accurately analyze reviews and complaints.",
+      "rows": ["Employees", "In forms"]
+    }
+  },
+  "sectionShellHint": "The settings will appear here when the section is ready."
+}

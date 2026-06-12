@@ -23,6 +23,7 @@ import {
   type AdminSubmissionsPayload,
   type SubmissionMetadata
 } from "~/shared/submissions";
+import { DEFAULT_LOCALE, fromPrismaLocale, type AppLocale } from "~/shared/i18n";
 
 type CreateSubmissionInput = {
   attachmentMediaAssetIds?: string[];
@@ -33,7 +34,7 @@ type CreateSubmissionInput = {
   customerDisplayName?: string;
   customerUserId?: string;
   kind: SubmissionKind;
-  locale?: "RU" | "UZ";
+  locale?: AppLocale;
   metadata?: SubmissionMetadata;
   organizationId: string;
   qrContext?: string;
@@ -413,7 +414,7 @@ export const toAdminSubmissionItem = (submission: {
   customer_display_name: null | string;
   id: string;
   kind: SubmissionKind;
-  locale: "RU" | "UZ";
+  locale: string;
   metadata: unknown;
   qr_context: null | string;
   rating: null | number;
@@ -439,7 +440,7 @@ export const toAdminSubmissionItem = (submission: {
     customerDisplayName: submission.customer_display_name,
     id: submission.id,
     kind: submission.kind,
-    locale: submission.locale,
+    locale: fromPrismaLocale(submission.locale),
     metadata,
     qrContext: submission.qr_context,
     rating: submission.rating,
@@ -671,7 +672,7 @@ export const createSubmission = async (
       customer_display_name: customerDisplayName,
       customer_user_id: input.customerUserId,
       kind: input.kind,
-      locale: input.locale ?? "RU",
+      locale: input.locale ?? DEFAULT_LOCALE,
       metadata: metadataWithSnapshot as Prisma.InputJsonObject,
       organization_id: organization.id,
       qr_context: input.qrContext,

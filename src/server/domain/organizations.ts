@@ -1,4 +1,4 @@
-import type { AppLocale, Prisma, PrismaClient } from "../../../prisma/generated/prisma/client";
+import type { Prisma, PrismaClient } from "../../../prisma/generated/prisma/client";
 
 import { type DomainDb, getDomainDb } from "~/server/domain/shared";
 import {
@@ -13,6 +13,7 @@ import {
 } from "~/shared/organization-presets";
 import { createReadableSlug } from "~/shared/slug";
 import { normalizeTimeZone } from "~/shared/time-zone";
+import { fromPrismaLocale, type AppLocale } from "~/shared/i18n";
 
 const toAdminOrganization = ({
   logoUrl,
@@ -24,7 +25,7 @@ const toAdminOrganization = ({
     contact_text: string;
     description: string;
     id: string;
-    locale: AppLocale;
+    locale: string;
     name: string;
     slug: string;
     subscription?: Parameters<typeof isOrganizationSubscriptionActive>[0];
@@ -34,7 +35,7 @@ const toAdminOrganization = ({
   contactText: organization.contact_text,
   description: organization.description,
   id: organization.id,
-  locale: organization.locale,
+  locale: fromPrismaLocale(organization.locale),
   logoUrl,
   name: organization.name,
   role,

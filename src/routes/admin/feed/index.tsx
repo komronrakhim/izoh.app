@@ -22,6 +22,7 @@ import { Button, PendingScreen } from "~/common/ui";
 import { cn } from "~/common/utils";
 import { fetchApiJson } from "~/shared/api";
 import { useAdminOrganization } from "~/shared/admin";
+import { getIntlLocale } from "~/shared/i18n";
 import { useI18n } from "~/shared/i18n/react";
 import { queryKeys } from "~/shared/query";
 import { getRatingEmoji, getRatingLabelKey } from "~/shared/ratings";
@@ -88,7 +89,7 @@ const getSubmissionTopicIds = (submission: AdminSubmissionItem) => {
 };
 
 const formatSubmissionDate = (value: string, locale: string) =>
-  new Intl.DateTimeFormat(locale === "uz" ? "uz-UZ" : "ru-RU", {
+  new Intl.DateTimeFormat(getIntlLocale(locale), {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
@@ -114,7 +115,7 @@ const formatDateSeparator = (
     return t("admin.feed.date.yesterday");
   }
 
-  return new Intl.DateTimeFormat(locale === "uz" ? "uz-UZ" : "ru-RU", {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     day: "numeric",
     month: "long"
   }).format(date);

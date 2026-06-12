@@ -26,6 +26,7 @@ import {
 } from "~/common/ui";
 import { cn } from "~/common/utils";
 import { fetchApiJson } from "~/shared/api";
+import { getIntlLocale } from "~/shared/i18n";
 import { useI18n } from "~/shared/i18n/react";
 import { queryKeys } from "~/shared/query";
 import { PageTransition } from "~/shared/router/page-transition";
@@ -47,20 +48,6 @@ type SubscriptionPagePayload = {
 const PAYMENT_SYNC_ATTEMPTS = 12;
 const PAYMENT_SYNC_INITIAL_DELAY_MS = 1_200;
 const PAYMENT_SYNC_INTERVAL_MS = 1_500;
-const UZ_MONTHS = [
-  "yanvar",
-  "fevral",
-  "mart",
-  "aprel",
-  "may",
-  "iyun",
-  "iyul",
-  "avgust",
-  "sentabr",
-  "oktabr",
-  "noyabr",
-  "dekabr"
-];
 const SUBSCRIPTION_BENEFITS = [
   {
     icon: QrCode,
@@ -228,16 +215,7 @@ const formatDate = (value: string | null | undefined, locale: string) => {
   if (!value) {
     return "";
   }
-
-  const date = new Date(value);
-
-  if (locale === "uz") {
-    return `${date.getDate()}-${UZ_MONTHS[date.getMonth()]}`;
-  }
-
-  const dateLocale = locale === "ru" ? "ru-RU" : locale;
-
-  return new Intl.DateTimeFormat(dateLocale, {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     day: "numeric",
     month: "long"
   }).format(new Date(value));

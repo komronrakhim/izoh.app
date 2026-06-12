@@ -52,15 +52,18 @@ describe("staff members API", () => {
   });
 
   it("requires a database to update staff members", async () => {
-    const response = await createApiApp().request("/api/organizations/org_1/staff-members/staff_1", {
-      body: JSON.stringify({
-        roleTitle: "Бариста"
-      }),
-      headers: {
-        "Content-Type": "application/json"
-      },
-      method: "PATCH"
-    });
+    const response = await createApiApp().request(
+      "/api/organizations/org_1/staff-members/staff_1",
+      {
+        body: JSON.stringify({
+          roleTitle: "Бариста"
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "PATCH"
+      }
+    );
     const payload = (await response.json()) as { error: string };
 
     expect(response.status).toBe(503);
@@ -68,9 +71,12 @@ describe("staff members API", () => {
   });
 
   it("requires a database to delete staff members", async () => {
-    const response = await createApiApp().request("/api/organizations/org_1/staff-members/staff_1", {
-      method: "DELETE"
-    });
+    const response = await createApiApp().request(
+      "/api/organizations/org_1/staff-members/staff_1",
+      {
+        method: "DELETE"
+      }
+    );
     const payload = (await response.json()) as { error: string };
 
     expect(response.status).toBe(503);

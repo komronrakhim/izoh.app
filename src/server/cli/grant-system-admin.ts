@@ -1,4 +1,5 @@
 import { getPrisma } from "~/server/db";
+import { DEFAULT_LOCALE } from "~/shared/i18n";
 
 const telegramIdArg = process.argv[2];
 
@@ -27,7 +28,7 @@ try {
   const user = await db.user.upsert({
     create: {
       first_name: "Telegram User",
-      locale: "RU",
+      locale: DEFAULT_LOCALE,
       locale_source: "TELEGRAM",
       system_role: "ADMIN",
       telegram_id: telegramId

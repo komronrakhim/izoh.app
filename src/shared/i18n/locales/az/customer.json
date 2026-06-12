@@ -1,0 +1,283 @@
+{
+  "title": "Necə getdi?",
+  "subtitle": "Bir neçə söz komandanın daha yaxşı olmasına kömək edəcək.",
+  "qrContext": "{{context}}",
+  "back": "Geri",
+  "next": "Sonrakı",
+  "actions": {
+    "review": "Qiymətləndirmə",
+    "complaint": "Hesabat",
+    "suggestion": "Təklif et"
+  },
+  "placeholders": {
+    "review": "Nə xoşunuza gəldi? Nəyi təkmilləşdirmək lazımdır?",
+    "complaint": "Nə oldu?",
+    "suggestion": "Fikir nədir? Nə əlavə etmək və ya təkmilləşdirmək lazımdır?"
+  },
+  "topicOptions": {
+    "complaint": {
+      "service": "Xidmət",
+      "quality": "Keyfiyyət",
+      "cleanliness": "Təmizlik",
+      "wait": "Gözləyirəm",
+      "payment": "Ödəniş",
+      "conditions": "Şərtlər",
+      "other": "Digər"
+    },
+    "suggestion": {
+      "service": "Xidmət",
+      "product": "Məhsul",
+      "comfort": "Şərtlər",
+      "price": "Qiymətlər",
+      "speed": "Sürət",
+      "events": "Promosyonlar",
+      "other": "Digər"
+    }
+  },
+  "staffTarget": {
+    "title": "Kimə aiddir?",
+    "teamTitle": "Bütün komanda",
+    "teamSubtitle": "Konkret bir insan seçmədən.",
+    "unknownTitle": "Əmin deyiləm",
+    "unknownSubtitle": "Mən adam seçməyəcəyəm.",
+    "employeeSubtitle": "işçi"
+  },
+  "wizard": {
+    "choice": {
+      "title": "Nə paylaşmaq istəyirsiniz?",
+      "subtitle": "Bir seçim edin, sonra yalnız lazım olanı soruşacağıq."
+    },
+    "choices": {
+      "great": {
+        "title": "Hər şey yaxşıdır",
+        "subtitle": "Qiymətləndirin və istəsəniz, bir neçə söz əlavə edin."
+      },
+      "ok": {
+        "title": "Daha yaxşı ola bilər",
+        "subtitle": "Nəyi yaxşılaşdırmaq lazım olduğunu söyləyin."
+      },
+      "issue": {
+        "title": "Problem var",
+        "subtitle": "Nəyin səhv olduğunu təsvir edin."
+      },
+      "idea": {
+        "title": "bir fikrim var",
+        "subtitle": "Təkmilləşdirilə bilənləri paylaşın."
+      }
+    },
+    "rating": {
+      "title": "Bunu necə qiymətləndirərdiniz?",
+      "subtitle": "İndi necə hiss etdiyini seçin.",
+      "labels": {
+        "1": "Pis",
+        "2": "Çox deyil",
+        "3": "Normal",
+        "4": "tamam",
+        "5": "Əla"
+      },
+      "hints": {
+        "1": "Nəyi düzəltmək lazım olduğunu bizə deyin.",
+        "2": "Mənə nəyi təkmilləşdirmək istədiyimi deyin.",
+        "3": "Daha yaxşı olacağını qeyd etmək olar.",
+        "4": "Bəyəndiyinizi əlavə edə bilərsiniz.",
+        "5": "Bir anı, bir insanı və ya komandanı tərifləyə bilərsiniz.",
+        "5_noSpecificTargets": "Xüsusilə bəyəndiyinizi əlavə edə bilərsiniz."
+      }
+    },
+    "details": {
+      "title": "Detalları dəqiqləşdirək",
+      "subtitle": "Əgər kömək edərlərsə, təfərrüatları qeyd edin."
+    },
+    "topics": {
+      "complaint": {
+        "title": "Tam olaraq nə?",
+        "subtitle": "Bir neçə seçə bilərsiniz."
+      },
+      "suggestion": {
+        "title": "İdeya nədir?",
+        "subtitle": "Lazım gələrsə, istiqamət seçin."
+      }
+    },
+    "staff": {
+      "title": "Kimə aiddir?",
+      "subtitle": "Əmin deyilsinizsə, neytral seçim seçin.",
+      "review": {
+        "1": {
+          "title": "Bu kimə təsir edir?",
+          "subtitle": "Əgər insanı xatırlayırsınızsa, onu seçin. Komandanı tərk edə bilərsiniz."
+        },
+        "2": {
+          "title": "Kimə aiddir?",
+          "subtitle": "Əgər bu sizə bunu anlamağa kömək edəcəksə, işçi seçin."
+        },
+        "3": {
+          "title": "Baxış kimə aiddir?",
+          "subtitle": "Bir şəxsi və ya bütün komandanı seçə bilərsiniz."
+        },
+        "4": {
+          "title": "Kimi tərifləmək?",
+          "subtitle": "Əgər kimsə xüsusilə faydalı olubsa, zəhmət olmasa, onları tag edin."
+        },
+        "5": {
+          "title": "Kimə təşəkkür etmək?",
+          "subtitle": "Bir şəxsi və ya bütün komandanı seçin."
+        }
+      }
+    },
+    "comment": {
+      "review": {
+        "title": "Əlavə etmək üçün bir şey varmı?",
+        "subtitle": "Nəyi bəyəndiniz və ya nəyi yaxşılaşdırmaq lazımdır."
+      },
+      "reviewByRating": {
+        "1": {
+          "title": "Nə səhv oldu?",
+          "subtitle": "Əsas olanı lazımsız təfərrüatlar olmadan yazın.",
+          "placeholder": "Nə oldu? Nəyi düzəltmək istərdiniz?",
+          "optional": "Qısaca: nə olub?"
+        },
+        "2": {
+          "title": "Sizi nə üzdü?",
+          "subtitle": "Mənə nəyi düzəltmək olar deyin.",
+          "placeholder": "Nə səhv idi? Harada narahat oldu?",
+          "optional": "Hətta bir neçə söz kifayətdir."
+        },
+        "3": {
+          "title": "Nə təkmilləşdirmək olar?",
+          "subtitle": "Onu yaxşılaşdırmaq üçün nəyi təkmilləşdirə bilərəm?",
+          "placeholder": "Nə yaxşı idi və nəyi təkmilləşdirmək istərdiniz?",
+          "optional": "Qiymətləndirmə kifayətdirsə, davam edə bilərsiniz."
+        },
+        "4": {
+          "title": "Nə xoşunuza gəldi?",
+          "subtitle": "Yaxşı bir anı və ya insanı qeyd edə bilərsiniz.",
+          "placeholder": "Nə yaxşıdı? Kimi tərifləmək istərdiniz?",
+          "optional": "Qiymətləndirmə kifayətdirsə, davam edə bilərsiniz."
+        },
+        "5": {
+          "title": "Xüsusilə nəyi bəyəndiniz?",
+          "subtitle": "İstəyirsinizsə, komandanı və ya şəxsi tərifləyin.",
+          "placeholder": "Kimi tərifləmək? Xüsusilə nə gözəl idi?",
+          "optional": "Qiymətləndirmə kifayətdirsə, davam edə bilərsiniz."
+        }
+      },
+      "complaint": {
+        "title": "Nə oldu?",
+        "subtitle": "Bunu anlamağa kömək edəcək əsas şeyi təsvir edin."
+      },
+      "suggestion": {
+        "title": "Fikir nədir?",
+        "subtitle": "Nə əlavə etmək və ya təkmilləşdirmək lazımdır?"
+      },
+      "optional": {
+        "review": "Şərh etmədən davam edə bilərsiniz.",
+        "complaint": "Qısa təsvir bunu anlamağa kömək edəcək.",
+        "complaintTopic": "Əgər seçilmiş mövzu kifayətdirsə, davam edə bilərsiniz.",
+        "complaintPhoto": "Şəkil hər şeyi göstərirsə, davam edə bilərsiniz.",
+        "complaintTopicPhoto": "Mövzu və ya şəkil kifayətdirsə, davam edə bilərsiniz.",
+        "suggestion": "Təklif vermək üçün ideya lazımdır."
+      },
+      "required": {
+        "review": "Davam etmək üçün qısa şərh əlavə edin.",
+        "reviewLow": "Davam etmək üçün nəyi düzəltmək lazım olduğunu yazın.",
+        "complaint": "Davam etmək üçün probleminizi təsvir edin.",
+        "suggestion": "Davam etmək fikrini təsvir edin."
+      },
+      "detailRequired": {
+        "complaintText": "Davam etmək üçün probleminizi təsvir edin.",
+        "complaintTextTopic": "Davam etmək üçün təsvir əlavə edin və ya mövzu seçin.",
+        "complaintTextPhoto": "Davam etmək üçün təsvir və ya şəkil əlavə edin.",
+        "complaintTextTopicPhoto": "Davam etmək üçün təsvir, mövzu və ya şəkil əlavə edin."
+      },
+      "filled": {
+        "review": "Şərh əlavə edildi. Davam edə bilərik.",
+        "complaint": "Təsvir əlavə edildi. Davam edə bilərik.",
+        "suggestion": "Fikir yazılır. Davam edə bilərik."
+      }
+    },
+    "contact": {
+      "titleOptional": "Əlaqə buraxın?",
+      "subtitleOptional": "Cavab almaq istəyirsinizsə, telefon nömrənizi və ya Telegram qeyd edin.",
+      "titleRequired": "Sizinlə necə əlaqə saxlaya bilərəm?",
+      "subtitleRequired": "Komandanın cavab verə bilməsi üçün telefon nömrəsi və ya Telegram təqdim edin.",
+      "placeholder": "Telefon və ya @username",
+      "skip": "Keç"
+    },
+    "summary": {
+      "title": "Göndərməyə hazırdır",
+      "subtitle": "Hər şeyin düzgün olub olmadığını yoxlayın.",
+      "kind": "Nə göndəririk",
+      "rating": "Qiymətləndirmə",
+      "staff": "Kimə aiddir",
+      "topics": "Mövzular",
+      "comment": "Şərh",
+      "contact": "Əlaqə",
+      "photos": "Foto",
+      "photosValue": "{{value}} ədəd.",
+      "noText": "Şərh yoxdur.",
+      "contactPrivateHint": "Yalnız komanda əlaqəni görəcək.",
+      "contactOptionalHint": "Əlaqəni tərk etmək lazım deyil."
+    },
+    "done": {
+      "default": {
+        "title": "Təşəkkürlər",
+        "subtitle": "Mesaj komandaya çatdı."
+      },
+      "reviewByRating": {
+        "1": {
+          "title": "Yazdığınız üçün təşəkkürlər",
+          "subtitle": "Komandaya çatdırdıq. Nəyin yolunda getmədiyini tez görməyə kömək edir."
+        },
+        "2": {
+          "title": "Dediyiniz üçün təşəkkürlər",
+          "subtitle": "Komanda rəyi görəcək və vəziyyəti təxmin etmədən anlayacaq."
+        },
+        "3": {
+          "title": "İpucu üçün təşəkkürlər",
+          "subtitle": "Rəyiniz nəyi yaxşılaşdırmaq mümkün olduğunu anlamağa kömək edir."
+        },
+        "4": {
+          "title": "Rəyiniz üçün təşəkkürlər",
+          "subtitle": "Komanda nəyin yaxşı alındığını görəcək və bu səviyyəni saxlaya biləcək."
+        },
+        "5": {
+          "title": "Təşəkkürlər, çox xoşdur",
+          "subtitle": "Səmimi sözləri komandaya çatdırdıq. Belə rəylər həqiqətən sevindirir."
+        }
+      },
+      "complaint": {
+        "title": "Xəbər verdiyiniz üçün təşəkkürlər",
+        "subtitle": "Mesaj komandaya çatdı. Detalları görüb vəziyyəti anlaya biləcəklər."
+      },
+      "suggestion": {
+        "title": "İdeya üçün təşəkkürlər",
+        "subtitle": "Komandaya çatdırdıq. Belə ideyalar daha yaxşı olmağa kömək edir."
+      }
+    }
+  },
+  "photos": {
+    "add": "Foto",
+    "hints": {
+      "review": "Detalları göstərmək daha asan olarsa, şəkil əlavə edə bilərsiniz.",
+      "complaint": "Fotoşəkil nə baş verdiyini tez başa düşməyə kömək edəcək.",
+      "suggestion": "Fikir daha aydındırsa, nümunə göstərə bilərsiniz."
+    },
+    "remove": "Fotonu silin",
+    "errors": {
+      "limit": "4-ə qədər şəkil əlavə edə bilərsiniz.",
+      "size": "Foto çox böyükdür.",
+      "type": "Bu şəkli əlavə etmək alınmadı.",
+      "upload": "Fotonu yükləmək alınmadı."
+    }
+  },
+  "attachPhoto": "Foto",
+  "attachPhotoSlot": "Şəkil {{index}}",
+  "submit": "Göndər",
+  "submitSuccess": "Təşəkkür edirəm, göndərildi",
+  "submitError": "Göndərmək alınmadı. Yenidən cəhd edin.",
+  "loading": "Forma açılır...",
+  "errorTitle": "Formanı açmaq mümkün olmadı",
+  "errorSubtitle": "Yenidən cəhd edin və ya yeni keçid istəyin.",
+  "emptyTitle": "Forma mövcud deyil",
+  "emptySubtitle": "Bu məkana hələ qonaq forması daxil edilməyib."
+}

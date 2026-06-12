@@ -1,0 +1,42 @@
+{
+  "start": {
+    "message": "Salam! Mən Izoh ✨\n\nMəkanlara qonaqlardan qısa QR-forma ilə rəy, şikayət və təklif toplamağa kömək edirəm.\n\nMəkanınızı sazlamaq üçün aşağıdakı menyunu açın 👇"
+  },
+  "groupConnect": {
+    "success": "Bitdi, əlaqə saxlayıram ✨\n\n\"{{organizationName}}\" üçün bildirişlər indi bu qrupa göndəriləcək.\nQonaq rəy, şikayət və ya təklif buraxarsa, diqqətlə burada yerləşdirəcəyəm.",
+    "errorOwner": "Bu qrup məkan sahibi tərəfindən seçilməlidir.",
+    "errorInvalid": "Qrupa qoşulmaq alınmadı. Bildirişləri açın və qrupu yenidən seçin."
+  },
+  "notifications": {
+    "headline": {
+      "review": "Yeni rəy",
+      "lowReview": "Aşağı qiymət",
+      "complaint": "Yeni şikayət",
+      "suggestion": "Yeni təklif"
+    },
+    "fields": {
+      "customer": "Qonaq",
+      "contact": "Qonağın əlaqəsi"
+    },
+    "staffTarget": {
+      "team": "Bütün komanda",
+      "unknown": "İşçi göstərilməyib"
+    },
+    "emptyText": {
+      "REVIEW": "Qonaq şərh vermədən reytinqi tərk edib.",
+      "COMPLAINT": "Qonaq şərhsiz şikayət edib.",
+      "SUGGESTION": "Qonaq təklifi şərhsiz təqdim edib."
+    }
+  },
+  "subscriptionInvoice": {
+    "description": {
+      "ANNUAL": "Izoh formalarına, müraciətlərə və bildirişlərə illik giriş.",
+      "MONTHLY": "Izoh formalarına, müraciətlərə və bildirişlərə aylıq giriş."
+    },
+    "label": "Izoh abunəliyi",
+    "title": {
+      "ANNUAL": "Izoh illik",
+      "MONTHLY": "Izoh aylıq"
+    }
+  }
+}

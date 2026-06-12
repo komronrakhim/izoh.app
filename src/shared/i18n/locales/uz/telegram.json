@@ -1,4 +1,7 @@
 {
+  "start": {
+    "message": "Salom! Men Izohman ✨\n\nJoylarga mehmonlardan qisqa QR-forma orqali fikr, shikoyat va takliflarni yig‘ishga yordam beraman.\n\nIlovani ochib joyingizni sozlash uchun pastdagi menyu tugmasini bosing 👇"
+  },
   "groupConnect": {
     "success": "Tayyor, men aloqadaman ✨\n\n«{{organizationName}}» bildirishnomalari endi shu guruhga keladi.\nMehmon izoh, shikoyat yoki taklif qoldirsa, uni shu yerga yuboraman.",
     "errorOwner": "Bu guruhni joy egasi tanlashi kerak.",
@@ -23,6 +26,17 @@
       "REVIEW": "Mehmon baho qoldirdi, izoh yozmadi.",
       "COMPLAINT": "Mehmon shikoyat yubordi, izoh yozmadi.",
       "SUGGESTION": "Mehmon taklif yubordi, izoh yozmadi."
+    }
+  },
+  "subscriptionInvoice": {
+    "description": {
+      "ANNUAL": "Izoh formalari, murojaatlari va bildirishnomalari uchun yillik kirish.",
+      "MONTHLY": "Izoh formalari, murojaatlari va bildirishnomalari uchun oylik kirish."
+    },
+    "label": "Izoh obunasi",
+    "title": {
+      "ANNUAL": "Izoh yillik",
+      "MONTHLY": "Izoh oylik"
     }
   }
 }

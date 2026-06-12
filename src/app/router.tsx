@@ -12,6 +12,7 @@ import { PendingScreen } from "~/common/ui";
 import { AdminAnalyticsPage } from "~/routes/admin/analytics";
 import { AdminOrganizationCreatePage } from "~/routes/admin/create";
 import { AdminDashboard, AdminOrganizationOverviewPage } from "~/routes/admin/dashboard";
+import { AdminFaqPage } from "~/routes/admin/faq";
 import { AdminFeedPage } from "~/routes/admin/feed";
 import { AdminLanguagePage } from "~/routes/admin/language";
 import { AdminQrConstructor } from "~/routes/admin/qr";
@@ -82,6 +83,12 @@ const adminLanguageRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/admin/language",
   component: AdminLanguagePage
+});
+
+const adminFaqRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/faq",
+  component: AdminFaqPage
 });
 
 const adminOrganizationRoute = createRoute({
@@ -155,6 +162,7 @@ const routeTree = rootRoute.addChildren([
   adminRoute,
   adminCreateOrganizationRoute,
   adminLanguageRoute,
+  adminFaqRoute,
   adminOrganizationRoute,
   adminQrRoute,
   adminFeedRoute,

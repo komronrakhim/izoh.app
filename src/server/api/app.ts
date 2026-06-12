@@ -1,6 +1,8 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
 import { InputFile } from "grammy";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { z } from "zod";
 
 import { getPrisma } from "~/server/db";
@@ -69,7 +71,12 @@ import { renderOrganizationQrPdf } from "~/server/pdf";
 import { getTelegramBot, validateTelegramInitData } from "~/server/telegram";
 import { getOptionalEnv, getRequiredEnv } from "~/server/config/env";
 import { isGuestMenuItemId } from "~/shared/guest-menu";
-import { fromPrismaLocale, normalizeAppLocale, toPrismaLocale } from "~/shared/i18n/config";
+import {
+  APP_LOCALES,
+  fromPrismaLocale,
+  normalizeAppLocale,
+  toPrismaLocale
+} from "~/shared/i18n/config";
 import { createTranslator } from "~/shared/i18n/server";
 import {
   DEFAULT_ORGANIZATION_PRESET_ID,
@@ -79,6 +86,8 @@ import { createSubmissionRequestSchema, submissionKindSchema } from "~/shared/su
 import { isAdminAnalyticsPeriod } from "~/shared/analytics";
 import {
   QR_DEFAULT_CUSTOM_COLORS,
+  QR_EMOJI_OPACITY_MAX,
+  QR_EMOJI_OPACITY_MIN,
   QR_FORMATS,
   QR_VISUAL_STYLES,
   createQrPdfFileName,
@@ -89,6 +98,9 @@ import { TIME_ZONE_MAX_LENGTH } from "~/shared/time-zone";
 
 const telegramInitDataHeader = "X-Telegram-Init-Data";
 const telegramWebhookSecretHeader = "X-Telegram-Bot-Api-Secret-Token";
+const telegramStartCoverPath = fileURLToPath(
+  new URL("../assets/telegram/start-cover.jpg", import.meta.url)
+);
 
 const mediaUploadSchema = z.object({
   contentType: z.string(),
@@ -100,7 +112,7 @@ const mediaUploadSchema = z.object({
 
 const tmaLocaleSchema = z.object({
   initData: z.string().min(1),
-  locale: z.enum(["ru", "uz"])
+  locale: z.enum(APP_LOCALES)
 });
 
 const guestMenuItemSchema = z.object({
@@ -110,7 +122,7 @@ const guestMenuItemSchema = z.object({
 const adminOrganizationSchema = z.object({
   businessType: z.enum(ORGANIZATION_PRESET_IDS).default(DEFAULT_ORGANIZATION_PRESET_ID),
   contactText: z.string().trim().max(120).optional(),
-  locale: z.enum(["ru", "uz", "RU", "UZ"]).optional(),
+  locale: z.enum(APP_LOCALES).optional(),
   name: z.string().trim().min(2).max(80),
   timeZone: z.string().trim().max(TIME_ZONE_MAX_LENGTH).optional()
 });
@@ -154,7 +166,7 @@ const organizationQrPdfSchema = z.object({
       text: qrHexColorSchema.default(QR_DEFAULT_CUSTOM_COLORS.text)
     })
     .optional(),
-  emojiEnabled: z.boolean().optional(),
+  emojiOpacity: z.number().min(QR_EMOJI_OPACITY_MIN).max(QR_EMOJI_OPACITY_MAX).optional(),
   emojiThemeId: z.enum(["calm", "great", "idea", "issue", "none", "warm"]).optional(),
   formatId: z
     .enum(QR_FORMATS.map((format) => format.id) as [QrFormatId, ...QrFormatId[]])
@@ -167,6 +179,54 @@ const organizationQrPdfSchema = z.object({
 const isNonProduction = () => process.env.NODE_ENV !== "production";
 
 const databaseRequired = (c: Context) => c.json({ error: "Database is required." }, 503);
+
+const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
+
+const getClientAddress = (c: Context) => {
+  const forwardedFor = c.req.header("x-forwarded-for")?.split(",")[0]?.trim();
+
+  return c.req.header("cf-connecting-ip") ?? forwardedFor ?? "unknown";
+};
+
+const enforceRateLimit = (
+  c: Context,
+  {
+    key,
+    limit,
+    windowMs
+  }: {
+    key: string;
+    limit: number;
+    windowMs: number;
+  }
+) => {
+  const now = Date.now();
+  const current = rateLimitBuckets.get(key);
+
+  if (rateLimitBuckets.size > 5000) {
+    for (const [bucketKey, bucket] of rateLimitBuckets.entries()) {
+      if (bucket.resetAt <= now) {
+        rateLimitBuckets.delete(bucketKey);
+      }
+    }
+  }
+
+  if (!current || current.resetAt <= now) {
+    rateLimitBuckets.set(key, {
+      count: 1,
+      resetAt: now + windowMs
+    });
+    return null;
+  }
+
+  current.count += 1;
+
+  if (current.count <= limit) {
+    return null;
+  }
+
+  return c.json({ error: "Too many requests. Please try again later." }, 429);
+};
 
 const getTelegramInitDataFromRequest = (c: {
   req: {
@@ -334,6 +394,24 @@ export const parseTelegramGroupConnectTokenCommand = (text: string | undefined) 
   return token.trim().toUpperCase();
 };
 
+const parseTelegramStartCommand = (text: string | undefined) => {
+  const [command, payload] = (text ?? "").trim().split(/\s+/);
+
+  if (!command) {
+    return null;
+  }
+
+  const normalizedCommand = command.split("@")[0]?.toLowerCase();
+
+  if (normalizedCommand !== "/start") {
+    return null;
+  }
+
+  return {
+    payload: payload?.trim() || ""
+  };
+};
+
 const sendTelegramWebhookMessage = async ({ chatId, text }: { chatId: bigint; text: string }) => {
   try {
     await getTelegramBot().api.sendMessage(chatId.toString(), text);
@@ -343,6 +421,26 @@ const sendTelegramWebhookMessage = async ({ chatId, text }: { chatId: bigint; te
       error: error instanceof Error ? error.message : String(error)
     });
     // Webhook processing should not fail just because the confirmation message could not be sent.
+  }
+};
+
+const sendTelegramStartMessage = async ({ chatId, text }: { chatId: bigint; text: string }) => {
+  if (!existsSync(telegramStartCoverPath)) {
+    await sendTelegramWebhookMessage({ chatId, text });
+    return;
+  }
+
+  try {
+    await getTelegramBot().api.sendPhoto(chatId.toString(), new InputFile(telegramStartCoverPath), {
+      caption: text
+    });
+  } catch (error) {
+    console.warn("Telegram start photo failed, sending text instead", {
+      chatId: chatId.toString(),
+      error: error instanceof Error ? error.message : String(error)
+    });
+
+    await sendTelegramWebhookMessage({ chatId, text });
   }
 };
 
@@ -408,12 +506,24 @@ const handleTelegramWebhookUpdate = async (
   }
 
   const token = parseTelegramGroupConnectTokenCommand(update.message?.text);
+  const chatId = parseTelegramBigIntId(update.message?.chat?.id);
 
   if (!token) {
+    const startCommand = parseTelegramStartCommand(update.message?.text);
+    const chatType = update.message?.chat?.type;
+
+    if (startCommand && !startCommand.payload && chatId && chatType === "private") {
+      const t = createTranslator(normalizeAppLocale(update.message?.from?.language_code));
+
+      await sendTelegramStartMessage({
+        chatId,
+        text: t("telegram.start.message")
+      });
+    }
+
     return;
   }
 
-  const chatId = parseTelegramBigIntId(update.message?.chat?.id);
   const userId = parseTelegramBigIntId(update.message?.from?.id);
 
   if (!chatId) {
@@ -1476,7 +1586,7 @@ export const createApiApp = () => {
       return c.json(
         await createOrganizationSubscriptionInvoice(
           {
-            locale: organization.locale,
+            locale: fromPrismaLocale(organization.locale),
             organizationId,
             payerUserId: user?.id,
             planCode: input.planCode
@@ -1661,9 +1771,18 @@ export const createApiApp = () => {
 
   app.post("/api/media/upload-sessions", async (c) => {
     const input = mediaUploadSchema.parse(await c.req.json());
+    const rateLimitResponse = enforceRateLimit(c, {
+      key: `media-upload:${getClientAddress(c)}:${input.ownerType}:${input.ownerId}:${input.kind}`,
+      limit: 40,
+      windowMs: 10 * 60 * 1000
+    });
     const db = getPrisma();
     const initData = getTelegramInitDataFromRequest(c);
     let userId: string | undefined;
+
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
 
     if (!db) {
       return c.json({ error: "Database is required for media upload." }, 503);
@@ -1791,10 +1910,19 @@ export const createApiApp = () => {
 
   app.post("/api/submissions", async (c) => {
     const input = createSubmissionRequestSchema.parse(await c.req.json());
+    const rateLimitResponse = enforceRateLimit(c, {
+      key: `submission:${getClientAddress(c)}:${input.organizationId}:${input.startParam ?? "direct"}`,
+      limit: 30,
+      windowMs: 10 * 60 * 1000
+    });
     const db = getPrisma();
     const initData = getTelegramInitDataFromRequest(c);
     let qrContext: string | undefined;
     let customerUserId: string | undefined;
+
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
 
     if (!db) {
       return databaseRequired(c);

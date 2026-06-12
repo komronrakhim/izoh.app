@@ -136,7 +136,35 @@
     "qrHint": "Mehmon kirishini bezash va yuklab olish.",
     "notifications": "Bildirishnomalar",
     "subscription": "Obuna",
-    "locale": "Til"
+    "locale": "Til",
+    "faq": "Savollar",
+    "support": "Yordam"
+  },
+  "faq": {
+    "title": "Savollar",
+    "subtitle": "Izoh qanday ishlashi va avval nimalarni sozlash yaxshiroq ekani haqida qisqa javoblar.",
+    "items": {
+      "guestEntry": {
+        "title": "Mehmon formani qanday ochadi?",
+        "body": "QR-kod yoki havola orqali. Stol, stoyka yoki boshqa nuqtalar uchun alohida QR qilish mumkin, kontekst esa murojaatga qo‘shiladi."
+      },
+      "setup": {
+        "title": "Avval nimani sozlash kerak?",
+        "body": "Faqat kerakli formalarni qoldiring, logotip qo‘shing va mehmon ko‘radigan matnni tekshiring. Shunda forma joyingizga mos ko‘rinadi."
+      },
+      "staff": {
+        "title": "Xodimlar qachon kerak?",
+        "body": "Mehmon xodimni yoki jamoani tanlashi muhim bo‘lsa. Bu kimga rahmat aytilgani yoki qayerda yordam kerakligini tezroq tushunishga yordam beradi."
+      },
+      "notifications": {
+        "title": "Bildirishnomalar qanday keladi?",
+        "body": "Murojaatlarni shaxsiy chat yoki Telegram guruhida olish mumkin. Muhim shikoyatlar va past baholar yo‘qolib ketmasligi yaxshiroq."
+      }
+    },
+    "support": {
+      "title": "Yordam kerakmi?",
+      "body": "Biror narsa ochilmasa, g‘alati ko‘rinsa yoki sozlamani muhokama qilish kerak bo‘lsa, Telegramda yozing."
+    }
   },
   "values": {
     "active": "Faol",
@@ -228,16 +256,37 @@
     },
     "overview": {
       "total": "Jami murojaatlar",
-      "insightsTitle": "Nima ko‘rinmoqda",
-      "detailsTitle": "Tafsilotlar"
+      "summaryTitle": "Asosiysi",
+      "detailsTitle": "Mehmonlar qanday yozmoqda"
     },
-    "insights": {
-      "total": "Tanlangan davrda {{count}} ta murojaat.",
-      "empty": "Hozircha ma’lumot kam. Mehmonlar yozishni boshlasa, xulosalar shu yerda chiqadi.",
-      "complaintTopic": "Shikoyatlarda ko‘proq «{{topic}}» uchraydi.",
-      "suggestionTopic": "Takliflarda ko‘proq «{{topic}}» haqida yozishadi.",
-      "staff": "Eng ko‘p rahmat aytilgan: {{name}}.",
-      "context": "Eng ko‘p murojaat «{{context}}» joyidan kelmoqda."
+    "summary": {
+      "emptyTitle": "Hozircha tinch",
+      "emptyText": "Mehmonlar yozishni boshlasa, bu yerda qisqa holat ko‘rinadi.",
+      "totalTitle": "{{count}} ta murojaat",
+      "totalText": "Tanlangan davr uchun.",
+      "moodEmptyTitle": "Kayfiyat keyinroq ko‘rinadi",
+      "moodEmptyText": "Baho qo‘yilgan izohlar kerak.",
+      "moodGoodTitle": "Kayfiyat yaxshi",
+      "moodGoodText": "O‘rtacha baho {{rating}}.",
+      "moodMixedTitle": "Kayfiyat turlicha",
+      "moodMixedText": "Yaxshi izohlar ham, alohida signallar ham bor.",
+      "moodAttentionTitle": "Signal bor",
+      "moodAttentionText": "Past baholar: {{count}}.",
+      "contextTitle": "Ko‘proq yozishadi: {{context}}",
+      "contextText": "Shu kontekstdan {{count}} ta murojaat.",
+      "peakTitle": "Faol vaqt: {{time}}",
+      "peakText": "Shu vaqt atrofida {{count}} ta murojaat."
+    },
+    "attention": {
+      "title": "Ko‘rib chiqish kerak",
+      "allGoodTitle": "Jiddiy signal yo‘q",
+      "allGoodText": "Hozircha hammasi sokin ko‘rinadi.",
+      "complaintTopicTitle": "Shikoyat mavzusi: {{topic}}",
+      "complaintTopicText": "Davr ichida {{count}} marta.",
+      "contextTitle": "{{context}}",
+      "contextText": "{{count}} signal: shikoyat yoki past baho.",
+      "lowRatingsTitle": "Past baholar",
+      "lowRatingsText": "{{count}} ta bahoga e’tibor kerak."
     },
     "metrics": {
       "reviews": "Izohlar",
@@ -272,7 +321,8 @@
     },
     "contexts": {
       "title": "Qayerdan yozishadi",
-      "meta": "{{complaints}} shikoyat, {{lowReviews}} past baho"
+      "quietMeta": "Asosan sokin",
+      "attentionMeta": "{{count}} ta e’tibor signali"
     },
     "time": {
       "peak": "Ko‘proq shu vaqtda yozishadi",

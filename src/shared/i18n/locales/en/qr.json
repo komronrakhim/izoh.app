@@ -1,0 +1,87 @@
+{
+  "constructor": {
+    "title": "QR for guests",
+    "subtitle": "Create a neat layout for a table, counter, or poster. We will add the guest form link automatically.",
+    "appearance": "Registration",
+    "copy": "Text",
+    "fit": "Format",
+    "style": "Style",
+    "save": "Save",
+    "saved": "QR-template saved",
+    "downloadPdf": "Download PDF",
+    "sendPdfToChat": "Download PDF",
+    "copyLink": "Copy link",
+    "autoSave": "Changes are saved themselves",
+    "preview": "Preview PDF",
+    "text": {
+      "title": "Text on card",
+      "defaultHeadline": "Rate us",
+      "defaultCaption": "Tell us what can be improved or what you would like to praise the team for.",
+      "headlinePlaceholder": "Heading",
+      "captionPlaceholder": "Short text under QR"
+    },
+    "context": {
+      "title": "Context",
+      "placeholder": "Table 4, Bar, Cashier",
+      "hint": "Always gets into QR and helps to understand where the request came from.",
+      "showInLayout": "Show in layout"
+    },
+    "formats": {
+      "title": "Size",
+      "sizeHint": "Size: {{size}}.",
+      "sticker": {
+        "name": "Sticker",
+        "size": "60×60 mm",
+        "description": "For a small sticker. Only QR and logo inside the code."
+      },
+      "table": {
+        "name": "On the table",
+        "size": "A6",
+        "description": "The main format for a table, menu holder or waiting area."
+      },
+      "stand": {
+        "name": "Stand",
+        "size": "4×6\"",
+        "description": "For the cash register, bar or reception in an acrylic stand."
+      },
+      "poster": {
+        "name": "Poster",
+        "size": "A5",
+        "description": "For an entrance, wall or prominent location near a queue."
+      }
+    },
+    "colors": {
+      "title": "Colors",
+      "background": "Background",
+      "paper": "Background QR",
+      "text": "Text and QR"
+    },
+    "styles": {
+      "title": "Registration"
+    },
+    "qrStyle": {
+      "title": "View QR",
+      "square": "Classic",
+      "rounded": "Soft",
+      "dots": "Points"
+    },
+    "emoji": {
+      "title": "Emoji",
+      "intensity": "Intensity",
+      "intensityLevels": {
+        "soft": "Softly",
+        "visible": "Noticeably",
+        "bright": "Bright",
+        "maximum": "Maximum"
+      },
+      "themes": {
+        "calm": "Calm down",
+        "great": "Joyfully",
+        "idea": "Idea",
+        "issue": "Problem",
+        "none": "No emoji",
+        "warm": "Warmth"
+      }
+    }
+  }
+}

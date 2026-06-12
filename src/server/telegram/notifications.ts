@@ -1,7 +1,8 @@
-import type { AppLocale, SubmissionKind } from "../../../prisma/generated/prisma/client";
+import type { SubmissionKind } from "../../../prisma/generated/prisma/client";
 
 import { getDomainDb, type DomainDb } from "~/server/domain/shared";
 import { createTranslator, fromPrismaLocale } from "~/shared/i18n";
+import type { AppLocale } from "~/shared/i18n";
 import { isImportantSubmission } from "~/shared/notifications";
 import { getRatingEmoji, getRatingLabelKey, normalizeRatingValue } from "~/shared/ratings";
 import { safeParseSubmissionMetadata } from "~/shared/submissions";
@@ -275,10 +276,11 @@ export const sendTelegramNotificationDelivery = async (
     delivery.target.type === "OWNER_DM"
       ? recipientUser?.telegram_id
       : delivery.target.telegram_chat_id;
-  const locale =
+  const locale = fromPrismaLocale(
     delivery.target.type === "OWNER_DM"
       ? (recipientUser?.locale ?? delivery.submission.organization.locale)
-      : delivery.submission.organization.locale;
+      : delivery.submission.organization.locale
+  );
 
   if (!chatId) {
     throw new TelegramPermanentDeliveryError("Notification target has no Telegram chat.");

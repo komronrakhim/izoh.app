@@ -21,6 +21,7 @@ import {
 } from "~/shared/module-settings";
 import type { StaffMemberItem } from "~/shared/staff";
 import { isOrganizationSubscriptionActive } from "~/server/domain/subscriptions";
+import { fromPrismaLocale } from "~/shared/i18n";
 
 const toStaffMemberItem = (
   staffMember: {
@@ -167,7 +168,7 @@ export const getGuestEntryConfig = async (
       organization: {
         description: organization.description,
         id: organization.id,
-        locale: organization.locale,
+        locale: fromPrismaLocale(organization.locale),
         logoUrl: null,
         name: organization.name
       },
@@ -234,7 +235,7 @@ export const getGuestEntryConfig = async (
     organization: {
       description: organization.description,
       id: organization.id,
-      locale: organization.locale,
+      locale: fromPrismaLocale(organization.locale),
       logoUrl: logoAsset?.public_url ?? null,
       name: organization.name
     },

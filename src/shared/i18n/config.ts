@@ -1,10 +1,20 @@
-export const APP_LOCALES = ["ru", "uz"] as const;
+export const APP_LOCALES = ["ru", "uz", "en", "tr", "kk", "ky", "tg", "az", "uk"] as const;
 
 export type AppLocale = (typeof APP_LOCALES)[number];
 
-export type PrismaAppLocale = Uppercase<AppLocale>;
-
 export const DEFAULT_LOCALE: AppLocale = "ru";
+
+export const APP_INTL_LOCALE_BY_LOCALE = {
+  az: "az-AZ",
+  en: "en-US",
+  kk: "kk-KZ",
+  ky: "ky-KG",
+  ru: "ru-RU",
+  tg: "tg-TJ",
+  tr: "tr-TR",
+  uk: "uk-UA",
+  uz: "uz-UZ"
+} satisfies Record<AppLocale, string>;
 
 export const LOCALE_STORAGE_KEY = "izoh.locale";
 
@@ -23,8 +33,10 @@ export const normalizeAppLocale = (value: string | undefined | null): AppLocale 
   return isSupportedLocale(normalized) ? normalized : DEFAULT_LOCALE;
 };
 
-export const toPrismaLocale = (locale: AppLocale): PrismaAppLocale =>
-  locale.toUpperCase() as PrismaAppLocale;
+export const toPrismaLocale = (locale: AppLocale): AppLocale => locale;
 
 export const fromPrismaLocale = (locale: string | undefined | null): AppLocale =>
-  normalizeAppLocale(locale?.toLowerCase());
+  normalizeAppLocale(locale);
+
+export const getIntlLocale = (locale: string | undefined | null) =>
+  APP_INTL_LOCALE_BY_LOCALE[normalizeAppLocale(locale)];

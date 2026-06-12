@@ -1,7 +1,6 @@
 import { randomInt } from "node:crypto";
 
 import type {
-  AppLocale,
   OrganizationNotificationGroupConnectToken,
   OrganizationNotificationTarget
 } from "../../../prisma/generated/prisma/client";
@@ -15,6 +14,7 @@ import {
   type OrganizationNotificationsPayload,
   type OrganizationNotificationTarget as OrganizationNotificationTargetPayload
 } from "~/shared/notifications";
+import { fromPrismaLocale, type AppLocale } from "~/shared/i18n";
 
 const groupConnectTokenAlphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 const groupConnectTokenTtlMs = 15 * 60 * 1000;
@@ -350,7 +350,10 @@ export const connectTelegramGroupByToken = async (
   }
 
   if (!telegramUserId || connectToken.organization.owner.telegram_id !== telegramUserId) {
-    throw new TelegramGroupConnectError("OWNER_MISMATCH", connectToken.organization.owner.locale);
+    throw new TelegramGroupConnectError(
+      "OWNER_MISMATCH",
+      fromPrismaLocale(connectToken.organization.owner.locale)
+    );
   }
 
   const existingGroupTarget = await db.organizationNotificationTarget.findFirst({
@@ -395,7 +398,7 @@ export const connectTelegramGroupByToken = async (
 
   return {
     organizationName: connectToken.organization.name,
-    ownerLocale: connectToken.organization.owner.locale,
+    ownerLocale: fromPrismaLocale(connectToken.organization.owner.locale),
     target
   };
 };

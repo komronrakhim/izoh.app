@@ -51,7 +51,7 @@ describe("admin organizations API", () => {
     await expect(
       createAdminOrganization(
         {
-          locale: "RU",
+          locale: "ru",
           name: "Fourth Place",
           ownerUserId: "user_1"
         },
@@ -136,7 +136,7 @@ describe("admin organizations API", () => {
 
     const response = await createApiApp().request("/api/admin/organizations", {
       body: JSON.stringify({
-        locale: "RU",
+        locale: "ru",
         name: "Coffee Place"
       }),
       headers: {

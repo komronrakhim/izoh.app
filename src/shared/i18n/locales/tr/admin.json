@@ -1,0 +1,722 @@
+{
+  "back": "yere",
+  "title": "Izoh",
+  "organization": "Yer",
+  "organizations": {
+    "title": "Yerler",
+    "hubTitle": "Yerleriniz",
+    "hubHint": "Ayarlar ve Vakalar'ı açmak için bir konum seçin.",
+    "listTitle": "Yerler",
+    "listHint": "{{count}} yerlerine kadar gidebilirsiniz. Her birinin kendi formları, bağlantıları ve bildirimleri vardır.",
+    "listLimitHint": "Artık {{count}} yerlerine gidebilirsiniz. Sınıra zaten ulaşıldı.",
+    "select": "Bir yer seçin",
+    "introTitle": "Izoh'ye hoş geldiniz",
+    "introHint": "Konukların neleri beğendiklerini ve nelerin geliştirilebileceğini hızlıca söylemelerine yardımcı olun.",
+    "introPoints": [
+      {
+        "title": "Basit bir giriş açın",
+        "hint": "QR'yi koyun veya bağlantıyı misafir için uygun olan yerde paylaşın."
+      },
+      {
+        "title": "Misafir bir konu seçer",
+        "hint": "Geri bildirim, şikayet veya fikir uzun formlar olmadan gönderilir."
+      },
+      {
+        "title": "Asıl şeyi görüyorsunuz",
+        "hint": "Çalışanın derecelendirmesi, metni, fotoğrafı ve adı durumu hızlı bir şekilde anlamanıza yardımcı olur."
+      }
+    ],
+    "introAction": "Bir yer ekle",
+    "emptyTitle": "Bir yer ekle",
+    "emptyHint": "Oluşturulduktan sonra formlarınızı, misafir bağlantınızı ve bildirimlerinizi özelleştirebilirsiniz.",
+    "openHint": "Yönetici panelini aç",
+    "back": "yerlere",
+    "createTitle": "Yeni yer",
+    "createHeroTitle": "Yeni yer",
+    "createHint": "İsim ve logo, misafirin nereye yazdığını anlamasına yardımcı olur.",
+    "namePlaceholder": "Yer adı",
+    "contactPlaceholder": "Telefon veya @username",
+    "contactHint": "Konuğa sizinle iletişime geçmesi gerekip gerekmediğini göstereceğiz.",
+    "presetTitle": "Biçim",
+    "presetHint": "Benzer bir format seçin, biz de uygun formları seçelim.",
+    "presets": {
+      "cafe": "Kafe",
+      "retail": "Mağaza",
+      "services": "Hizmetler",
+      "other": "Diğer"
+    },
+    "createAction": "Oluştur",
+    "creating": "Biz yaratıyoruz...",
+    "savingLogo": "Logo kaydediliyor...",
+    "error": "İşe yaramadı. Tekrar deneyin.",
+    "createError": "Bir yer yaratmak mümkün değildi. Tekrar deneyin.",
+    "logoTitle": "logosu",
+    "logoAlt": "Logoyu yerleştir",
+    "logoHint": "Tanınması kolay, basit bir resim daha iyidir.",
+    "logoAction": "Logoyu seçin",
+    "logoSelected": "Logo hazır",
+    "logoRemove": "Logoyu kaldır",
+    "logoUpdateError": "Logo güncellenemedi. Tekrar deneyin.",
+    "openGuestForm": "Misafir formu",
+    "dangerTitle": "Kaldırma",
+    "dangerHint": "Silme işlemi geri alınamaz.",
+    "delete": "Yeri sil",
+    "deleteError": "Konum silinemedi. Tekrar deneyin.",
+    "deletePopup": {
+      "title": "Yer silinsin mi?",
+      "message": "\"{{name}}\" ve tüm konum verileri silinecek: istekler, çalışanlar, medya, QR bağlamları, bildirimler ve ayarlar. Bu geri alınamaz.",
+      "confirm": "Sil"
+    },
+    "logoErrors": {
+      "type": "Bu resim eklenemedi. Başka bir şey dene.",
+      "size": "Görüntü çok ağır. Daha hafif bir resim deneyin."
+    }
+  },
+  "hints": {
+    "organization": "Temel konum ayarları.",
+    "feedback": "Telegram'de yeni istekler anında alınabilir.",
+    "system": "Burada arayüz dilini değiştirebilirsiniz."
+  },
+  "language": {
+    "action": "Dil seçin",
+    "listTitle": "Arayüz dili",
+    "listHint": "Bildirimler seçilen dilde de gönderilecektir."
+  },
+  "blocks": {
+    "capabilities": {
+      "title": "Formlar",
+      "hint": "Yalnızca konukların bağlantıyı açtıktan sonra gerçekten ihtiyaç duydukları şeyleri ekleyin."
+    },
+    "staff": {
+      "title": "Personel",
+      "hint": "Konuğun kimin hakkında yazdığını anlamak istiyorsanız kişi ekleyin."
+    },
+    "inbox": {
+      "title": "Başvurular",
+      "hint": "Tüm eleştiri, şikayet ve önerileriniz burada toplanıyor."
+    },
+    "print": {
+      "title": "QR",
+      "hint": "Masalar, tezgahlar ve çıkartmalar için."
+    },
+    "team": {
+      "title": "Ayarlar",
+      "hint": "Konuk bağlantısı, basılı QR, Telegram bildirimleri ve arayüz dili."
+    }
+  },
+  "capabilities": {
+    "review": {
+      "title": "Yorumlar",
+      "hint": "Konukların neyi sevdiğini anlayın."
+    },
+    "complaint": {
+      "title": "Şikayetler",
+      "hint": "Sorunu daha hızlı tespit edin."
+    },
+    "suggestion": {
+      "title": "Öneriler",
+      "hint": "Yararlı fikirleri toplayın."
+    },
+    "staff": {
+      "title": "Personel",
+      "hint": "Konuğun kimin hakkında yazdığını anlayın."
+    }
+  },
+  "rows": {
+    "overview": "Yer",
+    "review": "Yorumlar",
+    "complaint": "Şikayetler",
+    "suggestion": "Öneriler",
+    "staff": "Personel",
+    "feed": "Geri bildirimler",
+    "feedHint": "Yorumlar, şikayetler ve öneriler.",
+    "analytics": "Analiz",
+    "analyticsHint": "Derecelendirme ve dinamikler.",
+    "qr": "QR kodu",
+    "qrHint": "Misafir girişini hazırlayın ve indirin.",
+    "notifications": "Bildirimler",
+    "subscription": "Abonelik",
+    "locale": "Dil",
+    "faq": "Sorular",
+    "support": "Destek"
+  },
+  "faq": {
+    "title": "Sorular",
+    "subtitle": "Kısaca Izoh'nin nasıl çalıştığı ve ilk önce neyin yapılandırılması gerektiği hakkında kısaca.",
+    "items": {
+      "guestEntry": {
+        "title": "Misafirler formu nasıl açar?",
+        "body": "QR kodu veya bağlantı ile. Masalar, tezgah veya başka noktalar için ayrı QR oluşturabilirsiniz; bağlam misafir mesajına eklenir."
+      },
+      "setup": {
+        "title": "İlk önce neyi yapılandırmanız gerekir?",
+        "body": "Yalnızca gerekli formları bırakın, logo ekleyin ve misafirler için metni kontrol edin. Bu, şeklin alanınızın bir parçası gibi hissetmesini sağlayacaktır."
+      },
+      "staff": {
+        "title": "Personele ne zaman ihtiyaç duyulur?",
+        "body": "Konukların bir çalışan veya ekip seçmesi önemliyse. Bu, kime teşekkür edildiğini veya nerede yardıma ihtiyaç duyulduğunu hızlı bir şekilde anlamanıza yardımcı olur."
+      },
+      "notifications": {
+        "title": "Bildirimler nasıl geliyor?",
+        "body": "İstekleri kişisel bir sohbetten veya Telegram grubundan alabilirsiniz. Önemli şikayetleri ve düşük puanları kaybetmemek daha iyidir."
+      }
+    },
+    "support": {
+      "title": "Yardıma mı ihtiyacınız var?",
+      "body": "Bir şey açılmazsa, garip görünürse veya kurulumu tartışmak isterseniz Telegram'ye yazın."
+    }
+  },
+  "values": {
+    "active": "Aktif",
+    "inactive": "Etkin değil",
+    "enabled": "Dahil",
+    "disabled": "Devre dışı",
+    "setup": "Özelleştir",
+    "open": "Açık",
+    "download": "İndir",
+    "required": "Gerekli",
+    "optional": "Gerekli değil"
+  },
+  "feed": {
+    "title": "Başvurular",
+    "hint": "Misafirlerin başına gelenleri hızlı bir şekilde anlamak için yorumlar, şikayetler ve öneriler tek bir yerde.",
+    "loading": "İstekler yükleniyor...",
+    "emptyTitle": "Şimdilik boş",
+    "emptyHint": "Misafirler link veya QR üzerinden yazmaya başladığında mesajlar burada görünecektir.",
+    "emptyAction": "Bağlantı ve QR",
+    "emptyFilteredTitle": "Burası henüz boş",
+    "emptyFilteredHint": "Bu filtrede hiç isabet yok. Tüm mesajları açabilirsiniz.",
+    "loadErrorTitle": "İstekler açılamadı",
+    "loadErrorHint": "Bağlantınızı kontrol edip tekrar deneyin.",
+    "retry": "Tekrarla",
+    "emptyMessage": {
+      "REVIEW": "Konuk metinsiz bir değerlendirme bıraktı.",
+      "COMPLAINT": "Konuk açıklama yapmadan bir şikayette bulundu.",
+      "SUGGESTION": "Misafir metin yazmadan öneri gönderdi."
+    },
+    "photoCount": "{{count}} fotoğrafı",
+    "photoAlt": "Fotoğraf {{index}}",
+    "date": {
+      "today": "Bugün",
+      "yesterday": "Dün"
+    },
+    "gallery": {
+      "close": "Fotoğrafı kapat",
+      "next": "Sonraki fotoğraf",
+      "previous": "Önceki fotoğraf"
+    },
+    "meta": {
+      "contact": "Konuk iletişim",
+      "target": "Kime: {{value}}",
+      "targetTeam": "Kime: tüm takım",
+      "targetUnknown": "Kime: emin değilim"
+    },
+    "text": {
+      "showLess": "Daralt",
+      "showMore": "Tam olarak göster"
+    },
+    "signals": {
+      "important": "Dikkate ihtiyaç var",
+      "contact": "irtibatım var"
+    },
+    "kind": {
+      "REVIEW": "İncele",
+      "COMPLAINT": "Şikayet",
+      "SUGGESTION": "Teklif"
+    },
+    "filters": {
+      "ALL": "Hepsi",
+      "REVIEW": "Yorumlar",
+      "COMPLAINT": "Şikayetler",
+      "SUGGESTION": "Öneriler"
+    }
+  },
+  "analytics": {
+    "title": "Analitik",
+    "loadErrorTitle": "Analitik açılamadı",
+    "loadErrorHint": "Bağlantınızı kontrol edip tekrar deneyin.",
+    "retry": "Tekrarla",
+    "periods": {
+      "7D": "7 gün",
+      "30D": "30 gün",
+      "90D": "90 gün"
+    },
+    "tabs": {
+      "overview": "İncele",
+      "mood": "Ruh hali",
+      "topics": "Konular",
+      "team": "Takım",
+      "contexts": "Yerler",
+      "time": "Zaman"
+    },
+    "trend": {
+      "up": "+{{count}} önceki döneme göre",
+      "down": "-{{count}} önceki döneme",
+      "flat": "Değişiklik yok"
+    },
+    "overview": {
+      "total": "Toplam istek",
+      "summaryTitle": "Ana şey",
+      "detailsTitle": "Konuklar nasıl yazıyor?"
+    },
+    "summary": {
+      "emptyTitle": "Şimdilik sessiz",
+      "emptyText": "Misafirler yazmaya başladığında burada kısa bir resim görünecektir.",
+      "totalTitle": "{{count}} isabetleri",
+      "totalText": "Seçilen dönem için.",
+      "moodEmptyTitle": "Ruh hali daha sonra gelecek",
+      "moodEmptyText": "Derecelendirmeli incelemelere ihtiyacımız var.",
+      "moodGoodTitle": "İyi bir ruh hali",
+      "moodGoodText": "Ortalama derecelendirme {{rating}}.",
+      "moodMixedTitle": "Ruh hali farklı",
+      "moodMixedText": "İyi değerlendirmeler ve bireysel sinyaller var.",
+      "moodAttentionTitle": "Sinyaller var",
+      "moodAttentionText": "Düşük derecelendirmeler: {{count}}.",
+      "contextTitle": "Daha sık şunu yazıyorlar: {{context}}",
+      "contextText": "{{count}} bu bağlamdan çağrı yapar.",
+      "peakTitle": "Aktif süre: {{time}}",
+      "peakText": "{{count}} bu sıralarda arıyor."
+    },
+    "attention": {
+      "title": "Bir göz atmaya değer",
+      "allGoodTitle": "Ciddi sinyal yok",
+      "allGoodText": "Şu ana kadar her şey sakin görünüyor.",
+      "complaintTopicTitle": "Şikayet konusu: {{topic}}",
+      "complaintTopicText": "Dönem başına {{count}} kez.",
+      "contextTitle": "{{context}}",
+      "contextText": "{{count}} sinyalleri: şikayetler veya düşük derecelendirmeler.",
+      "lowRatingsTitle": "Düşük derecelendirmeler",
+      "lowRatingsText": "{{count}} derecelendirmeleri dikkat gerektirir."
+    },
+    "metrics": {
+      "reviews": "Yorumlar",
+      "complaints": "Şikayetler",
+      "suggestions": "Öneriler",
+      "mood": "Ortalama ruh hali"
+    },
+    "engagement": {
+      "withText": "Metin ile",
+      "withPhotos": "Fotoğraflı",
+      "withContact": "Temaslı"
+    },
+    "mood": {
+      "positive": "Olumlu",
+      "neutral": "Nötr",
+      "negative": "Düşük",
+      "average": "Ortalama",
+      "distribution": "Tahmini"
+    },
+    "topics": {
+      "complaints": "Şikayetlerde",
+      "suggestions": "Cümlelerde"
+    },
+    "team": {
+      "thanks": "Teşekkür",
+      "mentions": "Bahsetmeler",
+      "teamThanks": "Takım",
+      "attention": "Sinyaller",
+      "people": "Kime teşekkür ediyorlar?",
+      "personMeta": "{{mentions}}, {{complaints}} sinyallerinden bahsediyor",
+      "personMetaWithRole": "{{role}} {{mentions}}, {{complaints}} sinyallerinden bahsediyor"
+    },
+    "contexts": {
+      "title": "Nereden yazıyorlar?",
+      "quietMeta": "Çoğunlukla sakin",
+      "attentionMeta": "{{count}} dikkat çekiyor"
+    },
+    "time": {
+      "peak": "Daha sık onlar hakkında yazıyorlar",
+      "noPeak": "Henüz veri yok",
+      "weekdays": "Haftanın gününe göre"
+    },
+    "empty": {
+      "reviews": "Henüz derecelendirme içeren bir yorum yok.",
+      "complaint": "Şikayet konuları konuklar seçmeye başladıkça görünecektir.",
+      "suggestion": "Öneri konuları konuklar seçmeye başladıkça görünecektir.",
+      "team": "Konuklar çalışanları seçmeye başladığında, teşekkürler ve sözler burada görünecektir.",
+      "contexts": "Bağlantı veya QR masa, tezgah ya da başka bir nokta için oluşturulursa bağlamlar burada görünür."
+    }
+  },
+  "moduleSettings": {
+    "title": "Ayarlar",
+    "review": {
+      "hint": "Bir misafirin nasıl puan vereceğini ve ayrıntıları ne zaman isteyeceğini özelleştirin.",
+      "guestInput": {
+        "title": "Bir misafir ne bırakabilir?",
+        "hint": "Metin isteğe bağlıysa konuk bunu kolayca derecelendirebilir."
+      },
+      "lowRatingGroup": {
+        "title": "Ayrıntılar ne zaman sorulmalı?",
+        "hintOptional": "Puanınız düşükse lütfen daha detaylı yazınız. Konuk, derecelendirmeyle birlikte bir kişi bırakabilecektir.",
+        "hintRequired": "Düşük bir puan için soru daha kesin hale gelecektir. Konuk, derecelendirmeyle birlikte bir kişi bırakabilecektir."
+      },
+      "photos": {
+        "title": "Misafirden fotoğraf"
+      },
+      "comment": {
+        "title": "Değerlendirme metni"
+      },
+      "lowRating": {
+        "titleOptional": "Metin iste",
+        "titleRequired": "Sebebini belirtin"
+      },
+      "contact": {
+        "title": "Değerlendirme için iletişime geçin"
+      },
+      "threshold": "Değerlendirirken",
+      "thresholdValue": "{{value}} ve altı",
+      "thresholdDecrease": "Derecelendirme değerini azaltın",
+      "thresholdIncrease": "Derecelendirme değerini artırın"
+    },
+    "complaint": {
+      "hint": "Konuğun sorunu nasıl tanımlayabileceğini ve ayrıntıları nasıl bırakabileceğini ayarlayın.",
+      "form": {
+        "title": "Şikayete ne eklenmeli?",
+        "hint": "Yalnızca durumu daha hızlı anlamanıza yardımcı olacak şeyleri bırakın."
+      },
+      "reply": {
+        "title": "Misafir iletişimi",
+        "hint": "Etkinleştirilirse misafir, şikayetiyle birlikte bir iletişim kişisini de bırakabilir."
+      },
+      "photos": {
+        "title": "Şikayet için fotoğraf"
+      },
+      "comment": {
+        "title": "Açıklama"
+      },
+      "categories": {
+        "title": "Konular"
+      },
+      "categoryList": {
+        "title": "Konuk Konuları",
+        "hint": "Ortak nedenleri bırakın. Bu hem misafirin seçim yapmasını, hem de sizin konunun özünü anlamanızı kolaylaştırır."
+      },
+      "categoryOptions": {
+        "service": {
+          "title": "Hizmet",
+          "subtitle": "Ekip ve dikkat"
+        },
+        "quality": {
+          "title": "Kalite",
+          "subtitle": "Hizmet, ürün, sonuç"
+        },
+        "cleanliness": {
+          "title": "Temizlik",
+          "subtitle": "Düzen ve görünüm"
+        },
+        "wait": {
+          "title": "Bekliyor",
+          "subtitle": "Hız ve gecikme"
+        },
+        "payment": {
+          "title": "Ödeme",
+          "subtitle": "Fiyat, çek, iade"
+        },
+        "conditions": {
+          "title": "Şartlar",
+          "subtitle": "Alan ve rahatlık"
+        },
+        "other": {
+          "title": "Diğer",
+          "subtitle": "Diğer durumlar için"
+        }
+      },
+      "contact": {
+        "title": "Misafir iletişimden ayrılacak"
+      },
+      "contactRequired": {
+        "title": "İletişim gerekli"
+      }
+    },
+    "suggestion": {
+      "hint": "Bir misafirin nasıl fikir veya dilek gönderebileceğini ayarlayın.",
+      "form": {
+        "title": "Bu fikre ne eklenmeli?",
+        "hint": "Fikrin metnine her zaman ihtiyaç vardır. Fotoğraflar ve konular yardım olarak bırakılabilir."
+      },
+      "reply": {
+        "title": "Misafir iletişimi",
+        "hint": "Etkinleştirilirse konuk, fikriyle birlikte bir iletişim kişisi bırakabilir."
+      },
+      "photos": {
+        "title": "Fikir için fotoğraf"
+      },
+      "topics": {
+        "title": "Konular"
+      },
+      "topicList": {
+        "title": "Konuk Konuları",
+        "hint": "Gerçekten fikirlere ihtiyaç duyduğunuz alanları bırakın."
+      },
+      "topicOptions": {
+        "service": {
+          "title": "Hizmet",
+          "subtitle": "Ekip ve dikkat"
+        },
+        "product": {
+          "title": "Ürün",
+          "subtitle": "Ürün, hizmet, sonuç"
+        },
+        "comfort": {
+          "title": "Şartlar",
+          "subtitle": "Alan ve rahatlık"
+        },
+        "price": {
+          "title": "Fiyatlar",
+          "subtitle": "Maliyet ve fayda"
+        },
+        "speed": {
+          "title": "Hız",
+          "subtitle": "Zaman ve beklemek"
+        },
+        "events": {
+          "title": "Promosyonlar",
+          "subtitle": "Etkinlikler ve teklifler"
+        },
+        "other": {
+          "title": "Diğer",
+          "subtitle": "Diğer fikirler için"
+        }
+      },
+      "contact": {
+        "title": "Misafir iletişimden ayrılacak"
+      },
+      "contactRequired": {
+        "title": "İletişim gerekli"
+      }
+    },
+    "staff": {
+      "hint": "Kime teşekkür edeceğinizi veya sorunları nerede çözeceğinizi anlamanıza yardımcı olur.",
+      "people": {
+        "title": "Çalışanlar",
+        "hint": "İncelemelerde ve şikayetlerde seçilebilecek kişileri ekleyin."
+      },
+      "add": {
+        "title": "Bir çalışan ekleyin"
+      },
+      "empty": {
+        "title": "Henüz çalışan yok"
+      },
+      "inactive": "Gösterilmiyor",
+      "avatar": {
+        "title": "Fotoğraf",
+        "hint": "Fotoğraf, misafirin bir kişiyi daha hızlı tanımasına yardımcı olur.",
+        "action": "Fotoğraf seç",
+        "removed": "Fotoğraf kaldırılacak.",
+        "remove": "Fotoğrafı kaldır"
+      },
+      "avatarErrors": {
+        "type": "Bu fotoğraf eklenemedi.",
+        "size": "Fotoğraf çok ağır. Başka bir şey dene."
+      },
+      "selection": {
+        "title": "Konuk kimi seçebilir?",
+        "hint": "Konuğun kimin hakkında yazdığını nasıl belirtebileceğini seçin. Bir seçenek her zaman açık bırakılır."
+      },
+      "guestSelection": {
+        "title": "Belirli çalışan"
+      },
+      "teamReview": {
+        "title": "Bütün takım"
+      },
+      "dialog": {
+        "createTitle": "Yeni çalışan",
+        "editTitle": "Çalışan",
+        "description": "Rol boş bırakılabilir.",
+        "namePlaceholder": "İsim",
+        "rolePlaceholder": "Rol, örneğin Kasiyer",
+        "roleHint": "Misafirin kişiyi tanımasını kolaylaştırmak için bir rol belirleyebilirsiniz.",
+        "activeTitle": "Misafirlere göster",
+        "create": "Ekle",
+        "save": "Kaydet"
+      },
+      "createPage": {
+        "title": "Bir çalışan ekleyin",
+        "heroTitle": "Bir çalışan ekleyin",
+        "hint": "Bir ad ekleyin. Rol ve fotoğraf boş bırakılabilir.",
+        "avatarAlt": "Çalışan",
+        "error": "Çalışan eklenemedi. Tekrar deneyin.",
+        "savingAvatar": "Fotoğrafı kaydediyorum"
+      },
+      "editPage": {
+        "title": "Çalışan",
+        "loading": "Çalışan açmak",
+        "heroHint": "Değişiklikler misafirler tarafından görülebilecektir. İstek geçmişi değişmeyecek.",
+        "loadError": "Çalışan açılamadı.",
+        "error": "Kaydedilemedi. Tekrar deneyin.",
+        "saved": "Kaydedildi",
+        "visibilityTitle": "Konuk üniformasıyla",
+        "visibilityHint": "Kapatılırsa yeni misafirler çalışanı göremez.",
+        "dangerTitle": "Kaldırma",
+        "dangerHint": "İstek geçmişi değişmeyecek.",
+        "delete": "Çalışanı kaldır",
+        "deletePopup": {
+          "title": "Bir çalışan silinsin mi?",
+          "message": "Konuk formundan kaybolacaktır. İstek geçmişi değişmeyecek.",
+          "confirm": "Sil"
+        },
+        "deleteError": "Çalışan silinemedi."
+      }
+    }
+  },
+  "notificationSettings": {
+    "mode": {
+      "ALL": {
+        "title": "Tüm istekler"
+      },
+      "IMPORTANT_ONLY": {
+        "title": "Sadece önemli"
+      },
+      "OFF": {
+        "title": "Gönderme"
+      }
+    },
+    "types": {
+      "review": "Yorumlar",
+      "complaint": "Şikayetler",
+      "suggestion": "Öneriler"
+    },
+    "owner": {
+      "title": "Kişisel mesajlar",
+      "hint": "Kişisel olarak her şeyi, yalnızca önemli olanları alabilir veya kapatabilirsiniz. Önemli olanlar şikayetler ve düşük derecelendirmelerdir."
+    },
+    "group": {
+      "title": "Grup",
+      "hintEmpty": "Bir grup seçin. Bot oraya eklenecek ve bildirimlerin kendisini etkinleştirecek.",
+      "hintConnected": "Gruba hangi isteklerin gönderilmesi gerektiğini seçin.",
+      "hintDisconnected": "Bot gruptan çıkarıldı. Uygun olduğunda grubu tekrar bağlayın.",
+      "connect": "Grup seç",
+      "connected": "Bağlı",
+      "disconnect": "Grubu devre dışı bırak",
+      "fallbackTitle": "grup"
+    }
+  },
+  "subscription": {
+    "title": "Abonelik",
+    "heroTitle": "Deplasman kiti her zaman elinizin altında",
+    "heroSubtitle": "İstekleri toplayın, bildirim alın ve misafir girişini aktif tutun.",
+    "trialBadge": "7 gün ücretsiz",
+    "activeBadge": "Erişim etkin",
+    "activeUntil": "{{date}}'ye kadar",
+    "activeNoPeriod": "Son tarih yok",
+    "activeHeroTitle": "Abonelik aktif",
+    "activeHeroSubtitle": "Bağlantı ve QR çalışıyor, konuklar isteklerini bırakabilir ve bildirimler gelmeye devam edecektir.",
+    "activePlanLabel": "Tarife",
+    "activePeriodLabel": "Son tarih",
+    "from": "itibaren",
+    "heroChips": {
+      "form": "formu",
+      "notifications": "Bildirimler",
+      "entry": "Bağlantı ve QR"
+    },
+    "statusTitle": "Erişim",
+    "statuses": {
+      "TRIALING": "Deneme süresi",
+      "ACTIVE": "Aktif",
+      "EXPIRED": "Süresi dolmuş",
+      "CANCELED": "Durduruldu",
+      "GRANTED": "Yayınlandı"
+    },
+    "statusHints": {
+      "TRIALING": "Deneme süresi {{date}}'ye kadar geçerlidir.",
+      "ACTIVE": "Konuk formu {{date}}'ye kadar aktiftir.",
+      "EXPIRED": "Misafir formu şu anda kullanılamıyor. Tekrar istek alabilmek için lütfen aboneliğinizin ücretini ödeyin.",
+      "CANCELED": "Abonelik durduruldu. İstediğiniz zaman tekrar ödeme yapabilirsiniz.",
+      "GRANTED": "Erişim manuel olarak verildi ve {{date}}'ye kadar geçerlidir."
+    },
+    "statusHintsNoDate": {
+      "TRIALING": "Deneme süresi aktif.",
+      "ACTIVE": "Misafir formu aktiftir.",
+      "EXPIRED": "Misafir formu şu anda kullanılamıyor. Tekrar istek alabilmek için lütfen aboneliğinizin ücretini ödeyin.",
+      "CANCELED": "Abonelik durduruldu. İstediğiniz zaman tekrar ödeme yapabilirsiniz.",
+      "GRANTED": "Erişim manuel olarak verildi."
+    },
+    "currentPlanFallback": "Aktif erişim",
+    "plansTitle": "Tarife",
+    "plans": {
+      "MONTHLY": {
+        "title": "ay",
+        "subtitle": "Başlamak için uygun"
+      },
+      "ANNUAL": {
+        "title": "Yıl",
+        "subtitle": "Kalıcı çalışma için",
+        "badge": "Daha karlı"
+      }
+    },
+    "benefits": {
+      "activeTitle": "Neler mevcut?",
+      "activeHint": "Bütün bunlar zaten burası için işe yarıyor.",
+      "previewTitle": "Neler dahil?",
+      "previewHint": "Ödeme yapıldıktan sonra tüm ürünler bu konum için mevcut olacaktır.",
+      "items": {
+        "entry": {
+          "title": "Bağlantı ve QR",
+          "subtitle": "Konuklar, bağlantıyı veya QR'yi kullanarak formu açar ve hemen istenen bölümü seçerler."
+        },
+        "notifications": {
+          "title": "Bildirimler",
+          "subtitle": "Yeni istekler, ayarlarınıza göre kişisel veya bağlı bir gruba gönderilir."
+        },
+        "feed": {
+          "title": "İstek feed'i",
+          "subtitle": "İncelemeler, şikayetler ve öneriler tek bir kullanışlı listede saklanır."
+        },
+        "media": {
+          "title": "Fotoğraf",
+          "subtitle": "Konuk, durumu hızlı bir şekilde anlamaya yardımcı olacaksa resim ekleyebilir."
+        },
+        "staff": {
+          "title": "Personel",
+          "subtitle": "Personeli etkinleştirirseniz misafir bir çalışan veya ekip seçebilecektir."
+        },
+        "languages": {
+          "title": "Diller",
+          "subtitle": "Form ve bildirimler konuğun ve sahibinin diline göre düzenlenecektir."
+        }
+      }
+    },
+    "plansHint": "İlk 7 gün zaten dahildir. Deneme süresi sonrasında formun durmaması için ödeme yapılması gerekmektedir.",
+    "payAction": "{{amount}}'yi öde",
+    "payError": "Ödeme açılamadı. Tekrar deneyin."
+  },
+  "sections": {
+    "show": "Misafirlere göster",
+    "showHint": "Devre dışı bırakılırsa misafir bu bölümü formda görmez.",
+    "analytics": {
+      "hint": "Derecelendirme ve dinamikler.",
+      "rows": ["Ortalama derecelendirme", "Güne göre", "Nokta nokta"]
+    },
+    "feed": {
+      "hint": "İncelemeler, şikayetler ve öneriler tek listede.",
+      "rows": ["Yorumlar", "Şikayetler", "Öneriler"]
+    },
+    "review": {
+      "hint": "Konukları neyin mutlu ettiğini ve nereleri geliştirebileceğinizi anlamanıza yardımcı olurlar.",
+      "rows": ["Değerlendirme", "Yorum", "Fotoğraf"]
+    },
+    "complaint": {
+      "hint": "Sorunu hızlı bir şekilde görmenize ve uzun yazışmalara gerek kalmadan ayrıntıları almanıza yardımcı olurlar.",
+      "rows": ["Metin", "Fotoğraf", "Alıcılar"]
+    },
+    "suggestion": {
+      "hint": "Tahmine gerek kalmadan konukların fikirlerini toplamaya ve hizmeti iyileştirmeye yardımcı olur.",
+      "rows": ["Metin", "Fotoğraf", "Alıcılar"]
+    },
+    "notifications": {
+      "hint": "Botun hangi istekleri anında göndereceğini ve bunların nereye gideceğini yapılandırın.",
+      "rows": ["Kişisel mesajlar", "Grup", "İstek türleri"]
+    },
+    "qr": {
+      "hint": "Misafir bağlantısı otomatik oluşturulur. QR, onu masaya, tezgaha veya çıkartmaya düzenli yerleştirmenize yardımcı olur.",
+      "rows": ["Bağlantı", "Poster A4", "Etiket"]
+    },
+    "staff": {
+      "show": "Personel seçimi",
+      "showHint": "Etkinleştirilirse, çalışan seçimi incelemelerde ve şikayetlerde görünecektir.",
+      "hint": "Konuğun kimin hakkında yazdığını anlamanıza ve değerlendirmeleri ve şikayetleri daha doğru bir şekilde analiz etmenize yardımcı olur.",
+      "rows": ["Çalışanlar", "formlarda"]
+    }
+  },
+  "sectionShellHint": "Bölüm hazır olduğunda ayarlar burada görünecektir."
+}

@@ -1,154 +1,200 @@
 # Izoh
 
-Telegram Mini App for organization feedback, suggestions, complaints, staff-targeted ratings, QR entry points, and Telegram bot notifications.
+Izoh is a Telegram Mini App for places that want to collect guest feedback through QR forms. A guest scans a QR code, opens a short Telegram form, chooses what they want to send, and the team receives the submission in Telegram.
+
+The product has four runtime parts:
+
+- Web Mini App: React, Vite, Telegram Mini App SDK.
+- API: Hono HTTP server for Telegram auth, admin APIs, guest forms, media, PDF generation, and Telegram webhooks.
+- Notification Dispatcher: worker that sends queued submissions to Telegram chats.
+- Organization Deletion Worker: worker that deletes organizations and their media from the database and object storage.
 
 ## Stack
 
-- Vite + React + TypeScript
-- TanStack Router
-- Tailwind CSS 4 with CSS-first tokens
-- Hono Node API
-- Prisma 7 + PostgreSQL
-- Cloudflare R2 for media
-- `grammy` for Telegram bot delivery
-- `@telegram-apps/sdk` and `@telegram-apps/sdk-react` for TMA integration
+- React 19, TanStack Router, TanStack Query
+- Hono, grammy, Telegram Mini App SDK
+- PostgreSQL, Prisma 7 with the `pg` adapter
+- Cloudflare R2 for production media storage
+- sharp for image processing
+- pdfkit and qrcode for QR PDF generation
+- Vitest and TypeScript for verification
 
-## Commands
+## Local Setup
 
 ```bash
 npm install
-npm run setup
+cp .env.example .env
+npm run db:migrate
 npm run dev:all
-npm run dev:web
-npm run dev:api
-npm run dev:notification-dispatcher
-npm run dev:organization-deletion-worker
+```
+
+`npm run dev:all` starts the API, Mini App, Notification Dispatcher, and Organization Deletion Worker together. The script picks available ports and prints the local URLs.
+
+For local media, Izoh uses `.tmp/izoh-media` when R2 variables are missing and `NODE_ENV` is not `production`.
+
+## Environment
+
+Required for API and workers:
+
+```bash
+DATABASE_URL="postgresql://..."
+TELEGRAM_BOT_TOKEN=""
+TELEGRAM_BOT_USERNAME="izohappbot"
+TELEGRAM_WEBHOOK_SECRET=""
+```
+
+Required in production for media:
+
+```bash
+R2_ACCOUNT_ID=""
+R2_ACCESS_KEY_ID=""
+R2_SECRET_ACCESS_KEY=""
+R2_BUCKET="izoh-media"
+R2_PUBLIC_BASE_URL="https://media.example.com"
+```
+
+Required for the web service when API is deployed on another domain:
+
+```bash
+VITE_API_BASE_URL="https://api.example.com"
+```
+
+`R2_PUBLIC_BASE_URL` must be a public HTTPS URL because Telegram needs reachable media URLs for submission attachments.
+
+## Scripts
+
+```bash
+npm run dev:all                         # full local stack
+npm run dev:web                         # Vite only
+npm run dev:api                         # API only
+npm run dev:notification-dispatcher     # Telegram delivery worker
+npm run dev:organization-deletion-worker # deletion worker
+
+npm run verify                          # typecheck + tests
+npm run typecheck
+npm run test
+
 npm run build:web
 npm run build:api
 npm run build:notification-dispatcher
 npm run build:organization-deletion-worker
-npm run predeploy:api
-npm run verify
-npm run admin:grant-subscription -- --org <organization_id_or_slug>
+
+npm run start:web
+npm run start:api
+npm run start:notification-dispatcher
+npm run start:organization-deletion-worker
+
 npm run db:generate
 npm run db:migrate
-npm run typecheck
-npm test
+npm run db:migrate:deploy
+npm run db:studio
+
+npm run admin:grant -- <telegram_id>
+npm run admin:grant-subscription -- --org <organization_id_or_slug>
 ```
 
-The Mini App dev server uses `http://localhost:5173/` by default and moves to the
-next free port when needed.
+## Deployment
 
-`npm run setup` prepares `.env`, generates Prisma Client, and syncs the local
-database schema without resetting data. Use `npm run setup:verify` when you also
-want typecheck and tests. Use `npm run dev:all` to start the Mini App, API,
-Notification Dispatcher, and Organization Deletion Worker together.
+The recommended Railway layout is:
 
-`npm run build:web` is safe without `DATABASE_URL`. API and worker builds run
-Prisma generation because they use the generated client.
+- PostgreSQL plugin.
+- Web service.
+- API service.
+- Notification Dispatcher service.
+- Organization Deletion Worker service.
 
-`npm run predeploy:api` runs `prisma migrate deploy`. Production deploys do not
-fall back to `prisma db push`; a migration failure should stop the deploy.
-
-## Subscriptions
-
-Every new organization starts with a 7 day trial. When access expires, the guest
-form stays unavailable until the owner pays with Telegram Stars or a system admin
-grants access manually.
-
-- Monthly plan: `500 Stars`, recurring through Telegram.
-- Annual plan: `5000 Stars`, prepaid access for one year.
-- Annual payments are not recurring because Telegram Bot API Stars subscriptions
-  currently renew only every 30 days.
-
-Manual grant for internal support:
+API service:
 
 ```bash
-npm run admin:grant-subscription -- --org coffee-place --plan annual --reason "Partner"
+Build: npm run build:api
+Pre-deploy: npm run predeploy:api
+Start: npm run start:api
 ```
 
-## Railway
+Web service:
 
-Izoh is designed for five Railway services:
+```bash
+Build: npm run build:web
+Start: npm run start:web
+```
 
-- `Postgres` - Railway PostgreSQL plugin.
-- `Web` - Vite preview for the Telegram Mini App.
-- `API` - Hono API and Telegram webhook.
-- `Notification Dispatcher` - long-running queue processor with no public HTTP.
-- `Organization Deletion Worker` - long-running organization hard-delete processor with no public HTTP.
+Notification Dispatcher:
 
-Recommended service commands:
+```bash
+Build: npm run build:notification-dispatcher
+Start: npm run start:notification-dispatcher
+```
 
-| Service                      | Build command                                      | Start command                                |
-| ---------------------------- | -------------------------------------------------- | -------------------------------------------- |
-| Web                          | `npm run build:web`                                | `npm run start:web`                          |
-| API                          | `npm run build:api && npm run predeploy:api`       | `npm run start:api`                          |
-| Notification Dispatcher      | `npm run build:notification-dispatcher`            | `npm run start:notification-dispatcher`      |
-| Organization Deletion Worker | `npm run build:organization-deletion-worker`       | `npm run start:organization-deletion-worker` |
+Organization Deletion Worker:
 
-API exposes `GET /api/health` for health checks. Workers should not expose a
-health endpoint; they poll pending jobs from Postgres, claim them with DB locks,
-and retry with backoff.
+```bash
+Build: npm run build:organization-deletion-worker
+Start: npm run start:organization-deletion-worker
+```
 
-Telegram group notifications are connected only through the native Telegram group picker:
-
-1. Owner opens organization notification settings.
-2. Owner taps the group selection row.
-3. Telegram opens the group picker and adds the bot with a short internal payload.
-4. API webhook receives `/start@bot PAYLOAD`, activates the group target, and sends a short success message to the group.
-
-Configure the Telegram webhook after the API domain is available:
+After the API is deployed, set the Telegram webhook:
 
 ```bash
 curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
-  -d "url=https://YOUR_API_DOMAIN/api/telegram/webhook" \
+  -d "url=https://api.example.com/api/telegram/webhook" \
   -d "secret_token=$TELEGRAM_WEBHOOK_SECRET"
 ```
 
-## Environment
+Set the bot Mini App menu button in BotFather so users can open the app from the Telegram menu.
 
-Copy `.env.example` to `.env` and fill:
+## Product Flow
 
-- `DATABASE_URL`
-- `TELEGRAM_BOT_TOKEN`
-- `TELEGRAM_WEBHOOK_SECRET`
-- `TELEGRAM_BOT_USERNAME`
-- `VITE_API_BASE_URL` for the Web service when API is on a separate Railway domain
-- `R2_ACCOUNT_ID`
-- `R2_ACCESS_KEY_ID`
-- `R2_SECRET_ACCESS_KEY`
-- `R2_BUCKET`
-- `R2_PUBLIC_BASE_URL`
+1. Admin creates an organization in the Mini App.
+2. Izoh creates default modules, owner notifications, and a trial subscription.
+3. Admin configures guest form sections, staff, notification targets, and QR layouts.
+4. QR PDFs encode the organization slug and optional context code.
+5. Guest opens the QR form in Telegram, submits feedback, complaint, or suggestion.
+6. API stores the submission and queues Telegram deliveries.
+7. Notification Dispatcher sends messages and attachments to the configured Telegram targets.
 
-`R2_PUBLIC_BASE_URL` should be a production custom domain/CDN URL because Telegram needs HTTPS URLs for media attachments.
+## Runtime Notes
 
-## Key Paths
+- Telegram init data protects admin APIs and authenticated user actions.
+- Telegram webhook requests should use `TELEGRAM_WEBHOOK_SECRET`.
+- Public guest submission and media upload endpoints have a small in-memory rate limit for launch-day protection.
+- When the API is scaled to multiple instances, move rate limiting to the edge or a shared store.
 
-- `src/common/ui` - UI components copied and adapted from `cheerly.to`
-- `src/assets/styles/tokens.css` - OpenRunde, Tailwind v4 theme tokens, semantic variables, TMA layout variables
-- `src/shared/i18n/locales/{ru,uz}/*.json` - shared FE/BE translations split by module
-- `src/shared/tma` - TMA SDK wrapper and React provider
-- `src/server/media` - R2 upload sessions, direct browser PUT, processing, final public assets
-- `src/server/telegram` - init data validation and bot notifications
-- `src/server/notification-dispatcher` - Telegram delivery outbox polling, locks, retry/backoff
-- `src/server/organization-deletion-worker` - queued organization deletion, storage cleanup, retry/backoff
-- `src/server/domain` - product domain flows
-- `prisma/schema.prisma` - database model in the `cheerly.to` schema style
+## Media
 
-## Notification Flow
+Images are uploaded through short-lived upload sessions:
 
-1. Guest submits a review, complaint, or suggestion.
-2. API saves the submission and attachments.
-3. API selects active organization notification targets and creates pending
-   `TelegramNotificationDelivery` rows.
-4. API immediately responds to the guest.
-5. Notification Dispatcher claims pending rows, sends Telegram messages or media
-   groups, then marks deliveries `SENT`, `FAILED`, or schedules retry.
-6. Permanent Telegram failures for a group mark that group target `DISCONNECTED`.
+1. API creates a `MediaUploadSession`.
+2. Browser uploads the original image directly to local storage or R2.
+3. API finalizes the session, validates metadata, processes the image with `sharp`, writes final assets, and removes the temporary object.
 
-## Media Flow
+Production media uses R2. Local development uses `.tmp/izoh-media`.
 
-1. API creates a `MediaUploadSession` and short-lived presigned R2 `PUT` URL.
-2. Browser uploads the original image directly to a temp R2 object.
-3. API finalizes the session, validates R2 object metadata, downloads temp object, compresses with `sharp`, writes final delivery assets, and deletes the temp object.
-4. The database stores `MediaAsset` records for final assets only. Originals are not retained.
+## Assets
+
+- `src/server/assets/telegram/start-cover.jpg` is the `/start` bot cover image.
+- `public/emoji/fluent-3d` contains the local 3D emoji PNG assets used in QR PDF scenes and previews.
+- `src/assets/fonts/open-runde` contains PDF/UI font assets.
+
+The Fluent emoji assets are from Microsoft Fluent Emoji and are used under their published license.
+
+## Data Model
+
+`prisma/schema.prisma` is the source of truth. The main ownership chain is:
+
+- `User` owns `Organization`.
+- `Organization` owns module settings, guest contexts, staff, submissions, notification targets, subscriptions, and deletion jobs.
+- `Submission` owns submission attachments and notification deliveries.
+- `MediaUploadSession` and `MediaAsset` track object storage files independently by `owner_type` and `owner_id`.
+
+Organization deletion is asynchronous. The API marks the organization as `DELETING` and creates an `OrganizationDeletionJob`; the deletion worker removes database records and storage objects.
+
+## Generated Files
+
+These paths are generated or local-only and should not be committed:
+
+- `dist`
+- `coverage`
+- `prisma/generated`
+- `.tmp`
+- `.env`
+- `.DS_Store`

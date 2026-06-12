@@ -1,6 +1,5 @@
 import { randomBytes } from "node:crypto";
 import type {
-  AppLocale,
   OrganizationSubscription,
   OrganizationSubscriptionPayment,
   Prisma,
@@ -19,6 +18,7 @@ import {
   type OrganizationSubscriptionPayload,
   type SubscriptionInvoicePayload
 } from "~/shared/subscriptions";
+import { createTranslator, type AppLocale } from "~/shared/i18n";
 
 const STARS_CURRENCY = "XTR";
 const INVOICE_PAYLOAD_PREFIX = "izoh_sub";
@@ -197,19 +197,12 @@ const getPaymentPeriodEnd = ({
 };
 
 const getInvoiceText = (planCode: SubscriptionPlanCode, locale: AppLocale) => {
-  const monthly = planCode === "MONTHLY";
-  const ru = locale === "RU";
+  const t = createTranslator(locale);
 
   return {
-    description: ru
-      ? monthly
-        ? "Месячный доступ к формам, обращениям и уведомлениям Izoh."
-        : "Годовой доступ к формам, обращениям и уведомлениям Izoh."
-      : monthly
-        ? "Izoh formalari, murojaatlari va bildirishnomalari uchun oylik kirish."
-        : "Izoh formalari, murojaatlari va bildirishnomalari uchun yillik kirish.",
-    label: ru ? "Подписка Izoh" : "Izoh obunasi",
-    title: ru ? (monthly ? "Izoh на месяц" : "Izoh на год") : monthly ? "Izoh oylik" : "Izoh yillik"
+    description: t(`telegram.subscriptionInvoice.description.${planCode}`),
+    label: t("telegram.subscriptionInvoice.label"),
+    title: t(`telegram.subscriptionInvoice.title.${planCode}`)
   };
 };
 

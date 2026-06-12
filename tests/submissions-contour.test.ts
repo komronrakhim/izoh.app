@@ -20,7 +20,7 @@ const createContourDb = () => {
     customer_display_name: null | string;
     id: string;
     kind: "COMPLAINT" | "REVIEW" | "SUGGESTION";
-    locale: "RU" | "UZ";
+    locale: "ru" | "uz";
     metadata: unknown;
     organization_id: string;
     qr_context: null | string;

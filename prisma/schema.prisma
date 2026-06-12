@@ -8,11 +8,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum AppLocale {
-  RU
-  UZ
-}
-
 enum LocaleSource {
   TELEGRAM
   MANUAL
@@ -171,7 +166,7 @@ model User {
   username      String?
   language_code String?
   photo_url     String?
-  locale        AppLocale      @default(RU)
+  locale        String         @default("ru")
   locale_source LocaleSource   @default(TELEGRAM)
   system_role   UserSystemRole @default(USER)
 
@@ -206,7 +201,7 @@ model Organization {
   description         String             @default("")
   contact_text        String             @default("")
   logo_media_asset_id String?
-  locale              AppLocale          @default(RU)
+  locale              String             @default("ru")
   time_zone           String             @default("UTC")
 
   owner                             User                                        @relation("OwnedOrganizations", fields: [owner_user_id], references: [id], onDelete: Cascade)
@@ -450,7 +445,7 @@ model Submission {
   customer_contact_phone String?
   customer_display_name  String?
   qr_context             String?
-  locale                 AppLocale      @default(RU)
+  locale                 String         @default("ru")
   metadata               Json?
 
   organization            Organization                   @relation(fields: [organization_id], references: [id], onDelete: Cascade)
@@ -580,7 +575,7 @@ model Broadcast {
   created_by_user_id String?
   target_kind        BroadcastTargetKind @default(ALL_USERS)
   status             BroadcastStatus     @default(DRAFT)
-  locale             AppLocale?
+  locale             String?
   text               String
   metadata           Json?
   started_at         DateTime?

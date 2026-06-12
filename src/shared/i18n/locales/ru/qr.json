@@ -12,7 +12,6 @@
     "sendPdfToChat": "Скачать PDF",
     "copyLink": "Скопировать ссылку",
     "autoSave": "Изменения сохраняются сами",
-    "powered": "Powered by Izoh",
     "preview": "Предпросмотр PDF",
     "text": {
       "title": "Текст на карточке",
@@ -68,6 +67,13 @@
     },
     "emoji": {
       "title": "Emoji",
+      "intensity": "Интенсивность",
+      "intensityLevels": {
+        "soft": "Мягко",
+        "visible": "Заметно",
+        "bright": "Ярко",
+        "maximum": "Максимум"
+      },
       "themes": {
         "calm": "Спокойно",
         "great": "Радостно",

@@ -1,0 +1,87 @@
+{
+  "constructor": {
+    "title": "Misafirler için QR",
+    "subtitle": "Masa, tezgah veya poster için temiz bir maket hazırlayın. Misafir formu bağlantısını otomatik ekleyeceğiz.",
+    "appearance": "Kayıt",
+    "copy": "Metin",
+    "fit": "Biçim",
+    "style": "Stil",
+    "save": "Kaydet",
+    "saved": "QR şablonu kaydedildi",
+    "downloadPdf": "PDF indir",
+    "sendPdfToChat": "PDF'yi indirin",
+    "copyLink": "Bağlantıyı kopyala",
+    "autoSave": "Değişiklikler kendiliğinden kaydedilir",
+    "preview": "Önizleme PDF",
+    "text": {
+      "title": "Karttaki metin",
+      "defaultHeadline": "Bizi değerlendirin",
+      "defaultCaption": "Bize nelerin geliştirilebileceğini veya ekibi nelerden dolayı övmek istediğinizi söyleyin.",
+      "headlinePlaceholder": "Başlık",
+      "captionPlaceholder": "QR altındaki kısa metin"
+    },
+    "context": {
+      "title": "Bağlam",
+      "placeholder": "Tablo 4, Bar, Kasiyer",
+      "hint": "Her zaman QR'ye girer ve isteğin nereden geldiğinin anlaşılmasına yardımcı olur.",
+      "showInLayout": "Maket üzerinde göster"
+    },
+    "formats": {
+      "title": "Boyut",
+      "sizeHint": "Boyut: {{size}}.",
+      "sticker": {
+        "name": "Etiket",
+        "size": "60×60 мм",
+        "description": "Küçük bir çıkartma için. Kodun içinde yalnızca QR ve logo bulunur."
+      },
+      "table": {
+        "name": "Masanın üzerinde",
+        "size": "A6",
+        "description": "Bir masa, menü tutucusu veya bekleme alanı için ana format."
+      },
+      "stand": {
+        "name": "durmak",
+        "size": "4×6\"",
+        "description": "Akrilik standda kasa, bar veya resepsiyon için."
+      },
+      "poster": {
+        "name": "Poster",
+        "size": "A5",
+        "description": "Giriş, duvar veya kuyruğun yakınında göze çarpan bir yer için."
+      }
+    },
+    "colors": {
+      "title": "Renkler",
+      "background": "Arkaplan",
+      "paper": "Arka Plan QR",
+      "text": "Metin ve QR"
+    },
+    "styles": {
+      "title": "Kayıt"
+    },
+    "qrStyle": {
+      "title": "QR'yi görüntüle",
+      "square": "Klasik",
+      "rounded": "Yumuşak",
+      "dots": "Puanlar"
+    },
+    "emoji": {
+      "title": "Emoji",
+      "intensity": "Yoğunluk",
+      "intensityLevels": {
+        "soft": "Yavaşça",
+        "visible": "Dikkat çekici bir şekilde",
+        "bright": "Parlak",
+        "maximum": "Maksimum"
+      },
+      "themes": {
+        "calm": "Sakin ol",
+        "great": "Sevinçle",
+        "idea": "Fikir",
+        "issue": "Sorun",
+        "none": "Emoji yok",
+        "warm": "sıcaklık"
+      }
+    }
+  }
+}

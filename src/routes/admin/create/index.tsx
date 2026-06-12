@@ -17,10 +17,8 @@ import { cn } from "~/common/utils";
 import {
   MAX_ADMIN_ORGANIZATIONS,
   useAdminOrganization,
-  type AdminOrganization,
-  type AdminOrganizationLocale
+  type AdminOrganization
 } from "~/shared/admin";
-import { type AppLocale } from "~/shared/i18n";
 import { useI18n } from "~/shared/i18n/react";
 import { LOGO_MAX_BYTES, isSupportedImageContentType, uploadImageAsset } from "~/shared/media";
 import {
@@ -31,9 +29,6 @@ import {
 import { PageTransition } from "~/shared/router/page-transition";
 import { getBrowserTimeZone } from "~/shared/time-zone";
 import { useTma, useTmaBackButton, useTmaMainButton } from "~/shared/tma";
-
-const toAdminOrganizationLocale = (locale: AppLocale): AdminOrganizationLocale =>
-  locale.toUpperCase() as AdminOrganizationLocale;
 
 const presetIconMeta: Record<OrganizationPresetId, { icon: LucideIcon; tone: string }> = {
   cafe: {
@@ -211,7 +206,7 @@ export const AdminOrganizationCreatePage = () => {
         (await createOrganization({
           businessType,
           contactText: cleanContactText,
-          locale: toAdminOrganizationLocale(locale),
+          locale,
           name: cleanName,
           timeZone: getBrowserTimeZone()
         }));

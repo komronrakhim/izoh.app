@@ -7,6 +7,7 @@ import {
   Bell,
   ChevronRight,
   Globe2,
+  Headset,
   ImagePlus,
   Inbox,
   Languages,
@@ -38,6 +39,7 @@ import {
   type GuestMenuItem,
   type GuestMenuItemId
 } from "~/shared/guest-menu";
+import { IZOH_SUPPORT_TELEGRAM_URL } from "~/shared/brand";
 import { useI18n } from "~/shared/i18n/react";
 import { LOGO_MAX_BYTES, isSupportedImageContentType, uploadImageAsset } from "~/shared/media";
 import { queryKeys } from "~/shared/query";
@@ -54,6 +56,7 @@ type IconTone =
   | "analytics"
   | "complaint"
   | "create"
+  | "faq"
   | "feed"
   | "guestLink"
   | "locale"
@@ -62,6 +65,7 @@ type IconTone =
   | "review"
   | "staff"
   | "subscription"
+  | "support"
   | "suggestion"
   | "trash";
 
@@ -69,6 +73,7 @@ const iconToneClassNames: Record<IconTone, string> = {
   analytics: "bg-[#00C7BE] text-white",
   complaint: "bg-[#FF2D55] text-white",
   create: "bg-[#007AFF] text-white",
+  faq: "bg-[#5856D6] text-white",
   feed: "bg-[#2AABEE] text-white",
   guestLink: "bg-[#32ADE6] text-white",
   locale: "bg-[#BF5AF2] text-white",
@@ -77,6 +82,7 @@ const iconToneClassNames: Record<IconTone, string> = {
   review: "bg-[#FFB000] text-white",
   staff: "bg-[#9B6DFF] text-white",
   subscription: "bg-[#30B0C7] text-white",
+  support: "bg-[#3B82F6] text-white",
   suggestion: "bg-[#34C759] text-white",
   trash: "bg-[#FF3B30] text-white"
 };
@@ -254,6 +260,9 @@ export const AdminDashboard = () => {
   const { locale, t } = useI18n();
   const { error, isLoading, organizations, setActiveOrganizationId } = useAdminOrganization();
   const isOrganizationLimitReached = organizations.length >= MAX_ADMIN_ORGANIZATIONS;
+  const openSupport = React.useCallback(() => {
+    openTmaTelegramLink(IZOH_SUPPORT_TELEGRAM_URL);
+  }, []);
 
   if (isLoading && organizations.length === 0) {
     return (
@@ -279,58 +288,74 @@ export const AdminDashboard = () => {
           </section>
 
           {organizations.length > 0 || !isLoading ? (
-            <List
-              hint={t(
-                `admin.organizations.${isOrganizationLimitReached ? "listLimitHint" : "listHint"}`,
-                {
-                  count: MAX_ADMIN_ORGANIZATIONS
-                }
-              )}
-              separatorInsetClassName="ml-[76px]"
-              spacing="md"
-              title={t("admin.organizations.listTitle")}
-              items={[
-                ...organizations.map((organization) => ({
-                  addon: {
-                    after: <RowSuffix />,
-                    before: (
-                      <Avatar
-                        alt={organization.name}
-                        className="size-11 rounded-full"
-                        initialsClassName="ios-callout"
-                        name={organization.name}
-                        seed={organization.id}
-                        src={organization.logoUrl}
-                      />
-                    )
-                  },
-                  onClick: () => {
-                    setActiveOrganizationId(organization.id);
-                    void navigate({
-                      params: { organizationId: organization.id },
-                      to: "/admin/$organizationId"
-                    });
-                  },
-                  title: organization.name
-                })),
-                ...(!isLoading && !isOrganizationLimitReached
-                  ? [
-                      {
-                        addon: {
-                          after: <RowSuffix />,
-                          before: <SettingsIcon icon={Plus} tone="create" />
-                        },
-                        href: "/admin/new",
-                        title: t("admin.organizations.createAction")
-                      }
-                    ]
-                  : [])
-              ]}
-            />
+            <section className="grid gap-2.5">
+              {!isLoading && !isOrganizationLimitReached ? (
+                <List
+                  title={t("admin.organizations.listTitle")}
+                  hint={
+                    organizations.length > 0
+                      ? undefined
+                      : t("admin.organizations.listHint", {
+                          count: MAX_ADMIN_ORGANIZATIONS
+                        })
+                  }
+                  items={[
+                    {
+                      addon: {
+                        after: <RowSuffix />,
+                        before: <SettingsIcon icon={Plus} tone="create" />
+                      },
+                      href: "/admin/new",
+                      title: t("admin.organizations.createAction")
+                    }
+                  ]}
+                />
+              ) : null}
+
+              {organizations.length > 0 ? (
+                <List
+                  hint={t(
+                    `admin.organizations.${isOrganizationLimitReached ? "listLimitHint" : "listHint"}`,
+                    {
+                      count: MAX_ADMIN_ORGANIZATIONS
+                    }
+                  )}
+                  separatorInsetClassName="ml-[76px]"
+                  spacing="md"
+                  title={
+                    !isLoading && !isOrganizationLimitReached
+                      ? undefined
+                      : t("admin.organizations.listTitle")
+                  }
+                  items={organizations.map((organization) => ({
+                    addon: {
+                      after: <RowSuffix />,
+                      before: (
+                        <Avatar
+                          alt={organization.name}
+                          className="size-11 rounded-full"
+                          initialsClassName="ios-callout"
+                          name={organization.name}
+                          seed={organization.id}
+                          src={organization.logoUrl}
+                        />
+                      )
+                    },
+                    onClick: () => {
+                      setActiveOrganizationId(organization.id);
+                      void navigate({
+                        params: { organizationId: organization.id },
+                        to: "/admin/$organizationId"
+                      });
+                    },
+                    title: organization.name
+                  }))}
+                />
+              ) : null}
+            </section>
           ) : null}
 
           <List
-            hint={t("admin.hints.system")}
             items={[
               {
                 addon: {
@@ -339,6 +364,22 @@ export const AdminDashboard = () => {
                 },
                 href: "/admin/language",
                 title: t("admin.rows.locale")
+              },
+              {
+                addon: {
+                  after: <RowSuffix />,
+                  before: <SettingsIcon icon={MessageCircleQuestion} tone="faq" />
+                },
+                href: "/admin/faq",
+                title: t("admin.rows.faq")
+              },
+              {
+                addon: {
+                  after: <RowSuffix />,
+                  before: <SettingsIcon icon={Headset} tone="support" />
+                },
+                onClick: openSupport,
+                title: t("admin.rows.support")
               }
             ]}
           />
@@ -652,6 +693,28 @@ export const AdminOrganizationOverview = ({
         />
 
         <List
+          hint={t("admin.blocks.inbox.hint")}
+          items={[
+            {
+              addon: {
+                after: <RowSuffix />,
+                before: <SettingsIcon icon={MessageSquareText} tone="feed" />
+              },
+              href: `/admin/${organization.id}/feed`,
+              title: t("admin.rows.feed")
+            },
+            {
+              addon: {
+                after: <RowSuffix />,
+                before: <SettingsIcon icon={BarChart3} tone="analytics" />
+              },
+              href: `/admin/${organization.id}/analytics`,
+              title: t("admin.rows.analytics")
+            }
+          ]}
+        />
+
+        <List
           hint={t("admin.blocks.capabilities.hint")}
           items={feedbackCapabilityIds.map((id) => {
             const meta = capabilityMeta[id];
@@ -688,28 +751,6 @@ export const AdminOrganizationOverview = ({
               },
               href: `/admin/${organization.id}/staff`,
               title: t("admin.capabilities.staff.title")
-            }
-          ]}
-        />
-
-        <List
-          hint={t("admin.blocks.inbox.hint")}
-          items={[
-            {
-              addon: {
-                after: <RowSuffix />,
-                before: <SettingsIcon icon={MessageSquareText} tone="feed" />
-              },
-              href: `/admin/${organization.id}/feed`,
-              title: t("admin.rows.feed")
-            },
-            {
-              addon: {
-                after: <RowSuffix />,
-                before: <SettingsIcon icon={BarChart3} tone="analytics" />
-              },
-              href: `/admin/${organization.id}/analytics`,
-              title: t("admin.rows.analytics")
             }
           ]}
         />

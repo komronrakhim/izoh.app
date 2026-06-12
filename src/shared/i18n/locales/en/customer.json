@@ -1,0 +1,283 @@
+{
+  "title": "How did it go?",
+  "subtitle": "A few words help the team get better.",
+  "qrContext": "{{context}}",
+  "back": "Back",
+  "next": "Next",
+  "actions": {
+    "review": "Rate",
+    "complaint": "Report",
+    "suggestion": "Suggest"
+  },
+  "placeholders": {
+    "review": "What did you like? What needs to be improved?",
+    "complaint": "What happened?",
+    "suggestion": "What's the idea? What should be added or improved?"
+  },
+  "topicOptions": {
+    "complaint": {
+      "service": "Service",
+      "quality": "Quality",
+      "cleanliness": "Cleanliness",
+      "wait": "Waiting",
+      "payment": "Payment",
+      "conditions": "Terms",
+      "other": "Other"
+    },
+    "suggestion": {
+      "service": "Service",
+      "product": "Product",
+      "comfort": "Terms",
+      "price": "Prices",
+      "speed": "Speed",
+      "events": "Promotions",
+      "other": "Other"
+    }
+  },
+  "staffTarget": {
+    "title": "Whom does it concern?",
+    "teamTitle": "The whole team",
+    "teamSubtitle": "Without choosing a specific person.",
+    "unknownTitle": "Not sure",
+    "unknownSubtitle": "I won't choose a person.",
+    "employeeSubtitle": "Employee"
+  },
+  "wizard": {
+    "choice": {
+      "title": "What would you like to share?",
+      "subtitle": "Choose an option, then we will ask only what is needed."
+    },
+    "choices": {
+      "great": {
+        "title": "Everything is fine",
+        "subtitle": "Rate it and, if you like, add a few words."
+      },
+      "ok": {
+        "title": "It can be better",
+        "subtitle": "Tell me what needs to be improved."
+      },
+      "issue": {
+        "title": "There's a problem",
+        "subtitle": "Describe what's wrong."
+      },
+      "idea": {
+        "title": "I have an idea",
+        "subtitle": "Share what can be improved."
+      }
+    },
+    "rating": {
+      "title": "How would you rate it?",
+      "subtitle": "Choose how it feels now.",
+      "labels": {
+        "1": "Bad",
+        "2": "Not very",
+        "3": "Normal",
+        "4": "Okay",
+        "5": "Excellent"
+      },
+      "hints": {
+        "1": "Tell us what needs to be fixed.",
+        "2": "Tell me what I would like to improve.",
+        "3": "It can be noted that it would be better.",
+        "4": "You can add what you liked.",
+        "5": "You can praise a moment, a person or a team.",
+        "5_noSpecificTargets": "You can add what you especially liked."
+      }
+    },
+    "details": {
+      "title": "Let's clarify the details",
+      "subtitle": "Note details if they help."
+    },
+    "topics": {
+      "complaint": {
+        "title": "What exactly?",
+        "subtitle": "You can select several."
+      },
+      "suggestion": {
+        "title": "What is the idea about?",
+        "subtitle": "Select a direction if appropriate."
+      }
+    },
+    "staff": {
+      "title": "Who is it about?",
+      "subtitle": "If you're not sure, choose a neutral option.",
+      "review": {
+        "1": {
+          "title": "Who does this affect?",
+          "subtitle": "If you remember the person, choose him. You can leave the team."
+        },
+        "2": {
+          "title": "Whom does it concern?",
+          "subtitle": "Select an employee if this will help you figure it out."
+        },
+        "3": {
+          "title": "Who does the review concern?",
+          "subtitle": "You can select a person or the entire team."
+        },
+        "4": {
+          "title": "Whom to praise?",
+          "subtitle": "If anyone was particularly helpful, please tag them."
+        },
+        "5": {
+          "title": "Whom to thank?",
+          "subtitle": "Select a person or the entire team."
+        }
+      }
+    },
+    "comment": {
+      "review": {
+        "title": "Anything to add?",
+        "subtitle": "What you liked or what should be improved."
+      },
+      "reviewByRating": {
+        "1": {
+          "title": "What went wrong?",
+          "subtitle": "Write the main thing, without unnecessary details.",
+          "placeholder": "What happened? What would you like to fix?",
+          "optional": "Briefly: what was wrong?"
+        },
+        "2": {
+          "title": "What upset you?",
+          "subtitle": "Tell me what can be fixed.",
+          "placeholder": "What was wrong? Where did it become uncomfortable?",
+          "optional": "Even a few words are enough."
+        },
+        "3": {
+          "title": "What can be improved?",
+          "subtitle": "What can I improve to make it better?",
+          "placeholder": "What was okay and what would you like to improve?",
+          "optional": "If the assessment is sufficient, you can continue."
+        },
+        "4": {
+          "title": "What did you like?",
+          "subtitle": "You can celebrate a good moment or person.",
+          "placeholder": "What was good? Who do you want to praise?",
+          "optional": "If the assessment is sufficient, you can continue."
+        },
+        "5": {
+          "title": "What did you especially like?",
+          "subtitle": "Praise the team or person if you want.",
+          "placeholder": "Whom to praise? What was especially nice?",
+          "optional": "If the assessment is sufficient, you can continue."
+        }
+      },
+      "complaint": {
+        "title": "What happened?",
+        "subtitle": "Describe the main thing that will help you figure it out."
+      },
+      "suggestion": {
+        "title": "What's the idea?",
+        "subtitle": "What should be added or improved?"
+      },
+      "optional": {
+        "review": "You can continue without comment.",
+        "complaint": "A short description will help you figure it out.",
+        "complaintTopic": "If the chosen topic is sufficient, you can continue.",
+        "complaintPhoto": "If the photo shows everything, you can continue.",
+        "complaintTopicPhoto": "If the topic or photo is enough, you can continue.",
+        "suggestion": "Write the idea to send a suggestion."
+      },
+      "required": {
+        "review": "Add a short comment to continue.",
+        "reviewLow": "Write down what needs to be fixed to continue.",
+        "complaint": "Please describe your problem to continue.",
+        "suggestion": "Describe the idea to continue."
+      },
+      "detailRequired": {
+        "complaintText": "Please describe your problem to continue.",
+        "complaintTextTopic": "Add a description or select a topic to continue.",
+        "complaintTextPhoto": "Add a description or photo to continue.",
+        "complaintTextTopicPhoto": "Add a description, topic or photo to continue."
+      },
+      "filled": {
+        "review": "Comment added. We can continue.",
+        "complaint": "Description added. We can continue.",
+        "suggestion": "The idea is written down. We can continue."
+      }
+    },
+    "contact": {
+      "titleOptional": "Leave a contact?",
+      "subtitleOptional": "If you want an answer, please indicate your phone number or Telegram.",
+      "titleRequired": "How can I contact you?",
+      "subtitleRequired": "Please provide a phone number or Telegram so the team can respond.",
+      "placeholder": "Phone or @username",
+      "skip": "Skip"
+    },
+    "summary": {
+      "title": "Ready to ship",
+      "subtitle": "Check if everything is correct.",
+      "kind": "What we send",
+      "rating": "Evaluation",
+      "staff": "To whom it concerns",
+      "topics": "Topics",
+      "comment": "Comment",
+      "contact": "Contact",
+      "photos": "Photo",
+      "photosValue": "{{value}} pcs.",
+      "noText": "No comment.",
+      "contactPrivateHint": "Only the team will see the contact.",
+      "contactOptionalHint": "You don't have to leave contact."
+    },
+    "done": {
+      "default": {
+        "title": "Thank you",
+        "subtitle": "The message is already with the team."
+      },
+      "reviewByRating": {
+        "1": {
+          "title": "Thank you for writing",
+          "subtitle": "Passed it on to the team. This makes it easier to quickly notice what went wrong."
+        },
+        "2": {
+          "title": "Thank you for saying",
+          "subtitle": "The team will see the feedback and be able to figure it out without any guesswork."
+        },
+        "3": {
+          "title": "Thanks for the tip",
+          "subtitle": "Your feedback will help us understand what can be done better."
+        },
+        "4": {
+          "title": "Thanks for your feedback",
+          "subtitle": "The team will see what they did well and will be able to maintain this level."
+        },
+        "5": {
+          "title": "Thank you, very nice",
+          "subtitle": "We conveyed our warm words to the team. Reviews like this really make me happy."
+        }
+      },
+      "complaint": {
+        "title": "Thanks for letting me know",
+        "subtitle": "The message is already with the team. They will see the details and be able to figure it out."
+      },
+      "suggestion": {
+        "title": "Thanks for the idea",
+        "subtitle": "We passed it to the team. Ideas like this help things get better."
+      }
+    }
+  },
+  "photos": {
+    "add": "Photo",
+    "hints": {
+      "review": "You can add a photo if it’s easier to show the detail.",
+      "complaint": "A photo will help you quickly understand what happened.",
+      "suggestion": "You can show an example if the idea is clearer."
+    },
+    "remove": "Remove photo",
+    "errors": {
+      "limit": "You can add up to 4 photos.",
+      "size": "The photo is too big.",
+      "type": "Failed to add this photo.",
+      "upload": "Failed to upload photo."
+    }
+  },
+  "attachPhoto": "Photo",
+  "attachPhotoSlot": "Photo {{index}}",
+  "submit": "Send",
+  "submitSuccess": "Thank you, sent",
+  "submitError": "Failed to send. Try again.",
+  "loading": "Opening the form...",
+  "errorTitle": "Could not open the form",
+  "errorSubtitle": "Try again or ask for a new link.",
+  "emptyTitle": "Form not available",
+  "emptySubtitle": "This location has not yet included a guest form."
+}

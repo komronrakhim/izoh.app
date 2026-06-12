@@ -8,6 +8,10 @@ import { useI18n } from "~/shared/i18n/react";
 import { PageTransition } from "~/shared/router/page-transition";
 import { useTmaBackButton } from "~/shared/tma";
 
+const localeLabelCollator = new Intl.Collator("en-US", {
+  sensitivity: "base"
+});
+
 const LocaleCheck = ({ selected }: { selected: boolean }) =>
   selected ? (
     <Check aria-hidden="true" size={20} strokeWidth={2.45} className="text-primary" />
@@ -16,6 +20,16 @@ const LocaleCheck = ({ selected }: { selected: boolean }) =>
 export const AdminLanguagePage = () => {
   const navigate = useNavigate();
   const { locale, setLocale, t } = useI18n();
+  const sortedLocales = React.useMemo(
+    () =>
+      [...APP_LOCALES].sort((left, right) =>
+        localeLabelCollator.compare(
+          t(`common.locales.${left}.label`),
+          t(`common.locales.${right}.label`)
+        )
+      ),
+    [t]
+  );
 
   const backToAdmin = React.useCallback(() => {
     void navigate({
@@ -39,7 +53,7 @@ export const AdminLanguagePage = () => {
           <List
             title={t("admin.language.listTitle")}
             hint={t("admin.language.listHint")}
-            items={APP_LOCALES.map((item) => ({
+            items={sortedLocales.map((item) => ({
               addon: {
                 after: <LocaleCheck selected={item === locale} />
               },

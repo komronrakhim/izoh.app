@@ -1,6 +1,7 @@
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
 import sharp from "sharp";
+import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 import { IZOH_WORDMARK_PATHS, IZOH_WORDMARK_WIDTH } from "~/shared/brand";
@@ -10,12 +11,15 @@ import {
   QR_EMOJI_THEME_BY_ID,
   QR_FORMAT_BY_ID,
   getQrAlignmentPatternCenters,
+  getQrEmojiAssetPath,
+  getQrEmojiForMark,
   getQrEmojiScene,
   getQrErrorCorrectionLevel,
   getQrFormatLayout,
   getQrPalette,
   isQrAlignmentModule,
   isQrFinderModule,
+  normalizeQrEmojiOpacity,
   normalizeQrText,
   type QrCustomColors,
   type QrErrorCorrectionLevel,
@@ -29,7 +33,7 @@ export type OrganizationQrPdfTemplate = {
   caption?: string;
   context?: string;
   customColors?: Partial<QrCustomColors>;
-  emojiEnabled?: boolean;
+  emojiOpacity?: number;
   emojiThemeId?: QrEmojiThemeId;
   formatId?: QrFormatId;
   headline?: string;
@@ -79,59 +83,39 @@ const normalizeFontText = (value: string) => value.replace(/\s+/g, " ").trim();
 const emojiImageCache = new Map<string, Promise<Buffer | null>>();
 const organizationLogoImageCache = new Map<string, Promise<Buffer | null>>();
 
-const getTwemojiCode = (emoji: string) =>
-  Array.from(emoji)
-    .map((char) => char.codePointAt(0)?.toString(16))
-    .filter((code): code is string => Boolean(code) && code !== "fe0f")
-    .join("-");
-
 const loadEmojiImage = (emoji: string) => {
-  const cached = emojiImageCache.get(emoji);
+  const assetPath = getQrEmojiAssetPath(emoji);
+
+  if (!assetPath) {
+    return Promise.resolve(null);
+  }
+
+  const cached = emojiImageCache.get(assetPath);
 
   if (cached) {
     return cached;
   }
 
   const image = (async () => {
-    const code = getTwemojiCode(emoji);
-
-    if (!code) {
-      return null;
-    }
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 900);
-
     try {
-      const response = await fetch(
-        `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${code}.svg`,
-        {
-          signal: controller.signal
-        }
+      const asset = await readFile(
+        fileURLToPath(new URL(`../../../public${assetPath}`, import.meta.url))
       );
 
-      if (!response.ok) {
-        return null;
-      }
-
-      const svg = Buffer.from(await response.arrayBuffer());
-
-      return sharp(svg)
+      return sharp(asset)
         .resize({
           fit: "contain",
-          height: 96,
-          width: 96
+          height: 128,
+          width: 128
         })
         .png()
         .toBuffer();
     } catch {
       return null;
-    } finally {
-      clearTimeout(timeout);
     }
   })();
 
-  emojiImageCache.set(emoji, image);
+  emojiImageCache.set(assetPath, image);
 
   return image;
 };
@@ -247,13 +231,7 @@ const drawFinderPattern = ({
 }) => {
   doc.roundedRect(x, y, moduleSize * 7, moduleSize * 7, moduleSize * 2.2).fill(palette.foreground);
   doc
-    .roundedRect(
-      x + moduleSize,
-      y + moduleSize,
-      moduleSize * 5,
-      moduleSize * 5,
-      moduleSize * 1.65
-    )
+    .roundedRect(x + moduleSize, y + moduleSize, moduleSize * 5, moduleSize * 5, moduleSize * 1.65)
     .fill(palette.paper);
   doc
     .roundedRect(
@@ -281,22 +259,10 @@ const drawAlignmentPattern = ({
 }) => {
   doc.roundedRect(x, y, moduleSize * 5, moduleSize * 5, moduleSize * 1.35).fill(palette.foreground);
   doc
-    .roundedRect(
-      x + moduleSize,
-      y + moduleSize,
-      moduleSize * 3,
-      moduleSize * 3,
-      moduleSize * 0.84
-    )
+    .roundedRect(x + moduleSize, y + moduleSize, moduleSize * 3, moduleSize * 3, moduleSize * 0.84)
     .fill(palette.paper);
   doc
-    .roundedRect(
-      x + moduleSize * 2,
-      y + moduleSize * 2,
-      moduleSize,
-      moduleSize,
-      moduleSize * 0.28
-    )
+    .roundedRect(x + moduleSize * 2, y + moduleSize * 2, moduleSize, moduleSize, moduleSize * 0.28)
     .fill(palette.foreground);
 };
 
@@ -508,16 +474,18 @@ export const renderOrganizationQrPdf = async ({
     ...template.customColors
   });
   const emojiTheme = QR_EMOJI_THEME_BY_ID[template.emojiThemeId ?? QR_DEFAULT_DRAFT.emojiThemeId];
-  const showEmoji =
-    format.allowEmoji && emojiTheme.id !== "none" && (template.emojiEnabled ?? true);
+  const emojiOpacity = normalizeQrEmojiOpacity(template.emojiOpacity);
+  const showEmoji = format.allowEmoji && emojiTheme.id !== "none";
   const headline = format.compact
     ? ""
     : format.allowCustomHeadline
       ? normalizeFontText(normalizeQrText(template.headline, format.headlineMaxLength))
       : normalizeFontText(organizationName);
-  const context = format.allowContext && template.showContext !== false
-    ? normalizeFontText(normalizeQrText(template.context, format.contextMaxLength))
-    : "";
+  const context =
+    format.allowContext && template.showContext !== false
+      ? normalizeFontText(normalizeQrText(template.context, format.contextMaxLength))
+      : "";
+  const emojiSeed = `${format.id}:${emojiTheme.id}:${organizationName}:${context}:${url}`;
   const caption = format.allowCaption
     ? normalizeFontText(normalizeQrText(template.caption, format.captionMaxLength))
     : "";
@@ -535,7 +503,11 @@ export const renderOrganizationQrPdf = async ({
   registerFonts(doc);
   const pageWidth = doc.page.width;
   const pageHeight = doc.page.height;
-  const emojiMarks = getQrEmojiScene(format.id);
+  const emojiMarks = getQrEmojiScene(format.id, layout, {
+    hasCaption: Boolean(caption),
+    hasContext: Boolean(context),
+    hasHeadline: Boolean(headline)
+  });
   const background = palette.background;
   const textColor = palette.text;
   const mutedColor = palette.muted;
@@ -551,7 +523,13 @@ export const renderOrganizationQrPdf = async ({
 
   if (showEmoji) {
     for (const [index, mark] of emojiMarks.entries()) {
-      const emoji = emojiTheme.emojis[index % emojiTheme.emojis.length];
+      const emoji = getQrEmojiForMark({
+        emojiTheme,
+        formatId: format.id,
+        index,
+        mark,
+        seed: emojiSeed
+      });
       const image = await loadEmojiImage(emoji);
 
       if (!image) {
@@ -564,7 +542,7 @@ export const renderOrganizationQrPdf = async ({
       const centerY = pageHeight * mark.y;
 
       doc.save();
-      doc.opacity(mark.opacity);
+      doc.opacity(Math.min(1, mark.opacity * emojiOpacity));
       doc.rotate(mark.rotation, {
         origin: [centerX, centerY]
       });

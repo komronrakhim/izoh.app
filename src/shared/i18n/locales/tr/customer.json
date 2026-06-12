@@ -1,0 +1,283 @@
+{
+  "title": "Nasıl geçti?",
+  "subtitle": "Birkaç kelime ekibin daha iyi olmasına yardımcı olur.",
+  "qrContext": "{{context}}",
+  "back": "Geri",
+  "next": "Sonraki",
+  "actions": {
+    "review": "Oran",
+    "complaint": "Rapor",
+    "suggestion": "Öner"
+  },
+  "placeholders": {
+    "review": "Neyi beğendin? Neyin iyileştirilmesi gerekiyor?",
+    "complaint": "Ne oldu?",
+    "suggestion": "Fikir nedir? Neler eklenmeli veya geliştirilmeli?"
+  },
+  "topicOptions": {
+    "complaint": {
+      "service": "Hizmet",
+      "quality": "Kalite",
+      "cleanliness": "Temizlik",
+      "wait": "Bekliyor",
+      "payment": "Ödeme",
+      "conditions": "Şartlar",
+      "other": "Diğer"
+    },
+    "suggestion": {
+      "service": "Hizmet",
+      "product": "Ürün",
+      "comfort": "Şartlar",
+      "price": "Fiyatlar",
+      "speed": "Hız",
+      "events": "Promosyonlar",
+      "other": "Diğer"
+    }
+  },
+  "staffTarget": {
+    "title": "Bu kimi ilgilendiriyor?",
+    "teamTitle": "Bütün takım",
+    "teamSubtitle": "Belirli bir kişiyi seçmeden.",
+    "unknownTitle": "Emin değilim",
+    "unknownSubtitle": "Bir kişiyi seçmeyeceğim.",
+    "employeeSubtitle": "Çalışan"
+  },
+  "wizard": {
+    "choice": {
+      "title": "Ne paylaşmak istersiniz?",
+      "subtitle": "Bir seçenek seçin, sonra sadece gerekli olanı soracağız."
+    },
+    "choices": {
+      "great": {
+        "title": "Her şey yolunda",
+        "subtitle": "Değerlendirin ve isterseniz birkaç kelime ekleyin."
+      },
+      "ok": {
+        "title": "Daha iyi olabilir",
+        "subtitle": "Bana neyin iyileştirilmesi gerektiğini söyle."
+      },
+      "issue": {
+        "title": "Bir sorun var",
+        "subtitle": "Neyin yanlış olduğunu açıklayın."
+      },
+      "idea": {
+        "title": "bir fikrim var",
+        "subtitle": "Nelerin geliştirilebileceğini paylaşın."
+      }
+    },
+    "rating": {
+      "title": "Nasıl değerlendirirsiniz?",
+      "subtitle": "Şimdi nasıl hissettiğini seçin.",
+      "labels": {
+        "1": "Kötü",
+        "2": "Pek değil",
+        "3": "normal",
+        "4": "tamam",
+        "5": "Mükemmel"
+      },
+      "hints": {
+        "1": "Bize neyin düzeltilmesi gerektiğini söyleyin.",
+        "2": "Neyi geliştirmek istediğimi söyle bana.",
+        "3": "Daha iyi olacağı not edilebilir.",
+        "4": "Beğendiklerinizi ekleyebilirsiniz.",
+        "5": "Bir anı, bir kişiyi veya bir takımı övebilirsiniz.",
+        "5_noSpecificTargets": "Özellikle beğendiğiniz şeyleri ekleyebilirsiniz."
+      }
+    },
+    "details": {
+      "title": "Detayları açıklayalım",
+      "subtitle": "Yardımcı olacaksa ayrıntıları not edin."
+    },
+    "topics": {
+      "complaint": {
+        "title": "Tam olarak ne?",
+        "subtitle": "Birkaç tane seçebilirsiniz."
+      },
+      "suggestion": {
+        "title": "Fikir ne hakkında?",
+        "subtitle": "Uygunsa bir yön seçin."
+      }
+    },
+    "staff": {
+      "title": "Kiminle ilgili?",
+      "subtitle": "Emin değilseniz tarafsız bir seçenek seçin.",
+      "review": {
+        "1": {
+          "title": "Bu kimi etkiliyor?",
+          "subtitle": "Eğer kişiyi hatırlıyorsanız onu seçin. Takımdan ayrılabilirsiniz."
+        },
+        "2": {
+          "title": "Bu kimi ilgilendiriyor?",
+          "subtitle": "Bunu anlamanıza yardımcı olacaksa bir çalışan seçin."
+        },
+        "3": {
+          "title": "İnceleme kimleri ilgilendiriyor?",
+          "subtitle": "Bir kişiyi veya ekibin tamamını seçebilirsiniz."
+        },
+        "4": {
+          "title": "Kimi övmeli?",
+          "subtitle": "Özellikle yardımcı olan biri varsa lütfen etiketleyin."
+        },
+        "5": {
+          "title": "Kime teşekkür etmeliyiz?",
+          "subtitle": "Bir kişiyi veya ekibin tamamını seçin."
+        }
+      }
+    },
+    "comment": {
+      "review": {
+        "title": "Eklenecek bir şey var mı?",
+        "subtitle": "Neyi beğendiniz ya da nelerin geliştirilmesi gerekiyor?"
+      },
+      "reviewByRating": {
+        "1": {
+          "title": "Ne yanlış gitti?",
+          "subtitle": "Gereksiz ayrıntılar olmadan ana şeyi yazın.",
+          "placeholder": "Ne oldu? Neyi düzeltmek istersiniz?",
+          "optional": "Kısaca: Sorun neydi?"
+        },
+        "2": {
+          "title": "Seni ne üzdü?",
+          "subtitle": "Bana neyin düzeltilebileceğini söyle.",
+          "placeholder": "Sorun neydi? Nerede rahatsız oldu?",
+          "optional": "Birkaç kelime bile yeterli."
+        },
+        "3": {
+          "title": "Neler geliştirilebilir?",
+          "subtitle": "Daha iyi hale getirmek için neyi geliştirebilirim?",
+          "placeholder": "Neler yolundaydı ve neyi geliştirmek istersiniz?",
+          "optional": "Değerlendirme yeterli ise devam edebilirsiniz."
+        },
+        "4": {
+          "title": "Neyi beğendin?",
+          "subtitle": "İyi bir anı veya kişiyi kutlayabilirsiniz.",
+          "placeholder": "Ne iyiydi? Kimi övmek istersiniz?",
+          "optional": "Değerlendirme yeterli ise devam edebilirsiniz."
+        },
+        "5": {
+          "title": "Özellikle neyi beğendin?",
+          "subtitle": "İsterseniz takımı veya kişiyi övün.",
+          "placeholder": "Kimi övmeli? Özellikle güzel olan neydi?",
+          "optional": "Değerlendirme yeterli ise devam edebilirsiniz."
+        }
+      },
+      "complaint": {
+        "title": "Ne oldu?",
+        "subtitle": "Bunu anlamanıza yardımcı olacak ana şeyi açıklayın."
+      },
+      "suggestion": {
+        "title": "Fikir nedir?",
+        "subtitle": "Neler eklenmeli veya geliştirilmeli?"
+      },
+      "optional": {
+        "review": "Yorum yapmadan devam edebilirsiniz.",
+        "complaint": "Kısa bir açıklama bunu anlamanıza yardımcı olacaktır.",
+        "complaintTopic": "Seçilen konu yeterli ise devam edebilirsiniz.",
+        "complaintPhoto": "Fotoğraf her şeyi gösteriyorsa devam edebilirsiniz.",
+        "complaintTopicPhoto": "Konu veya fotoğraf yeterliyse devam edebilirsiniz.",
+        "suggestion": "Teklif sunmak için bir fikre ihtiyaç vardır."
+      },
+      "required": {
+        "review": "Devam etmek için kısa bir yorum ekleyin.",
+        "reviewLow": "Devam etmek için neyin düzeltilmesi gerektiğini yazın.",
+        "complaint": "Devam etmek için lütfen sorununuzu açıklayın.",
+        "suggestion": "Devam etme fikrini açıklayın."
+      },
+      "detailRequired": {
+        "complaintText": "Devam etmek için lütfen sorununuzu açıklayın.",
+        "complaintTextTopic": "Devam etmek için bir açıklama ekleyin veya bir konu seçin.",
+        "complaintTextPhoto": "Devam etmek için bir açıklama veya fotoğraf ekleyin.",
+        "complaintTextTopicPhoto": "Devam etmek için bir açıklama, konu veya fotoğraf ekleyin."
+      },
+      "filled": {
+        "review": "Yorum eklendi. Devam edebiliriz.",
+        "complaint": "Açıklama eklendi. Devam edebiliriz.",
+        "suggestion": "Fikir yazılmıştır. Devam edebiliriz."
+      }
+    },
+    "contact": {
+      "titleOptional": "Kişi bırakılsın mı?",
+      "subtitleOptional": "Cevap istiyorsanız lütfen telefon numaranızı veya Telegram'yi belirtin.",
+      "titleRequired": "Sizinle nasıl iletişime geçebilirim?",
+      "subtitleRequired": "Ekibin yanıt verebilmesi için lütfen bir telefon numarası veya Telegram sağlayın.",
+      "placeholder": "Telefon veya @username",
+      "skip": "Atla"
+    },
+    "summary": {
+      "title": "Gönderilmeye hazır",
+      "subtitle": "Her şeyin doğru olup olmadığını kontrol edin.",
+      "kind": "Ne gönderiyoruz",
+      "rating": "Değerlendirme",
+      "staff": "Kiminle alakalı",
+      "topics": "Konular",
+      "comment": "Yorum",
+      "contact": "İletişim",
+      "photos": "Fotoğraf",
+      "photosValue": "{{value}} adet.",
+      "noText": "Yorum yok.",
+      "contactPrivateHint": "Kişiyi yalnızca ekip görecektir.",
+      "contactOptionalHint": "İletişimi bırakmanıza gerek yok."
+    },
+    "done": {
+      "default": {
+        "title": "Teşekkürler",
+        "subtitle": "Mesaj ekibe ulaştı."
+      },
+      "reviewByRating": {
+        "1": {
+          "title": "Yazdığınız için teşekkürler",
+          "subtitle": "Ekibe ilettik. Neyin ters gittiğini hızlı fark etmeyi kolaylaştırır."
+        },
+        "2": {
+          "title": "Söylediğiniz için teşekkürler",
+          "subtitle": "Ekip geri bildirimi görecek ve tahmin etmeden anlayabilecek."
+        },
+        "3": {
+          "title": "İpucu için teşekkürler",
+          "subtitle": "Geri bildiriminiz neyin daha iyi yapılabileceğini anlamaya yardımcı olur."
+        },
+        "4": {
+          "title": "Geri bildiriminiz için teşekkürler",
+          "subtitle": "Ekip neyi iyi yaptığını görecek ve bu seviyeyi koruyabilecek."
+        },
+        "5": {
+          "title": "Teşekkürler, çok güzel",
+          "subtitle": "Sıcak sözleri ekibe ilettik. Böyle yorumlar gerçekten mutlu eder."
+        }
+      },
+      "complaint": {
+        "title": "Bildirdiğiniz için teşekkürler",
+        "subtitle": "Mesaj ekibe ulaştı. Detayları görüp durumu anlayabilecekler."
+      },
+      "suggestion": {
+        "title": "Fikir için teşekkürler",
+        "subtitle": "Ekibe ilettik. Böyle fikirler daha iyi olmaya yardımcı olur."
+      }
+    }
+  },
+  "photos": {
+    "add": "Fotoğraf",
+    "hints": {
+      "review": "Detayı göstermek daha kolaysa fotoğraf ekleyebilirsiniz.",
+      "complaint": "Bir fotoğraf, ne olduğunu hızlı bir şekilde anlamanıza yardımcı olacaktır.",
+      "suggestion": "Fikir daha açıksa bir örnek gösterebilirsiniz."
+    },
+    "remove": "Fotoğrafı kaldır",
+    "errors": {
+      "limit": "En fazla 4 fotoğraf ekleyebilirsiniz.",
+      "size": "Fotoğraf çok büyük.",
+      "type": "Bu fotoğraf eklenemedi.",
+      "upload": "Fotoğraf yüklenemedi."
+    }
+  },
+  "attachPhoto": "Fotoğraf",
+  "attachPhotoSlot": "Fotoğraf {{index}}",
+  "submit": "Gönder",
+  "submitSuccess": "Teşekkür ederim gönderdim",
+  "submitError": "Gönderilemedi. Tekrar deneyin.",
+  "loading": "Formu açıyoruz...",
+  "errorTitle": "Form açılamadı",
+  "errorSubtitle": "Tekrar deneyin veya yeni bir bağlantı isteyin.",
+  "emptyTitle": "Form mevcut değil",
+  "emptySubtitle": "Bu konum henüz bir misafir formu içermemektedir."
+}

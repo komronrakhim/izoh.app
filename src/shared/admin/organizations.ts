@@ -1,4 +1,6 @@
-export type AdminOrganizationLocale = "RU" | "UZ";
+import type { AppLocale } from "~/shared/i18n";
+
+export type AdminOrganizationLocale = AppLocale;
 export type AdminOrganizationRole = "OWNER";
 
 export type AdminOrganization = {

@@ -164,13 +164,7 @@ export const List = ({
   );
 };
 
-export const ListRow = ({
-  item,
-  spacing = "sm"
-}: {
-  item: ListItem;
-  spacing?: ListSpacing;
-}) => {
+export const ListRow = ({ item, spacing = "sm" }: { item: ListItem; spacing?: ListSpacing }) => {
   const isDisabled = item.disabled;
   const isAction = item.isAction ?? true;
   const variant = item.variant ?? "default";

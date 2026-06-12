@@ -23,7 +23,7 @@ describe("submissions API", () => {
       body: JSON.stringify({
         bodyText: "Все хорошо",
         kind: "REVIEW",
-        locale: "RU",
+        locale: "ru",
         organizationId: "org_1",
         rating: 5,
         startParam: "coffee-place"

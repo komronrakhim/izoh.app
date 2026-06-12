@@ -7,7 +7,7 @@ const normalizeTelegramText = (value: string) => value.replace(/<[^>]+>/g, "");
 describe("Telegram submission notifications", () => {
   it("formats a low review as an important Russian notification without changing its kind", () => {
     const message = formatSubmissionNotificationText({
-      locale: "RU",
+      locale: "ru",
       submission: {
         body_text: "Кофе был холодный <script>",
         customer_display_name: "Анонимный клиент",
@@ -44,7 +44,7 @@ describe("Telegram submission notifications", () => {
 
   it("formats complaint topics in the recipient locale", () => {
     const message = formatSubmissionNotificationText({
-      locale: "UZ",
+      locale: "uz",
       submission: {
         body_text: "Juda uzoq kutdik",
         customer_display_name: null,
@@ -74,7 +74,7 @@ describe("Telegram submission notifications", () => {
 
   it("formats neutral staff targets without requiring a staff member row", () => {
     const message = formatSubmissionNotificationText({
-      locale: "RU",
+      locale: "ru",
       submission: {
         body_text: "Не понял, кто отвечал за заказ",
         customer_display_name: null,
@@ -101,7 +101,7 @@ describe("Telegram submission notifications", () => {
 
   it("formats staff snapshots after the staff member row is gone", () => {
     const message = formatSubmissionNotificationText({
-      locale: "RU",
+      locale: "ru",
       submission: {
         body_text: "Спасибо за помощь",
         customer_display_name: null,
@@ -134,7 +134,7 @@ describe("Telegram submission notifications", () => {
 
   it("keeps media captions inside the requested limit", () => {
     const message = formatSubmissionNotificationText({
-      locale: "RU",
+      locale: "ru",
       maxLength: 1000,
       submission: {
         body_text: "a".repeat(4000),

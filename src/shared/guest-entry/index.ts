@@ -10,6 +10,7 @@ import type {
   SuggestionModuleSettings
 } from "~/shared/module-settings";
 import type { StaffMemberItem } from "~/shared/staff";
+import type { AppLocale } from "~/shared/i18n";
 
 export const GUEST_ENTRY_CHANNEL_IDS = ["review", "complaint", "suggestion"] as const;
 
@@ -34,7 +35,7 @@ export type GuestEntryConfigPayload = {
   organization: {
     description: string;
     id: string;
-    locale: "RU" | "UZ";
+    locale: AppLocale;
     logoUrl?: string | null;
     name: string;
   };

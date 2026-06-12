@@ -2,9 +2,6 @@
 CREATE SCHEMA IF NOT EXISTS "public";
 
 -- CreateEnum
-CREATE TYPE "AppLocale" AS ENUM ('RU', 'UZ');
-
--- CreateEnum
 CREATE TYPE "LocaleSource" AS ENUM ('TELEGRAM', 'MANUAL');
 
 -- CreateEnum
@@ -79,7 +76,7 @@ CREATE TABLE "User" (
     "username" TEXT,
     "language_code" TEXT,
     "photo_url" TEXT,
-    "locale" "AppLocale" NOT NULL DEFAULT 'RU',
+    "locale" TEXT NOT NULL DEFAULT 'ru',
     "locale_source" "LocaleSource" NOT NULL DEFAULT 'TELEGRAM',
     "system_role" "UserSystemRole" NOT NULL DEFAULT 'USER',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -98,7 +95,7 @@ CREATE TABLE "Organization" (
     "description" TEXT NOT NULL DEFAULT '',
     "contact_text" TEXT NOT NULL DEFAULT '',
     "logo_media_asset_id" TEXT,
-    "locale" "AppLocale" NOT NULL DEFAULT 'RU',
+    "locale" TEXT NOT NULL DEFAULT 'ru',
     "time_zone" TEXT NOT NULL DEFAULT 'UTC',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -277,7 +274,7 @@ CREATE TABLE "Submission" (
     "customer_contact_phone" TEXT,
     "customer_display_name" TEXT,
     "qr_context" TEXT,
-    "locale" "AppLocale" NOT NULL DEFAULT 'RU',
+    "locale" TEXT NOT NULL DEFAULT 'ru',
     "metadata" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -373,7 +370,7 @@ CREATE TABLE "Broadcast" (
     "created_by_user_id" TEXT,
     "target_kind" "BroadcastTargetKind" NOT NULL DEFAULT 'ALL_USERS',
     "status" "BroadcastStatus" NOT NULL DEFAULT 'DRAFT',
-    "locale" "AppLocale",
+    "locale" TEXT,
     "text" TEXT NOT NULL,
     "metadata" JSONB,
     "started_at" TIMESTAMP(3),

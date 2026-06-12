@@ -32,6 +32,7 @@ import {
   type AdminAnalyticsPeriod,
   type AdminAnalyticsStaffItem
 } from "~/shared/analytics";
+import { getIntlLocale } from "~/shared/i18n";
 import { useI18n } from "~/shared/i18n/react";
 import { queryKeys } from "~/shared/query";
 import { getRatingEmoji, getRatingLabelKey } from "~/shared/ratings";
@@ -39,6 +40,7 @@ import { PageTransition } from "~/shared/router/page-transition";
 import { useTma, useTmaBackButton } from "~/shared/tma";
 
 type AnalyticsTab = "contexts" | "mood" | "overview" | "team" | "time" | "topics";
+type Translate = (key: string, options?: Record<string, unknown>) => string;
 
 const baseTabs = ["overview", "mood", "topics", "contexts", "time"] as const satisfies Readonly<
   Exclude<AnalyticsTab, "team">[]
@@ -66,14 +68,23 @@ const metricToneClassNames = {
 type MetricTone = keyof typeof metricToneClassNames;
 
 const formatNumber = (value: number, locale: string) =>
-  new Intl.NumberFormat(locale === "uz" ? "uz-UZ" : "ru-RU").format(value);
+  new Intl.NumberFormat(getIntlLocale(locale)).format(value);
+
+const formatDecimal = (value: number, locale: string) =>
+  new Intl.NumberFormat(getIntlLocale(locale), {
+    maximumFractionDigits: 1,
+    minimumFractionDigits: 0
+  }).format(value);
 
 const formatPercent = (value: number) => `${Math.round(value)}%`;
 
 const getPercent = (value: number, total: number) => (total > 0 ? (value / total) * 100 : 0);
 
+const formatCountWithPercent = (value: number, total: number, locale: string) =>
+  `${formatNumber(value, locale)} · ${formatPercent(getPercent(value, total))}`;
+
 const formatDate = (value: string, locale: string) =>
-  new Intl.DateTimeFormat(locale === "uz" ? "uz-UZ" : "ru-RU", {
+  new Intl.DateTimeFormat(getIntlLocale(locale), {
     day: "numeric",
     month: "short"
   }).format(new Date(`${value}T12:00:00`));
@@ -81,14 +92,11 @@ const formatDate = (value: string, locale: string) =>
 const formatHour = (hour: number) => String(hour).padStart(2, "0") + ":00";
 
 const getWeekdayName = (day: number, locale: string) =>
-  new Intl.DateTimeFormat(locale === "uz" ? "uz-UZ" : "ru-RU", {
+  new Intl.DateTimeFormat(getIntlLocale(locale), {
     weekday: "short"
   }).format(new Date(Date.UTC(2026, 5, 7 + day)));
 
-const getTrendText = (
-  analytics: AdminAnalyticsPayload,
-  t: (key: string, options?: Record<string, unknown>) => string
-) => {
+const getTrendText = (analytics: AdminAnalyticsPayload, t: Translate) => {
   const diff = analytics.totals.trend.current - analytics.totals.trend.previous;
 
   if (diff === 0) {
@@ -100,11 +108,8 @@ const getTrendText = (
   });
 };
 
-const getTopicTitle = (
-  kind: "complaint" | "suggestion",
-  id: string,
-  t: (key: string, options?: Record<string, unknown>) => string
-) => t(`customer.topicOptions.${kind}.${id}`);
+const getTopicTitle = (kind: "complaint" | "suggestion", id: string, t: Translate) =>
+  t(`customer.topicOptions.${kind}.${id}`);
 
 const MetricIcon = ({ icon: Icon, tone }: { icon: LucideIcon; tone: MetricTone }) => (
   <ListIcon className={cn(metricToneClassNames[tone], "text-white")}>
@@ -121,11 +126,16 @@ const AnalyticsPanel = ({
   className?: string;
   title?: React.ReactNode;
 }) => (
-  <section className="grid gap-2.5">
+  <section className="grid min-w-0 gap-2.5">
     {title ? (
-      <h3 className="ios-caption-1 px-4 font-semibold uppercase text-muted">{title}</h3>
+      <h3 className="ios-caption-1 px-3 font-semibold uppercase text-muted">{title}</h3>
     ) : null}
-    <div className={cn("iz-liquid-list rounded-[28px] border border-transparent p-4", className)}>
+    <div
+      className={cn(
+        "iz-liquid-list min-w-0 overflow-hidden rounded-[24px] border border-transparent p-3.5",
+        className
+      )}
+    >
       {children}
     </div>
   </section>
@@ -141,18 +151,22 @@ const StatGrid = ({
     value: React.ReactNode;
   }>;
 }) => (
-  <div className="grid grid-cols-2 gap-2.5">
+  <div className="grid grid-cols-[repeat(auto-fit,minmax(132px,1fr))] gap-2.5">
     {items.map((item) => (
       <div
         key={item.label}
-        className="grid min-h-[112px] content-between rounded-[22px] bg-foreground/[0.045] p-3.5 dark:bg-white/[0.06]"
+        className="grid min-h-[104px] min-w-0 content-between rounded-[18px] bg-foreground/[0.045] p-3 dark:bg-white/[0.06]"
       >
         <div className="flex items-center justify-between gap-2">
           <MetricIcon icon={item.icon} tone={item.tone} />
         </div>
-        <div className="grid gap-1">
-          <div className="ios-title-2 font-semibold text-foreground">{item.value}</div>
-          <div className="ios-caption-1 font-medium text-muted">{item.label}</div>
+        <div className="grid min-w-0 gap-1">
+          <div className="ios-title-3 min-w-0 break-words font-semibold text-foreground">
+            {item.value}
+          </div>
+          <div className="ios-caption-1 min-w-0 break-words font-medium text-muted">
+            {item.label}
+          </div>
         </div>
       </div>
     ))}
@@ -174,11 +188,13 @@ const ProgressRow = ({
 }) => (
   <div className="grid gap-2">
     <div className="flex items-center justify-between gap-3">
-      <div className="min-w-0">
-        <div className="ios-body truncate text-foreground">{label}</div>
-        {meta ? <div className="ios-caption-1 mt-0.5 text-muted">{meta}</div> : null}
+      <div className="min-w-0 flex-1">
+        <div className="ios-subhead min-w-0 break-words font-medium text-foreground">{label}</div>
+        {meta ? (
+          <div className="ios-caption-1 mt-0.5 min-w-0 break-words text-muted">{meta}</div>
+        ) : null}
       </div>
-      <div className="ios-subhead shrink-0 font-medium text-muted">{value}</div>
+      <div className="ios-subhead shrink-0 tabular-nums font-medium text-muted">{value}</div>
     </div>
     <div className="h-2 overflow-hidden rounded-full bg-foreground/[0.075] dark:bg-white/[0.09]">
       <div
@@ -197,6 +213,200 @@ const EmptyBlock = ({ text }: { text: string }) => (
   </div>
 );
 
+type FriendlyCard = {
+  description: string;
+  icon: LucideIcon;
+  title: string;
+  tone: MetricTone;
+};
+
+const FriendlyCardRow = ({ card }: { card: FriendlyCard }) => (
+  <div className="flex min-w-0 items-start gap-3 rounded-[18px] bg-foreground/[0.035] p-3 dark:bg-white/[0.045]">
+    <MetricIcon icon={card.icon} tone={card.tone} />
+    <div className="grid min-w-0 flex-1 gap-0.5">
+      <p className="ios-subhead min-w-0 break-words font-semibold text-foreground">{card.title}</p>
+      <p className="ios-footnote min-w-0 break-words text-muted">{card.description}</p>
+    </div>
+  </div>
+);
+
+const getMoodSummaryCard = ({
+  analytics,
+  locale,
+  t
+}: {
+  analytics: AdminAnalyticsPayload;
+  locale: string;
+  t: Translate;
+}): FriendlyCard => {
+  const average = analytics.rating.average;
+
+  if (!average) {
+    return {
+      description: t("admin.analytics.summary.moodEmptyText"),
+      icon: SmilePlus,
+      title: t("admin.analytics.summary.moodEmptyTitle"),
+      tone: "blue"
+    };
+  }
+
+  if (average >= 4.2) {
+    return {
+      description: t("admin.analytics.summary.moodGoodText", {
+        rating: formatDecimal(average, locale)
+      }),
+      icon: SmilePlus,
+      title: t("admin.analytics.summary.moodGoodTitle"),
+      tone: "green"
+    };
+  }
+
+  if (average < 3.8 || analytics.rating.negativeCount > 0) {
+    return {
+      description: t("admin.analytics.summary.moodAttentionText", {
+        count: formatNumber(analytics.rating.negativeCount, locale)
+      }),
+      icon: AlertTriangle,
+      title: t("admin.analytics.summary.moodAttentionTitle"),
+      tone: "orange"
+    };
+  }
+
+  return {
+    description: t("admin.analytics.summary.moodMixedText"),
+    icon: SmilePlus,
+    title: t("admin.analytics.summary.moodMixedTitle"),
+    tone: "blue"
+  };
+};
+
+const getSummaryCards = ({
+  analytics,
+  locale,
+  t
+}: {
+  analytics: AdminAnalyticsPayload;
+  locale: string;
+  t: Translate;
+}) => {
+  const total = analytics.totals.counts.ALL;
+
+  if (total === 0) {
+    return [
+      {
+        description: t("admin.analytics.summary.emptyText"),
+        icon: Sparkles,
+        title: t("admin.analytics.summary.emptyTitle"),
+        tone: "purple"
+      }
+    ] satisfies FriendlyCard[];
+  }
+
+  const topContext = analytics.contexts[0];
+  const peakHour = analytics.time.peakHour;
+  const placeOrTimeCard: FriendlyCard | null = topContext
+    ? {
+        description: t("admin.analytics.summary.contextText", {
+          count: formatNumber(topContext.count, locale)
+        }),
+        icon: MapPin,
+        title: t("admin.analytics.summary.contextTitle", {
+          context: topContext.label
+        }),
+        tone: "teal"
+      }
+    : peakHour
+      ? {
+          description: t("admin.analytics.summary.peakText", {
+            count: formatNumber(peakHour.count, locale)
+          }),
+          icon: Clock3,
+          title: t("admin.analytics.summary.peakTitle", {
+            time: formatHour(peakHour.hour)
+          }),
+          tone: "teal"
+        }
+      : null;
+
+  return [
+    {
+      description: t("admin.analytics.summary.totalText"),
+      icon: Sparkles,
+      title: t("admin.analytics.summary.totalTitle", {
+        count: formatNumber(total, locale)
+      }),
+      tone: "purple"
+    },
+    getMoodSummaryCard({
+      analytics,
+      locale,
+      t
+    }),
+    placeOrTimeCard
+  ].filter(Boolean) as FriendlyCard[];
+};
+
+const getAttentionCard = ({
+  analytics,
+  locale,
+  t
+}: {
+  analytics: AdminAnalyticsPayload;
+  locale: string;
+  t: Translate;
+}): FriendlyCard => {
+  const topComplaintTopic = analytics.topics.complaint[0];
+  const contextWithSignal = analytics.contexts.find(
+    (item) => item.complaintCount + item.lowReviewCount > 0
+  );
+
+  if (topComplaintTopic) {
+    return {
+      description: t("admin.analytics.attention.complaintTopicText", {
+        count: formatNumber(topComplaintTopic.count, locale)
+      }),
+      icon: MessageCircleWarning,
+      title: t("admin.analytics.attention.complaintTopicTitle", {
+        topic: getTopicTitle("complaint", topComplaintTopic.id, t)
+      }),
+      tone: "pink"
+    };
+  }
+
+  if (contextWithSignal) {
+    const signalCount = contextWithSignal.complaintCount + contextWithSignal.lowReviewCount;
+
+    return {
+      description: t("admin.analytics.attention.contextText", {
+        count: formatNumber(signalCount, locale)
+      }),
+      icon: MapPin,
+      title: t("admin.analytics.attention.contextTitle", {
+        context: contextWithSignal.label
+      }),
+      tone: "orange"
+    };
+  }
+
+  if (analytics.rating.negativeCount > 0) {
+    return {
+      description: t("admin.analytics.attention.lowRatingsText", {
+        count: formatNumber(analytics.rating.negativeCount, locale)
+      }),
+      icon: AlertTriangle,
+      title: t("admin.analytics.attention.lowRatingsTitle"),
+      tone: "orange"
+    };
+  }
+
+  return {
+    description: t("admin.analytics.attention.allGoodText"),
+    icon: CheckCircle2,
+    title: t("admin.analytics.attention.allGoodTitle"),
+    tone: "green"
+  };
+};
+
 const OverviewTab = ({
   analytics,
   locale,
@@ -207,54 +417,41 @@ const OverviewTab = ({
   t: (key: string, options?: Record<string, unknown>) => string;
 }) => {
   const total = analytics.totals.counts.ALL;
-  const topComplaintTopic = analytics.topics.complaint[0];
-  const topSuggestionTopic = analytics.topics.suggestion[0];
-  const topStaff = analytics.staff.items[0];
-  const topContext = analytics.contexts[0];
-  const insights = [
-    total > 0
-      ? t("admin.analytics.insights.total", {
-          count: total
-        })
-      : t("admin.analytics.insights.empty"),
-    topComplaintTopic
-      ? t("admin.analytics.insights.complaintTopic", {
-          topic: getTopicTitle("complaint", topComplaintTopic.id, t)
-        })
-      : null,
-    topSuggestionTopic
-      ? t("admin.analytics.insights.suggestionTopic", {
-          topic: getTopicTitle("suggestion", topSuggestionTopic.id, t)
-        })
-      : null,
-    analytics.staff.enabled && topStaff?.thanksCount
-      ? t("admin.analytics.insights.staff", {
-          name: topStaff.displayName
-        })
-      : null,
-    topContext
-      ? t("admin.analytics.insights.context", {
-          context: topContext.label
-        })
-      : null
-  ].filter(Boolean) as string[];
+  const summaryCards = getSummaryCards({
+    analytics,
+    locale,
+    t
+  });
+  const attentionCard = getAttentionCard({
+    analytics,
+    locale,
+    t
+  });
 
   return (
     <div className="grid gap-5">
+      <AnalyticsPanel title={t("admin.analytics.overview.summaryTitle")}>
+        <div className="grid gap-2.5">
+          {summaryCards.map((card) => (
+            <FriendlyCardRow key={card.title} card={card} />
+          ))}
+        </div>
+      </AnalyticsPanel>
+
       <AnalyticsPanel>
         <div className="grid gap-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="grid gap-1">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="grid min-w-0 gap-1">
               <p className="ios-caption-1 font-semibold uppercase text-muted">
                 {t("admin.analytics.overview.total")}
               </p>
-              <h3 className="ios-large-title font-semibold tracking-normal text-foreground">
+              <h3 className="ios-title-1 font-semibold tracking-normal text-foreground">
                 {formatNumber(total, locale)}
               </h3>
             </div>
             <span
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 ios-footnote font-semibold",
+                "inline-flex max-w-full items-center gap-1.5 rounded-full px-3 py-1.5 ios-footnote font-semibold",
                 analytics.totals.trend.direction === "up"
                   ? "bg-primary/10 text-primary"
                   : analytics.totals.trend.direction === "down"
@@ -306,18 +503,8 @@ const OverviewTab = ({
         </div>
       </AnalyticsPanel>
 
-      <AnalyticsPanel title={t("admin.analytics.overview.insightsTitle")}>
-        <div className="grid gap-3">
-          {insights.slice(0, 4).map((insight, index) => (
-            <div key={insight} className="flex items-start gap-3">
-              <MetricIcon
-                icon={index === 0 ? Sparkles : index === 1 ? MessageSquareText : CheckCircle2}
-                tone={index === 0 ? "purple" : index === 1 ? "orange" : "teal"}
-              />
-              <p className="ios-body min-w-0 flex-1 text-foreground">{insight}</p>
-            </div>
-          ))}
-        </div>
+      <AnalyticsPanel title={t("admin.analytics.attention.title")}>
+        <FriendlyCardRow card={attentionCard} />
       </AnalyticsPanel>
 
       <AnalyticsPanel title={t("admin.analytics.overview.detailsTitle")}>
@@ -326,19 +513,19 @@ const OverviewTab = ({
             label={t("admin.analytics.engagement.withText")}
             percent={getPercent(analytics.engagement.withText, total)}
             tone="blue"
-            value={formatNumber(analytics.engagement.withText, locale)}
+            value={formatCountWithPercent(analytics.engagement.withText, total, locale)}
           />
           <ProgressRow
             label={t("admin.analytics.engagement.withPhotos")}
             percent={getPercent(analytics.engagement.withPhotos, total)}
             tone="purple"
-            value={formatNumber(analytics.engagement.withPhotos, locale)}
+            value={formatCountWithPercent(analytics.engagement.withPhotos, total, locale)}
           />
           <ProgressRow
             label={t("admin.analytics.engagement.withContact")}
             percent={getPercent(analytics.engagement.withContact, total)}
             tone="green"
-            value={formatNumber(analytics.engagement.withContact, locale)}
+            value={formatCountWithPercent(analytics.engagement.withContact, total, locale)}
           />
         </div>
       </AnalyticsPanel>
@@ -578,19 +765,26 @@ const ContextsTab = ({
     <AnalyticsPanel title={t("admin.analytics.contexts.title")}>
       {analytics.contexts.length > 0 ? (
         <div className="grid gap-4">
-          {analytics.contexts.map((item) => (
-            <ProgressRow
-              key={item.label}
-              label={item.label}
-              meta={t("admin.analytics.contexts.meta", {
-                complaints: item.complaintCount,
-                lowReviews: item.lowReviewCount
-              })}
-              percent={getPercent(item.count, maxCount)}
-              tone={item.complaintCount + item.lowReviewCount > 0 ? "orange" : "teal"}
-              value={formatNumber(item.count, locale)}
-            />
-          ))}
+          {analytics.contexts.map((item) => {
+            const signalCount = item.complaintCount + item.lowReviewCount;
+
+            return (
+              <ProgressRow
+                key={item.label}
+                label={item.label}
+                meta={
+                  signalCount > 0
+                    ? t("admin.analytics.contexts.attentionMeta", {
+                        count: formatNumber(signalCount, locale)
+                      })
+                    : t("admin.analytics.contexts.quietMeta")
+                }
+                percent={getPercent(item.count, maxCount)}
+                tone={signalCount > 0 ? "orange" : "teal"}
+                value={formatNumber(item.count, locale)}
+              />
+            );
+          })}
         </div>
       ) : (
         <EmptyBlock text={t("admin.analytics.empty.contexts")} />
@@ -610,6 +804,8 @@ const TimeTab = ({
 }) => {
   const maxDaily = Math.max(...analytics.time.daily.map((item) => item.ALL), 1);
   const maxWeekday = Math.max(...analytics.time.weekdays.map((item) => item.count), 1);
+  const firstDaily = analytics.time.daily[0];
+  const lastDaily = analytics.time.daily.at(-1);
 
   return (
     <div className="grid gap-5">
@@ -628,23 +824,30 @@ const TimeTab = ({
             </div>
             <MetricIcon icon={Clock3} tone="teal" />
           </div>
-          <div className="flex h-[104px] items-end gap-1.5">
-            {analytics.time.daily.map((item) => (
-              <div key={item.date} className="flex min-w-0 flex-1 flex-col items-center gap-2">
-                <div className="flex h-[76px] w-full items-end">
+          <div className="grid gap-2">
+            <div className="flex h-[94px] items-end gap-0.5 rounded-[18px] bg-foreground/[0.035] px-2.5 py-2 dark:bg-white/[0.045]">
+              {analytics.time.daily.map((item) => (
+                <div key={item.date} className="flex min-w-0 flex-1 items-end">
                   <div
-                    className="w-full rounded-t-full bg-primary/80"
+                    className="min-w-[2px] flex-1 rounded-t-full bg-primary/80"
                     style={{
                       height:
                         item.ALL > 0 ? `${Math.max(8, getPercent(item.ALL, maxDaily))}%` : "0%"
                     }}
                   />
                 </div>
-                <span className="ios-caption-2 max-w-full truncate text-muted">
-                  {formatDate(item.date, locale)}
+              ))}
+            </div>
+            {firstDaily && lastDaily ? (
+              <div className="flex items-center justify-between gap-3 px-1">
+                <span className="ios-caption-2 text-muted">
+                  {formatDate(firstDaily.date, locale)}
+                </span>
+                <span className="ios-caption-2 text-muted">
+                  {formatDate(lastDaily.date, locale)}
                 </span>
               </div>
-            ))}
+            ) : null}
           </div>
         </div>
       </AnalyticsPanel>
@@ -810,69 +1013,71 @@ export const AdminAnalyticsPage = () => {
 
   return (
     <PageTransition>
-      <main className="tma-page bg-surface text-foreground">
-        <div className="account-shell">
-          <section className="grid gap-3">
-            <h2 className="ios-title-1 font-semibold tracking-normal text-foreground">
+      <main className="tma-page overflow-x-hidden bg-surface text-foreground">
+        <div className="account-shell gap-5">
+          <section className="grid min-w-0 gap-3">
+            <h2 className="ios-title-2 font-semibold tracking-normal text-foreground">
               {t("admin.analytics.title")}
             </h2>
 
-            <div className="scrollbar-hide -mx-4 flex gap-1 overflow-x-auto px-4 py-1 sm:-mx-6 sm:px-6">
-              {ADMIN_ANALYTICS_PERIODS.map((item) => {
-                const active = item === period;
+            <div className="iz-liquid-list grid min-w-0 gap-2 rounded-[24px] border border-transparent p-2">
+              <div className="grid grid-cols-3 gap-1">
+                {ADMIN_ANALYTICS_PERIODS.map((item) => {
+                  const active = item === period;
 
-                return (
-                  <button
-                    key={item}
-                    type="button"
-                    aria-pressed={active}
-                    className={cn(
-                      "ios-touch-target ios-footnote relative shrink-0 rounded-full px-3.5 font-medium transition-colors",
-                      active
-                        ? "bg-surface-2 text-foreground shadow-[0_1px_4px_rgba(15,23,42,0.08)] ring-1 ring-border/70 dark:bg-surface-3 dark:ring-white/10"
-                        : "bg-foreground/[0.045] text-muted hover:bg-foreground/[0.07] hover:text-foreground dark:bg-white/[0.055] dark:hover:bg-white/[0.08]"
-                    )}
-                    onClick={() => {
-                      tma.haptics.selection();
-                      setPeriod(item);
-                    }}
-                  >
-                    {t(`admin.analytics.periods.${item}`)}
-                  </button>
-                );
-              })}
-            </div>
+                  return (
+                    <button
+                      key={item}
+                      type="button"
+                      aria-pressed={active}
+                      className={cn(
+                        "ios-touch-target ios-footnote min-w-0 rounded-[16px] px-2.5 font-medium transition-colors",
+                        active
+                          ? "bg-surface text-foreground shadow-[0_1px_4px_rgba(15,23,42,0.08)] ring-1 ring-border/70 dark:bg-surface-3 dark:ring-white/10"
+                          : "text-muted hover:bg-foreground/[0.045] hover:text-foreground dark:hover:bg-white/[0.055]"
+                      )}
+                      onClick={() => {
+                        tma.haptics.selection();
+                        setPeriod(item);
+                      }}
+                    >
+                      {t(`admin.analytics.periods.${item}`)}
+                    </button>
+                  );
+                })}
+              </div>
 
-            <div className="scrollbar-hide -mx-4 flex gap-1 overflow-x-auto px-4 py-1 sm:-mx-6 sm:px-6">
-              {tabs.map((item) => {
-                const active = item === activeTab;
-                const Icon = tabIconMap[item];
+              <div className="scrollbar-hide flex min-w-0 gap-1 overflow-x-auto">
+                {tabs.map((item) => {
+                  const active = item === activeTab;
+                  const Icon = tabIconMap[item];
 
-                return (
-                  <button
-                    key={item}
-                    type="button"
-                    aria-pressed={active}
-                    className={cn(
-                      "ios-touch-target ios-footnote relative inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 font-medium transition-colors",
-                      active
-                        ? "bg-primary text-primary-foreground shadow-[0_1px_4px_rgba(15,23,42,0.08)]"
-                        : "bg-foreground/[0.045] text-muted hover:bg-foreground/[0.07] hover:text-foreground dark:bg-white/[0.055] dark:hover:bg-white/[0.08]"
-                    )}
-                    onClick={() => {
-                      tma.haptics.selection();
-                      setActiveTab(item);
-                    }}
-                  >
-                    <Icon size={14.5} strokeWidth={2.35} />
-                    {t(`admin.analytics.tabs.${item}`)}
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      key={item}
+                      type="button"
+                      aria-pressed={active}
+                      className={cn(
+                        "ios-touch-target ios-footnote inline-flex shrink-0 items-center gap-1.5 rounded-[16px] px-3 font-medium transition-colors",
+                        active
+                          ? "bg-primary text-primary-foreground shadow-[0_1px_4px_rgba(15,23,42,0.08)]"
+                          : "bg-foreground/[0.04] text-muted hover:bg-foreground/[0.065] hover:text-foreground dark:bg-white/[0.05] dark:hover:bg-white/[0.075]"
+                      )}
+                      onClick={() => {
+                        tma.haptics.selection();
+                        setActiveTab(item);
+                      }}
+                    >
+                      <Icon size={14.5} strokeWidth={2.35} />
+                      {t(`admin.analytics.tabs.${item}`)}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </section>
 
-          <section>{renderTab({ activeTab, analytics, locale, t })}</section>
+          <section className="min-w-0">{renderTab({ activeTab, analytics, locale, t })}</section>
         </div>
       </main>
     </PageTransition>

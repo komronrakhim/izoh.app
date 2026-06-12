@@ -12,7 +12,6 @@
     "sendPdfToChat": "PDF yuklab olish",
     "copyLink": "Havolani nusxalash",
     "autoSave": "O‘zgarishlar o‘zi saqlanadi",
-    "powered": "Powered by Izoh",
     "preview": "PDF ko‘rinishi",
     "text": {
       "title": "Karta matni",
@@ -68,6 +67,13 @@
     },
     "emoji": {
       "title": "Emoji",
+      "intensity": "Intensivlik",
+      "intensityLevels": {
+        "soft": "Yumshoq",
+        "visible": "Sezilarli",
+        "bright": "Yorqin",
+        "maximum": "Maksimum"
+      },
       "themes": {
         "calm": "Sokin",
         "great": "Quvonchli",

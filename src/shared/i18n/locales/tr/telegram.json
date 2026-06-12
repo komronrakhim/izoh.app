@@ -1,0 +1,42 @@
+{
+  "start": {
+    "message": "Merhaba! Ben Izoh ✨\n\nMekanların konuklardan kısa bir QR formu ile yorum, şikayet ve fikir toplamasına yardımcı oluyorum.\n\nMekanınızı ayarlamak için aşağıdaki menüyü açın 👇"
+  },
+  "groupConnect": {
+    "success": "Bitti, iletişimdeyim ✨\n\n\"{{organizationName}}\" ile ilgili bildirimler artık bu gruba gönderilecek.\nBir misafir yorum, şikayet veya öneri bırakırsa bunu dikkatlice burada yayınlayacağım.",
+    "errorOwner": "Bu grup mekan sahibi tarafından seçilmelidir.",
+    "errorInvalid": "Gruba bağlanılamadı. Bildirimleri açın ve grubu tekrar seçin."
+  },
+  "notifications": {
+    "headline": {
+      "review": "Yeni yorum",
+      "lowReview": "Düşük puan",
+      "complaint": "Yeni şikayet",
+      "suggestion": "Yeni öneri"
+    },
+    "fields": {
+      "customer": "Misafir",
+      "contact": "Misafir iletişimi"
+    },
+    "staffTarget": {
+      "team": "Tüm ekip",
+      "unknown": "Çalışan belirtilmedi"
+    },
+    "emptyText": {
+      "REVIEW": "Konuk derecelendirmeyi yorum yapmadan bıraktı.",
+      "COMPLAINT": "Konuk yorum yapmadan şikayette bulundu.",
+      "SUGGESTION": "Misafir yorum yazmadan öneri gönderdi."
+    }
+  },
+  "subscriptionInvoice": {
+    "description": {
+      "ANNUAL": "Izoh formları, başvuruları ve bildirimlerine yıllık erişim.",
+      "MONTHLY": "Izoh formları, başvuruları ve bildirimlerine aylık erişim."
+    },
+    "label": "Izoh aboneliği",
+    "title": {
+      "ANNUAL": "Izoh yıllık",
+      "MONTHLY": "Izoh aylık"
+    }
+  }
+}

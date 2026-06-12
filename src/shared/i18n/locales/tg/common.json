@@ -1,0 +1,47 @@
+{
+  "brand": "Izoh",
+  "appType": "Mini App",
+  "loading": "Бор шуда истодааст...",
+  "poweredBy": "Izoh",
+  "actions": {
+    "clear": "Тоза кардан"
+  },
+  "locales": {
+    "az": {
+      "label": "Azərbaycanca",
+      "short": "AZ"
+    },
+    "en": {
+      "label": "English",
+      "short": "EN"
+    },
+    "kk": {
+      "label": "Қазақша",
+      "short": "KK"
+    },
+    "ky": {
+      "label": "Кыргызча",
+      "short": "KY"
+    },
+    "ru": {
+      "label": "Русский",
+      "short": "RU"
+    },
+    "tg": {
+      "label": "Тоҷикӣ",
+      "short": "TG"
+    },
+    "tr": {
+      "label": "Türkçe",
+      "short": "TR"
+    },
+    "uk": {
+      "label": "Українська",
+      "short": "UK"
+    },
+    "uz": {
+      "label": "O‘zbekcha",
+      "short": "UZ"
+    }
+  }
+}

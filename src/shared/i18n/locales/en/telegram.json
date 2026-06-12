@@ -1,0 +1,42 @@
+{
+  "start": {
+    "message": "Hello! I'm Izoh ✨\n\nI help places collect reviews, complaints, and ideas from guests through a short QR form.\n\nOpen the menu below to set up your place 👇"
+  },
+  "groupConnect": {
+    "success": "Done, I'm in touch ✨\n\nNotifications for \"{{organizationName}}\" will now be sent to this group.\nIf a guest leaves a review, complaint or suggestion, I will carefully post it here.",
+    "errorOwner": "This group must be selected by the place owner.",
+    "errorInvalid": "Failed to connect the group. Open notifications and select the group again."
+  },
+  "notifications": {
+    "headline": {
+      "review": "New review",
+      "lowReview": "Low score",
+      "complaint": "New complaint",
+      "suggestion": "New suggestion"
+    },
+    "fields": {
+      "customer": "Guest",
+      "contact": "Guest contact"
+    },
+    "staffTarget": {
+      "team": "The whole team",
+      "unknown": "Employee not specified"
+    },
+    "emptyText": {
+      "REVIEW": "The guest left the rating without comment.",
+      "COMPLAINT": "The guest submitted a complaint without comment.",
+      "SUGGESTION": "The guest submitted a suggestion without comment."
+    }
+  },
+  "subscriptionInvoice": {
+    "description": {
+      "ANNUAL": "Yearly access to Izoh forms, submissions, and notifications.",
+      "MONTHLY": "Monthly access to Izoh forms, submissions, and notifications."
+    },
+    "label": "Izoh subscription",
+    "title": {
+      "ANNUAL": "Izoh yearly",
+      "MONTHLY": "Izoh monthly"
+    }
+  }
+}

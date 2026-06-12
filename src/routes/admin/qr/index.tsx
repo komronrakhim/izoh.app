@@ -16,12 +16,17 @@ import {
   QR_DEFAULT_DRAFT,
   QR_CONTEXT_MAX_LENGTH,
   QR_DRAFT_STORAGE_KEY,
+  QR_EMOJI_OPACITY_PRESET_BY_ID,
+  QR_EMOJI_OPACITY_PRESETS,
   QR_EMOJI_THEMES,
   QR_EMOJI_THEME_BY_ID,
   QR_FORMATS,
   QR_FORMAT_BY_ID,
   createQrPdfFileName,
   getQrAlignmentPatternCenters,
+  getQrEmojiForMark,
+  getQrEmojiAssetPath,
+  getQrEmojiOpacityPreset,
   getQrEmojiScene,
   getQrErrorCorrectionLevel,
   getQrFormatLayout,
@@ -32,11 +37,13 @@ import {
   isQrFinderModule,
   isQrFormatId,
   isQrVisualStyle,
+  normalizeQrEmojiOpacity,
   normalizeQrHexColor,
   normalizeQrText,
   type QrCustomColors,
   type QrErrorCorrectionLevel,
   type QrEmojiThemeId,
+  type QrEmojiOpacityPresetId,
   type QrFormatId,
   type QrPalette,
   type QrTemplateDraft,
@@ -96,6 +103,7 @@ const readDraft = (
       emojiThemeId: isQrEmojiThemeId(draft.emojiThemeId)
         ? draft.emojiThemeId
         : QR_DEFAULT_DRAFT.emojiThemeId,
+      emojiOpacity: normalizeQrEmojiOpacity(draft.emojiOpacity),
       formatId: isQrFormatId(draft.formatId) ? draft.formatId : QR_DEFAULT_DRAFT.formatId,
       headline: normalizeQrText(draft.headline, QR_HEADLINE_MAX_LENGTH),
       qrContext: normalizeQrText(draft.qrContext, QR_CONTEXT_MAX_LENGTH),
@@ -186,10 +194,10 @@ const QrMatrixSvg = ({
   value: string;
   style: QrVisualStyle;
 }) => {
-  const qr = React.useMemo(() => createQr(value, errorCorrectionLevel), [
-    errorCorrectionLevel,
-    value
-  ]);
+  const qr = React.useMemo(
+    () => createQr(value, errorCorrectionLevel),
+    [errorCorrectionLevel, value]
+  );
   const quietZone = 4;
   const moduleCount = qr.modules.size;
   const size = moduleCount + quietZone * 2;
@@ -399,6 +407,7 @@ const EmojiThemePicker = ({
   <div className="scrollbar-hide -mx-4 flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 py-1.5 sm:-mx-6 sm:scroll-px-6 sm:px-6">
     {QR_EMOJI_THEMES.map((theme) => {
       const active = theme.id === emojiThemeId;
+      const previewEmojiAssetPath = getQrEmojiAssetPath(theme.previewEmoji);
 
       return (
         <button
@@ -418,7 +427,16 @@ const EmojiThemePicker = ({
             onChange(theme.id);
           }}
         >
-          <span className="text-[28px] leading-none">{theme.previewEmoji}</span>
+          {previewEmojiAssetPath ? (
+            <img
+              alt=""
+              className="size-7 select-none"
+              draggable={false}
+              src={previewEmojiAssetPath}
+            />
+          ) : (
+            <span className="text-[28px] leading-none">{theme.previewEmoji}</span>
+          )}
           <span className="ios-caption-2 font-medium text-muted">
             {t(`qr.constructor.emoji.themes.${theme.id}`)}
           </span>
@@ -427,6 +445,34 @@ const EmojiThemePicker = ({
     })}
   </div>
 );
+
+const EmojiOpacityControl = ({
+  label,
+  onChange,
+  t,
+  value
+}: {
+  label: string;
+  onChange: (value: number) => void;
+  t: (key: string) => string;
+  value: number;
+}) => {
+  const presetId = getQrEmojiOpacityPreset(value).id;
+
+  return (
+    <div className="grid gap-1.5">
+      <FieldLabel>{label}</FieldLabel>
+      <PillPicker
+        items={QR_EMOJI_OPACITY_PRESETS.map((preset) => preset.id)}
+        value={presetId}
+        getLabel={(item) => t(`qr.constructor.emoji.intensityLevels.${item}`)}
+        onChange={(item: QrEmojiOpacityPresetId) => {
+          onChange(QR_EMOJI_OPACITY_PRESET_BY_ID[item].opacity);
+        }}
+      />
+    </div>
+  );
+};
 
 const FieldLabel = ({ children }: { children: React.ReactNode }) => (
   <p className="ios-caption-1 px-1 font-medium text-muted">{children}</p>
@@ -575,25 +621,27 @@ const PreviewText = ({
 const QrPosterPreview = ({
   caption,
   context,
+  emojiOpacity,
+  emojiThemeId,
   formatId,
   headline,
   organizationLogoUrl,
   organizationName,
   palette,
   qrStyle,
-  emojiThemeId,
   url,
   t
 }: {
   caption: string;
   context: string;
+  emojiOpacity: number;
+  emojiThemeId: QrEmojiThemeId;
   formatId: QrFormatId;
   headline: string;
   organizationLogoUrl?: null | string;
   organizationName: string;
   palette: QrPalette;
   qrStyle: QrVisualStyle;
-  emojiThemeId: QrEmojiThemeId;
   url: null | string;
   t: (key: string) => string;
 }) => {
@@ -611,8 +659,13 @@ const QrPosterPreview = ({
   const surfaceColor = palette.background;
   const textColor = palette.text;
   const mutedColor = palette.muted;
-  const emojiMarks = getQrEmojiScene(formatId);
+  const emojiMarks = getQrEmojiScene(formatId, layout, {
+    hasCaption: Boolean(caption),
+    hasContext: Boolean(printableContext),
+    hasHeadline: Boolean(title)
+  });
   const emojiTheme = QR_EMOJI_THEME_BY_ID[emojiThemeId];
+  const emojiSeed = `${formatId}:${emojiThemeId}:${organizationName}:${context}:${url ?? ""}`;
   const errorCorrectionLevel = getQrErrorCorrectionLevel(formatId);
   const compactLogoPadding = Math.max(3, layout.logoSize * 0.16);
 
@@ -634,25 +687,31 @@ const QrPosterPreview = ({
 
           {showEmoji
             ? emojiMarks.map((mark, index) => {
+                const emoji = getQrEmojiForMark({
+                  emojiTheme,
+                  formatId,
+                  index,
+                  mark,
+                  seed: emojiSeed
+                });
+                const emojiAssetPath = getQrEmojiAssetPath(emoji);
                 const size = Math.min(layout.pageWidth, layout.pageHeight) * mark.size;
                 const x = layout.pageWidth * mark.x;
                 const y = layout.pageHeight * mark.y;
 
-                return (
-                  <text
+                return emojiAssetPath ? (
+                  <image
                     key={`${emojiThemeId}-${formatId}-${index}`}
-                    dominantBaseline="middle"
-                    fontFamily="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif"
-                    fontSize={size}
-                    opacity={mark.opacity}
-                    textAnchor="middle"
+                    height={size}
+                    href={emojiAssetPath}
+                    opacity={Math.min(1, mark.opacity * emojiOpacity)}
+                    preserveAspectRatio="xMidYMid meet"
                     transform={`rotate(${mark.rotation} ${x} ${y})`}
-                    x={x}
-                    y={y}
-                  >
-                    {emojiTheme.emojis[index % emojiTheme.emojis.length]}
-                  </text>
-                );
+                    width={size}
+                    x={x - size / 2}
+                    y={y - size / 2}
+                  />
+                ) : null;
               })
             : null}
 
@@ -791,6 +850,7 @@ export const AdminQrConstructor = () => {
   const [formatId, setFormatId] = React.useState<QrFormatId>(initialDraft.formatId);
   const [qrStyle, setQrStyle] = React.useState<QrVisualStyle>(initialDraft.qrStyle);
   const [emojiThemeId, setEmojiThemeId] = React.useState<QrEmojiThemeId>(initialDraft.emojiThemeId);
+  const [emojiOpacity, setEmojiOpacity] = React.useState(initialDraft.emojiOpacity);
   const [qrContext, setQrContext] = React.useState(initialDraft.qrContext);
   const [headline, setHeadline] = React.useState(initialDraft.headline);
   const [caption, setCaption] = React.useState(initialDraft.caption);
@@ -814,6 +874,7 @@ export const AdminQrConstructor = () => {
     : "";
   const showTextSettings = currentFormat.allowCustomHeadline || currentFormat.allowCaption;
   const showQrStylePicker = currentFormat.qrStyles.length > 1;
+  const showEmojiOpacityControl = currentFormat.allowEmoji && emojiThemeId !== "none";
   const deferredQrContext = React.useDeferredValue(cleanQrContext);
   const qrLinkQuery = useQuery({
     enabled: Boolean(organization) && tma.isReady,
@@ -856,6 +917,7 @@ export const AdminQrConstructor = () => {
     setQrContext(draft.qrContext);
     setQrStyle(draft.qrStyle);
     setEmojiThemeId(draft.emojiThemeId);
+    setEmojiOpacity(draft.emojiOpacity);
     setHeadline(draft.headline);
     setCaption(draft.caption);
     setCustomColors(draft.customColors);
@@ -880,6 +942,7 @@ export const AdminQrConstructor = () => {
       JSON.stringify({
         caption: cleanCaption,
         customColors,
+        emojiOpacity,
         emojiThemeId,
         formatId,
         headline: cleanHeadline,
@@ -894,6 +957,7 @@ export const AdminQrConstructor = () => {
     cleanHeadline,
     cleanQrContext,
     customColors,
+    emojiOpacity,
     emojiThemeId,
     formatId,
     organization,
@@ -922,6 +986,7 @@ export const AdminQrConstructor = () => {
           caption: cleanCaption,
           context: cleanQrContext,
           customColors,
+          emojiOpacity,
           emojiThemeId,
           formatId,
           headline: cleanHeadline,
@@ -967,6 +1032,7 @@ export const AdminQrConstructor = () => {
     cleanHeadline,
     cleanQrContext,
     customColors,
+    emojiOpacity,
     emojiThemeId,
     formatId,
     isPdfActionPending,
@@ -1053,6 +1119,7 @@ export const AdminQrConstructor = () => {
           <QrPosterPreview
             caption={cleanCaption}
             context={printableQrContext}
+            emojiOpacity={emojiOpacity}
             emojiThemeId={emojiThemeId}
             formatId={formatId}
             headline={cleanHeadline}
@@ -1095,9 +1162,17 @@ export const AdminQrConstructor = () => {
                 </div>
               ) : null}
               {currentFormat.allowEmoji ? (
-                <div className="grid gap-1">
+                <div className="grid gap-2">
                   <FieldLabel>{t("qr.constructor.emoji.title")}</FieldLabel>
                   <EmojiThemePicker emojiThemeId={emojiThemeId} t={t} onChange={setEmojiThemeId} />
+                  {showEmojiOpacityControl ? (
+                    <EmojiOpacityControl
+                      label={t("qr.constructor.emoji.intensity")}
+                      t={t}
+                      value={emojiOpacity}
+                      onChange={setEmojiOpacity}
+                    />
+                  ) : null}
                 </div>
               ) : null}
             </div>

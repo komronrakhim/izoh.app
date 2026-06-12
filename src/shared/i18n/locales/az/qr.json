@@ -1,0 +1,87 @@
+{
+  "constructor": {
+    "title": "Qonaqlar üçün QR",
+    "subtitle": "Masa, piştaxta və ya poster üçün səliqəli maket hazırlayın. Qonaq forması linkini avtomatik əlavə edəcəyik.",
+    "appearance": "Qeydiyyat",
+    "copy": "Mətn",
+    "fit": "Format",
+    "style": "Stil",
+    "save": "Saxla",
+    "saved": "QR şablonu saxlandı",
+    "downloadPdf": "PDF yüklə",
+    "sendPdfToChat": "PDF yükləyin",
+    "copyLink": "Linki kopyala",
+    "autoSave": "Dəyişikliklər özləri saxlanılır",
+    "preview": "PDF",
+    "text": {
+      "title": "Kartdakı mətn",
+      "defaultHeadline": "Bizi qiymətləndirin",
+      "defaultCaption": "Bizə nəyin yaxşılaşdırıla biləcəyini və ya komandanı nəyə görə tərifləmək istədiyinizi deyin.",
+      "headlinePlaceholder": "Başlıq",
+      "captionPlaceholder": "QR altında qısa mətn"
+    },
+    "context": {
+      "title": "Kontekst",
+      "placeholder": "Cədvəl 4, Bar, Kassir",
+      "hint": "Həmişə QR-ə daxil olur və sorğunun haradan gəldiyini anlamağa kömək edir.",
+      "showInLayout": "Maketdə göstər"
+    },
+    "formats": {
+      "title": "Ölçü",
+      "sizeHint": "Ölçü: {{size}}.",
+      "sticker": {
+        "name": "Stiker",
+        "size": "60×60 мм",
+        "description": "Kiçik bir stiker üçün. Kodun içərisində yalnız QR və loqo."
+      },
+      "table": {
+        "name": "Masanın üstündə",
+        "size": "A6",
+        "description": "Masa, menyu sahibi və ya gözləmə sahəsi üçün əsas format."
+      },
+      "stand": {
+        "name": "dayanmaq",
+        "size": "4×6\"",
+        "description": "Akril stenddə kassa, bar və ya qəbul üçün."
+      },
+      "poster": {
+        "name": "Poster",
+        "size": "A5",
+        "description": "Növbəyə yaxın giriş, divar və ya görkəmli yer üçün."
+      }
+    },
+    "colors": {
+      "title": "Rənglər",
+      "background": "Fon",
+      "paper": "Fon QR",
+      "text": "Mətn və QR"
+    },
+    "styles": {
+      "title": "Qeydiyyat"
+    },
+    "qrStyle": {
+      "title": "Baxın QR",
+      "square": "Klassik",
+      "rounded": "Yumşaq",
+      "dots": "Xallar"
+    },
+    "emoji": {
+      "title": "Emoji",
+      "intensity": "İntensivlik",
+      "intensityLevels": {
+        "soft": "Yumşaq",
+        "visible": "Diqqətlə",
+        "bright": "Parlaq",
+        "maximum": "Maksimum"
+      },
+      "themes": {
+        "calm": "Sakit ol",
+        "great": "Sevinclə",
+        "idea": "İdeya",
+        "issue": "Problem",
+        "none": "Emoji yoxdur",
+        "warm": "İstilik"
+      }
+    }
+  }
+}

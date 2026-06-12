@@ -40,7 +40,7 @@ describe("guest entry config API", () => {
           findFirst: async () => ({
             description: "",
             id: "org_1",
-            locale: "RU",
+            locale: "ru",
             logo_media_asset_id: null,
             module_settings: [],
             name: "Coffee Place",
@@ -78,7 +78,7 @@ describe("guest entry config API", () => {
           findFirst: async () => ({
             description: "",
             id: "org_1",
-            locale: "RU",
+            locale: "ru",
             logo_media_asset_id: null,
             module_settings: [],
             name: "Coffee Place",
