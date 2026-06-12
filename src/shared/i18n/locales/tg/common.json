@@ -6,6 +6,13 @@
   "actions": {
     "clear": "Тоза кардан"
   },
+  "contactQuickFill": {
+    "add": "Иловаи тамос",
+    "title": "Иловаи тамос",
+    "message": "Варианти қулайро интихоб кунед, то дастӣ нанависед.",
+    "useUsername": "{{username}}",
+    "usePhone": "Рақамро фиристодан"
+  },
   "locales": {
     "az": {
       "label": "Azərbaycanca",

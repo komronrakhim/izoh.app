@@ -53,7 +53,7 @@ import {
   createOrganizationSubscriptionInvoice,
   getOrganizationSubscriptionPayload
 } from "~/server/domain/subscriptions";
-import { syncUserFromTelegram } from "~/server/domain/users";
+import { syncUserContactFromTelegram, syncUserFromTelegram } from "~/server/domain/users";
 import {
   createGuestEntryStartParam,
   normalizeGuestContext,
@@ -68,7 +68,11 @@ import {
   putLocalMediaObject
 } from "~/server/media";
 import { renderOrganizationQrPdf } from "~/server/pdf";
-import { getTelegramBot, validateTelegramInitData } from "~/server/telegram";
+import {
+  getTelegramBot,
+  validateTelegramContactData,
+  validateTelegramInitData
+} from "~/server/telegram";
 import { getOptionalEnv, getRequiredEnv } from "~/server/config/env";
 import { isGuestMenuItemId } from "~/shared/guest-menu";
 import {
@@ -113,6 +117,11 @@ const mediaUploadSchema = z.object({
 const tmaLocaleSchema = z.object({
   initData: z.string().min(1),
   locale: z.enum(APP_LOCALES)
+});
+
+const tmaContactSchema = z.object({
+  contactData: z.string().min(1),
+  initData: z.string().min(1)
 });
 
 const guestMenuItemSchema = z.object({
@@ -330,9 +339,16 @@ type TelegramWebhookUpdate = {
       title?: string;
       type?: string;
     };
+    contact?: {
+      phone_number?: string;
+      user_id?: number | string;
+    };
     from?: {
+      first_name?: string;
       id?: number | string;
       language_code?: string;
+      last_name?: string;
+      username?: string;
     };
     successful_payment?: {
       currency?: string;
@@ -498,6 +514,26 @@ const handleTelegramWebhookUpdate = async (
     await markTelegramGroupDisconnectedByChatId(
       {
         telegramChatId: membershipChatId
+      },
+      db
+    );
+
+    return;
+  }
+
+  const contact = update.message?.contact;
+  const contactUserId = parseTelegramBigIntId(contact?.user_id);
+  const messageUserId = parseTelegramBigIntId(update.message?.from?.id);
+
+  if (contact?.phone_number && contactUserId && messageUserId && contactUserId === messageUserId) {
+    await syncUserContactFromTelegram(
+      {
+        firstName: update.message?.from?.first_name,
+        languageCode: update.message?.from?.language_code,
+        lastName: update.message?.from?.last_name,
+        phoneNumber: contact.phone_number,
+        telegramId: messageUserId,
+        username: update.message?.from?.username
       },
       db
     );
@@ -1725,6 +1761,55 @@ export const createApiApp = () => {
         id: user.id,
         locale: user.locale,
         localeSource: user.locale_source,
+        phoneNumber: user.phone_number,
+        telegramId: user.telegram_id.toString(),
+        username: user.username
+      }
+    });
+  });
+
+  app.post("/api/tma/contact", async (c) => {
+    const input = tmaContactSchema.parse(await c.req.json());
+    const botToken = getRequiredEnv("TELEGRAM_BOT_TOKEN");
+    const validated = validateTelegramInitData({
+      botToken,
+      initData: input.initData
+    });
+    const validatedContact = validateTelegramContactData({
+      botToken,
+      contactData: input.contactData
+    });
+
+    if (!validated.user) {
+      return c.json({ error: "Telegram user is required." }, 400);
+    }
+
+    if (String(validatedContact.contact.user_id) !== String(validated.user.id)) {
+      return c.json({ error: "Telegram contact does not belong to the current user." }, 403);
+    }
+
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    const user = await syncUserContactFromTelegram(
+      {
+        firstName: validated.user.first_name,
+        languageCode: validated.user.language_code,
+        lastName: validated.user.last_name,
+        phoneNumber: validatedContact.contact.phone_number,
+        telegramId: BigInt(validated.user.id),
+        username: validated.user.username
+      },
+      db
+    );
+
+    return c.json({
+      user: {
+        id: user.id,
+        phoneNumber: user.phone_number,
         telegramId: user.telegram_id.toString()
       }
     });

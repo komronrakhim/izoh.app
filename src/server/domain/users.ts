@@ -47,3 +47,48 @@ export const syncUserFromTelegram = async (
     }
   });
 };
+
+export const syncUserContactFromTelegram = async (
+  {
+    firstName,
+    languageCode,
+    lastName,
+    phoneNumber,
+    telegramId,
+    username
+  }: {
+    firstName?: string;
+    languageCode?: string;
+    lastName?: string;
+    phoneNumber: string;
+    telegramId: bigint;
+    username?: string;
+  },
+  db: DomainDb
+): Promise<User> => {
+  const normalizedPhoneNumber = phoneNumber.replace(/\s+/g, " ").trim();
+
+  if (!normalizedPhoneNumber) {
+    throw new Error("Telegram contact phone number is required.");
+  }
+
+  const user = await syncUserFromTelegram(
+    {
+      first_name: firstName?.trim() || "Guest",
+      id: telegramId.toString(),
+      language_code: languageCode,
+      last_name: lastName,
+      username
+    },
+    db
+  );
+
+  return db.user.update({
+    data: {
+      phone_number: normalizedPhoneNumber
+    },
+    where: {
+      id: user.id
+    }
+  });
+};

@@ -4,6 +4,7 @@ import {
   Coffee,
   Handshake,
   ImagePlus,
+  Plus,
   ShoppingBag,
   Sparkles,
   X,
@@ -28,7 +29,7 @@ import {
 } from "~/shared/organization-presets";
 import { PageTransition } from "~/shared/router/page-transition";
 import { getBrowserTimeZone } from "~/shared/time-zone";
-import { useTma, useTmaBackButton, useTmaMainButton } from "~/shared/tma";
+import { pickTmaContact, useTma, useTmaBackButton, useTmaMainButton } from "~/shared/tma";
 
 const presetIconMeta: Record<OrganizationPresetId, { icon: LucideIcon; tone: string }> = {
   cafe: {
@@ -77,6 +78,7 @@ export const AdminOrganizationCreatePage = () => {
     null
   );
   const [isSaving, setIsSaving] = React.useState(false);
+  const [isPickingContact, setIsPickingContact] = React.useState(false);
   const logoInputId = React.useId();
   const logoInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -155,6 +157,30 @@ export const AdminOrganizationCreatePage = () => {
     setLogoPreviewUrl(URL.createObjectURL(file));
     setLogoError(null);
   };
+
+  const pickContact = React.useCallback(async () => {
+    setIsPickingContact(true);
+
+    try {
+      await pickTmaContact({
+        copy: {
+          getUsernameLabel: (username) =>
+            t("common.contactQuickFill.useUsername", {
+              username
+            }),
+          quickPickMessage: t("common.contactQuickFill.message"),
+          quickPickTitle: t("common.contactQuickFill.title"),
+          usePhone: t("common.contactQuickFill.usePhone")
+        },
+        haptics: tma.haptics,
+        initDataRaw: tma.initDataRaw,
+        onContact: setContactText,
+        username: tma.user?.username
+      });
+    } finally {
+      setIsPickingContact(false);
+    }
+  }, [t, tma.haptics, tma.initDataRaw, tma.user?.username]);
 
   const attachLogo = React.useCallback(
     async (organization: AdminOrganization) => {
@@ -355,8 +381,23 @@ export const AdminOrganizationCreatePage = () => {
                 onChange={(event) => setName(event.target.value)}
               />
               <Input
+                addon={{
+                  after:
+                    contactText || createdOrganization ? null : (
+                      <button
+                        aria-label={t("common.contactQuickFill.add")}
+                        className="relative grid size-7 place-items-center rounded-full bg-primary text-white shadow-[0_8px_18px_rgba(0,0,0,0.12)] transition-[opacity,transform] active:scale-95 disabled:pointer-events-none disabled:opacity-58 [&_svg]:absolute [&_svg]:left-1/2 [&_svg]:top-1/2 [&_svg]:block [&_svg]:-translate-x-1/2 [&_svg]:-translate-y-1/2"
+                        disabled={isPickingContact || isSaving}
+                        type="button"
+                        onClick={pickContact}
+                      >
+                        <Plus size={15} strokeWidth={3} />
+                      </button>
+                    )
+                }}
                 autoComplete="off"
                 clearLabel={t("common.actions.clear")}
+                clearable={Boolean(contactText)}
                 disabled={Boolean(createdOrganization)}
                 enterKeyHint="done"
                 hint={t("admin.organizations.contactHint")}

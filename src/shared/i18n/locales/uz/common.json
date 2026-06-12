@@ -6,6 +6,13 @@
   "actions": {
     "clear": "Tozalash"
   },
+  "contactQuickFill": {
+    "add": "Kontakt qo‘shish",
+    "title": "Kontakt qo‘shish",
+    "message": "Qo‘lda yozmaslik uchun qulay variantni tanlang.",
+    "useUsername": "{{username}}",
+    "usePhone": "Raqamni ulashish"
+  },
   "locales": {
     "az": {
       "label": "Azərbaycanca",

@@ -6,6 +6,13 @@
   "actions": {
     "clear": "Təmizlə"
   },
+  "contactQuickFill": {
+    "add": "Kontaktı əlavə et",
+    "title": "Kontaktı əlavə et",
+    "message": "Əl ilə yazmamaq üçün uyğun variantı seçin.",
+    "useUsername": "{{username}}",
+    "usePhone": "Nömrəni paylaş"
+  },
   "locales": {
     "az": {
       "label": "Azərbaycanca",

@@ -74,6 +74,7 @@ CREATE TABLE "User" (
     "first_name" TEXT NOT NULL,
     "last_name" TEXT,
     "username" TEXT,
+    "phone_number" TEXT,
     "language_code" TEXT,
     "photo_url" TEXT,
     "locale" TEXT NOT NULL DEFAULT 'ru',

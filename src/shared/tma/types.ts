@@ -1,5 +1,12 @@
 export type TmaColorScheme = "light" | "dark";
 
+export type TmaUserContext = {
+  firstName?: string;
+  id?: string;
+  lastName?: string;
+  username?: string;
+};
+
 export type TmaLaunchContext = {
   isTelegram: boolean;
   initDataRaw: string;
@@ -7,6 +14,7 @@ export type TmaLaunchContext = {
   primaryColor?: `#${string}`;
   startParam?: string;
   platform?: string;
+  user?: TmaUserContext;
 };
 
 export type TmaButtonState = {

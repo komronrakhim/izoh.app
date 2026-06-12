@@ -1,7 +1,7 @@
 import { createHmac } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
-import { validateTelegramInitData } from "~/server/telegram";
+import { validateTelegramContactData, validateTelegramInitData } from "~/server/telegram";
 
 const botToken = "123456:TEST_TOKEN";
 
@@ -57,5 +57,24 @@ describe("validateTelegramInitData", () => {
         initData
       })
     ).toThrow("signature");
+  });
+
+  it("accepts signed Telegram contact data", () => {
+    const contactData = createSignedInitData({
+      auth_date: String(Math.floor(Date.now() / 1000)),
+      contact: JSON.stringify({
+        first_name: "Komron",
+        phone_number: "+998901234567",
+        user_id: 123
+      })
+    });
+
+    const result = validateTelegramContactData({
+      botToken,
+      contactData
+    });
+
+    expect(result.contact.user_id).toBe(123);
+    expect(result.contact.phone_number).toBe("+998901234567");
   });
 });

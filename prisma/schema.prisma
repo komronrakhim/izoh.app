@@ -164,6 +164,7 @@ model User {
   first_name    String
   last_name     String?
   username      String?
+  phone_number  String?
   language_code String?
   photo_url     String?
   locale        String         @default("ru")

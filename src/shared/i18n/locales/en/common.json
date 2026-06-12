@@ -6,6 +6,13 @@
   "actions": {
     "clear": "Clear"
   },
+  "contactQuickFill": {
+    "add": "Add contact",
+    "title": "Add contact",
+    "message": "Choose what to use so you do not have to type it manually.",
+    "useUsername": "{{username}}",
+    "usePhone": "Share phone number"
+  },
   "locales": {
     "az": {
       "label": "Azərbaycanca",

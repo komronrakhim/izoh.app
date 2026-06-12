@@ -6,6 +6,13 @@
   "actions": {
     "clear": "Очистить"
   },
+  "contactQuickFill": {
+    "add": "Подставить контакт",
+    "title": "Подставить контакт",
+    "message": "Выберите удобный вариант, чтобы не вводить вручную.",
+    "useUsername": "{{username}}",
+    "usePhone": "Поделиться номером"
+  },
   "locales": {
     "az": {
       "label": "Azərbaycanca",

@@ -6,6 +6,13 @@
   "actions": {
     "clear": "Тазалау"
   },
+  "contactQuickFill": {
+    "add": "Контакт қосу",
+    "title": "Контакт қосу",
+    "message": "Қолмен жазбау үшін ыңғайлы нұсқаны таңдаңыз.",
+    "useUsername": "{{username}}",
+    "usePhone": "Нөмірмен бөлісу"
+  },
   "locales": {
     "az": {
       "label": "Azərbaycanca",

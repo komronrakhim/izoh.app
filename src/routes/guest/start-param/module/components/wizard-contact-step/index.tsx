@@ -1,11 +1,14 @@
-import { X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 
 import { cn } from "~/common/utils";
 
 type WizardContactStepProps = {
+  addContactLabel: string;
   clearLabel: string;
   contact: string;
   contactRequired: boolean;
+  isAddingContact?: boolean;
+  onAddContact: () => void;
   onContactChange: (value: string) => void;
   onSkip: () => void;
   placeholder: string;
@@ -14,9 +17,12 @@ type WizardContactStepProps = {
 };
 
 export const WizardContactStep = ({
+  addContactLabel,
   clearLabel,
   contact,
   contactRequired,
+  isAddingContact,
+  onAddContact,
   onContactChange,
   onSkip,
   placeholder,
@@ -43,7 +49,17 @@ export const WizardContactStep = ({
         >
           <X size={14} strokeWidth={3} />
         </button>
-      ) : null}
+      ) : (
+        <button
+          aria-label={addContactLabel}
+          className="absolute right-3 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-full bg-[color:var(--wizard-accent)] text-white shadow-[0_8px_18px_rgba(0,0,0,0.12)] transition-[opacity,transform] active:scale-95 disabled:pointer-events-none disabled:opacity-58 [&_svg]:absolute [&_svg]:left-1/2 [&_svg]:top-1/2 [&_svg]:block [&_svg]:-translate-x-1/2 [&_svg]:-translate-y-1/2"
+          disabled={isAddingContact}
+          type="button"
+          onClick={onAddContact}
+        >
+          <Plus size={15} strokeWidth={3} />
+        </button>
+      )}
     </div>
     {!contactRequired ? (
       <button

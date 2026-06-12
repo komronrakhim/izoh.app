@@ -6,8 +6,14 @@ type ValidateTelegramInitDataInput = {
   maxAgeSeconds?: number;
 };
 
+type ValidateTelegramContactDataInput = {
+  botToken: string;
+  contactData: string;
+  maxAgeSeconds?: number;
+};
+
 export type TelegramInitDataUser = {
-  id: number;
+  id: number | string;
   first_name: string;
   last_name?: string;
   username?: string;
@@ -21,6 +27,19 @@ export type ValidatedTelegramInitData = {
   raw: URLSearchParams;
   startParam?: string;
   user?: TelegramInitDataUser;
+};
+
+export type TelegramContactData = {
+  user_id: number | string;
+  phone_number: string;
+  first_name: string;
+  last_name?: string;
+};
+
+export type ValidatedTelegramContactData = {
+  authDate: Date;
+  contact: TelegramContactData;
+  raw: URLSearchParams;
 };
 
 const createDataCheckString = (params: URLSearchParams) =>
@@ -80,5 +99,58 @@ export const validateTelegramInitData = ({
     raw: params,
     startParam: params.get("start_param") ?? undefined,
     user
+  };
+};
+
+export const validateTelegramContactData = ({
+  botToken,
+  contactData,
+  maxAgeSeconds = 60 * 60 * 24
+}: ValidateTelegramContactDataInput): ValidatedTelegramContactData => {
+  const params = new URLSearchParams(contactData);
+  const hash = params.get("hash");
+  const authDateRaw = params.get("auth_date");
+
+  if (!hash || !authDateRaw) {
+    throw new Error("Telegram contact data is missing required fields.");
+  }
+
+  const authDateSeconds = Number(authDateRaw);
+
+  if (!Number.isFinite(authDateSeconds)) {
+    throw new Error("Telegram contact data auth date is invalid.");
+  }
+
+  const ageSeconds = Math.floor(Date.now() / 1000) - authDateSeconds;
+
+  if (ageSeconds > maxAgeSeconds) {
+    throw new Error("Telegram contact data is expired.");
+  }
+
+  const secret = createHmac("sha256", "WebAppData").update(botToken).digest();
+  const expectedHash = createHmac("sha256", secret)
+    .update(createDataCheckString(params))
+    .digest("hex");
+
+  if (!safeEqualHex(hash, expectedHash)) {
+    throw new Error("Telegram contact data signature is invalid.");
+  }
+
+  const contactRaw = params.get("contact");
+
+  if (!contactRaw) {
+    throw new Error("Telegram contact data is missing contact.");
+  }
+
+  const contact = JSON.parse(contactRaw) as TelegramContactData;
+
+  if (!contact.user_id || !contact.phone_number || !contact.first_name) {
+    throw new Error("Telegram contact data contact is invalid.");
+  }
+
+  return {
+    authDate: new Date(authDateSeconds * 1000),
+    contact,
+    raw: params
   };
 };

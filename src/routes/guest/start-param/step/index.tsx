@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
 
 import { useI18n } from "~/shared/i18n/react";
-import { useTmaBackButton, useTmaMainButton } from "~/shared/tma";
+import { pickTmaContact, useTma, useTmaBackButton, useTmaMainButton } from "~/shared/tma";
 
 import {
   WizardContactStep,
@@ -32,6 +32,8 @@ export const CustomerWizardStepPage = () => {
   const routeStep = isWizardRouteStep(params.wizardStep) ? params.wizardStep : null;
   const wizard = useCustomerWizard();
   const { t } = useI18n();
+  const tma = useTma();
+  const [isAddingContact, setIsAddingContact] = React.useState(false);
   const resolvedStep = routeStep ? wizard.resolveRouteStep(routeStep) : "choice";
   const step = routeStep && resolvedStep === routeStep ? routeStep : null;
   const mainButtonState = step ? wizard.getMainButtonState(step) : null;
@@ -67,6 +69,30 @@ export const CustomerWizardStepPage = () => {
       wizard.goNext(step);
     }
   });
+
+  const handleAddContact = React.useCallback(async () => {
+    setIsAddingContact(true);
+
+    try {
+      await pickTmaContact({
+        copy: {
+          getUsernameLabel: (username) =>
+            t("common.contactQuickFill.useUsername", {
+              username
+            }),
+          quickPickMessage: t("common.contactQuickFill.message"),
+          quickPickTitle: t("common.contactQuickFill.title"),
+          usePhone: t("common.contactQuickFill.usePhone")
+        },
+        haptics: tma.haptics,
+        initDataRaw: tma.initDataRaw,
+        onContact: wizard.onContactChange,
+        username: tma.user?.username
+      });
+    } finally {
+      setIsAddingContact(false);
+    }
+  }, [t, tma.haptics, tma.initDataRaw, tma.user?.username, wizard.onContactChange]);
 
   if (!step) {
     return null;
@@ -150,9 +176,12 @@ export const CustomerWizardStepPage = () => {
 
                 {step === "contact" ? (
                   <WizardContactStep
+                    addContactLabel={t("common.contactQuickFill.add")}
                     clearLabel={t("common.actions.clear")}
                     contact={wizard.contact}
                     contactRequired={wizard.contactRequired}
+                    isAddingContact={isAddingContact}
+                    onAddContact={handleAddContact}
                     onContactChange={wizard.onContactChange}
                     onSkip={() => wizard.goNext(step)}
                     placeholder={t("customer.wizard.contact.placeholder")}

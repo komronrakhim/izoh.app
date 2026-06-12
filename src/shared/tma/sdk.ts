@@ -10,6 +10,8 @@ import {
   hapticFeedbackSelectionChanged,
   hideBackButton,
   init,
+  isAccessDeniedError,
+  isCancelledError,
   miniAppReady,
   mountBackButton,
   mountMainButton,
@@ -24,6 +26,7 @@ import {
   openInvoice as openInvoiceSdk,
   openTelegramLink,
   requestContentSafeAreaInsets,
+  requestContactComplete as requestContactCompleteSdk,
   retrieveLaunchParams,
   retrieveRawInitData,
   requestSafeAreaInsets,
@@ -47,6 +50,7 @@ import type {
   TmaButtonState,
   TmaColorScheme,
   TmaLaunchContext,
+  TmaUserContext,
   TmaSecondaryButtonState
 } from "./types";
 
@@ -82,8 +86,8 @@ type TelegramWebAppLike = {
   colorScheme?: string;
   MainButton?: TelegramButtonLike;
   SecondaryButton?: TelegramButtonLike;
-  offEvent?: (eventType: string, eventHandler: () => void) => void;
-  onEvent?: (eventType: string, eventHandler: () => void) => void;
+  offEvent?: (eventType: string, eventHandler: (...args: unknown[]) => void) => void;
+  onEvent?: (eventType: string, eventHandler: (...args: unknown[]) => void) => void;
   isFullscreen?: boolean;
   isVersionAtLeast?: (version: string) => boolean;
   openInvoice?: (url: string, callback?: (status: string) => void) => void;
@@ -196,6 +200,81 @@ const getTelegramWebApp = (): TelegramWebAppLike | undefined => {
       };
     }
   ).Telegram?.WebApp;
+};
+
+const normalizeTmaUser = (user: {
+  first_name?: unknown;
+  id?: unknown;
+  last_name?: unknown;
+  username?: unknown;
+}): TmaUserContext | undefined => {
+  const id =
+    typeof user.id === "number" || typeof user.id === "string" ? String(user.id) : undefined;
+  const username = typeof user.username === "string" ? user.username.trim() : undefined;
+  const firstName = typeof user.first_name === "string" ? user.first_name.trim() : undefined;
+  const lastName = typeof user.last_name === "string" ? user.last_name.trim() : undefined;
+
+  if (!id && !username && !firstName && !lastName) {
+    return undefined;
+  }
+
+  return {
+    firstName: firstName || undefined,
+    id,
+    lastName: lastName || undefined,
+    username: username || undefined
+  };
+};
+
+const getTmaUserFromRawInitData = (rawInitData: string) => {
+  const userRaw = new URLSearchParams(rawInitData).get("user");
+
+  if (!userRaw) {
+    return undefined;
+  }
+
+  try {
+    return normalizeTmaUser(JSON.parse(userRaw) as Record<string, unknown>);
+  } catch {
+    return undefined;
+  }
+};
+
+export const getTmaUser = () => {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+
+  const unsafeUser = (
+    window as Window & {
+      Telegram?: {
+        WebApp?: {
+          initDataUnsafe?: {
+            user?: {
+              first_name?: unknown;
+              id?: unknown;
+              last_name?: unknown;
+              username?: unknown;
+            };
+          };
+        };
+      };
+    }
+  ).Telegram?.WebApp?.initDataUnsafe?.user;
+
+  if (unsafeUser) {
+    const normalizedUser = normalizeTmaUser(unsafeUser);
+
+    if (normalizedUser) {
+      return normalizedUser;
+    }
+  }
+
+  return isTelegramEnvironment()
+    ? safe(undefined as TmaUserContext | undefined, () =>
+        getTmaUserFromRawInitData(retrieveRawInitData() ?? "")
+      )
+    : undefined;
 };
 
 const getTelegramPlatform = () => {
@@ -722,7 +801,8 @@ export const getTmaLaunchContext = (): TmaLaunchContext => {
       typeof launchParams?.tgWebAppPlatform === "string"
         ? launchParams.tgWebAppPlatform
         : undefined,
-    startParam
+    startParam,
+    user: getTmaUser()
   };
 };
 
@@ -1014,6 +1094,72 @@ export const showTmaPopup = async (options: TmaPopupOptions) => {
   }
 
   return Promise.resolve(result as string | null);
+};
+
+export type TmaContactRequestResult =
+  | {
+      error?: string;
+      status: "cancelled" | "unavailable";
+    }
+  | {
+      contactDataRaw: string;
+      phoneNumber: string;
+      status: "sent";
+    };
+
+const getErrorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : String(error);
+
+export const requestTmaContactPhone = async (): Promise<TmaContactRequestResult> => {
+  const requestResult = safe<
+    | [
+        called: true,
+        data: Promise<{
+          parsed?: {
+            contact?: {
+              phone_number?: string;
+            };
+          };
+          raw?: string;
+        }>
+      ]
+    | [called: false]
+  >([false], () => requestContactCompleteSdk.ifAvailable() as never);
+
+  if (!requestResult[0]) {
+    return {
+      status: "unavailable"
+    };
+  }
+
+  try {
+    const payload = await Promise.resolve(requestResult[1]);
+    const phoneNumber = payload.parsed?.contact?.phone_number?.trim();
+    const contactDataRaw = payload.raw?.trim();
+
+    if (!phoneNumber || !contactDataRaw) {
+      return {
+        status: "unavailable"
+      };
+    }
+
+    return {
+      contactDataRaw,
+      phoneNumber,
+      status: "sent"
+    };
+  } catch (error) {
+    if (isAccessDeniedError(error) || isCancelledError(error)) {
+      return {
+        status: "cancelled"
+      };
+    }
+
+    return {
+      error: getErrorMessage(error),
+      status: "unavailable"
+    };
+  }
 };
 
 export const openTmaTelegramLink = (url: string | URL) => {
