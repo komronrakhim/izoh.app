@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 
 import { PendingScreen } from "~/common/ui";
+import { AdminAnalyticsPage } from "~/routes/admin/analytics";
 import { AdminOrganizationCreatePage } from "~/routes/admin/create";
 import { AdminDashboard, AdminOrganizationOverviewPage } from "~/routes/admin/dashboard";
 import { AdminFeedPage } from "~/routes/admin/feed";
@@ -17,6 +18,7 @@ import { AdminQrConstructor } from "~/routes/admin/qr";
 import { AdminSection } from "~/routes/admin/section";
 import { AdminStaffCreatePage } from "~/routes/admin/staff/create";
 import { AdminStaffMemberPage } from "~/routes/admin/staff/member";
+import { AdminSubscriptionPage } from "~/routes/admin/subscription";
 import { CustomerWizardChoicePage } from "~/routes/guest/start-param/choice";
 import { CustomerWizardRoute } from "~/routes/guest/start-param";
 import { CustomerWizardStepPage } from "~/routes/guest/start-param/step";
@@ -100,6 +102,12 @@ const adminFeedRoute = createRoute({
   component: AdminFeedPage
 });
 
+const adminAnalyticsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/$organizationId/analytics",
+  component: AdminAnalyticsPage
+});
+
 const adminStaffCreateRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/admin/$organizationId/staff/new",
@@ -110,6 +118,12 @@ const adminStaffMemberRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/admin/$organizationId/staff/$staffMemberId",
   component: AdminStaffMemberPage
+});
+
+const adminSubscriptionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/$organizationId/subscription",
+  component: AdminSubscriptionPage
 });
 
 const adminSectionRoute = createRoute({
@@ -144,8 +158,10 @@ const routeTree = rootRoute.addChildren([
   adminOrganizationRoute,
   adminQrRoute,
   adminFeedRoute,
+  adminAnalyticsRoute,
   adminStaffCreateRoute,
   adminStaffMemberRoute,
+  adminSubscriptionRoute,
   adminSectionRoute,
   guestRoute.addChildren([guestChoiceRoute, guestStepRoute])
 ]);

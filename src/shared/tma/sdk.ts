@@ -14,11 +14,14 @@ import {
   mountBackButton,
   mountMainButton,
   mountMiniAppSync,
+  mountSecondaryButton,
   mountSwipeBehavior,
   mountThemeParamsSync,
   mountViewport,
-  onMainButtonClick,
   onBackButtonClick,
+  onMainButtonClick,
+  onSecondaryButtonClick,
+  openInvoice as openInvoiceSdk,
   openTelegramLink,
   requestContentSafeAreaInsets,
   retrieveLaunchParams,
@@ -28,9 +31,11 @@ import {
   setMiniAppBackgroundColor,
   setMiniAppBottomBarColor,
   setMiniAppHeaderColor,
+  setSecondaryButtonParams,
   showPopup,
   showBackButton,
   unmountMainButton,
+  unmountSecondaryButton,
   isThemeParamsDark,
   themeParamsButtonColor,
   themeParamsButtonTextColor,
@@ -38,14 +43,22 @@ import {
 } from "@telegram-apps/sdk";
 import type { ShowPopupOptions, ShowPopupOptionsButton } from "@telegram-apps/sdk";
 
-import type { TmaButtonState, TmaColorScheme, TmaLaunchContext } from "./types";
+import type {
+  TmaButtonState,
+  TmaColorScheme,
+  TmaLaunchContext,
+  TmaSecondaryButtonState
+} from "./types";
 
 let didInit = false;
 let backButtonVisibleCount = 0;
 let backButtonHideTimeout: number | undefined;
 let mainButtonVisibleCount = 0;
 let mainButtonHideTimeout: number | undefined;
+let secondaryButtonVisibleCount = 0;
+let secondaryButtonHideTimeout: number | undefined;
 const hiddenMainButtonText = "Continue";
+const hiddenSecondaryButtonText = "Copy";
 const preferredDarkMediaQuery = "(prefers-color-scheme: dark)";
 const tmaPrimaryCssVar = "--iz-tma-primary";
 const tmaPrimaryForegroundCssVar = "--iz-tma-primary-foreground";
@@ -54,21 +67,29 @@ const tmaBackgroundCssVar = "--iz-tma-bg";
 const tmaHeaderBackgroundCssVar = "--iz-tma-header-bg";
 const tmaBottomBackgroundCssVar = "--iz-tma-bottom-bg";
 
+type TelegramButtonLike = {
+  disable?: () => void;
+  enable?: () => void;
+  hide?: () => void;
+  hideProgress?: () => void;
+  setParams?: (params: Record<string, unknown>) => void;
+  setText?: (text: string) => void;
+  show?: () => void;
+  showProgress?: (leaveActive?: boolean) => void;
+};
+
 type TelegramWebAppLike = {
   colorScheme?: string;
-  MainButton?: {
-    disable?: () => void;
-    enable?: () => void;
-    hide?: () => void;
-    hideProgress?: () => void;
-    setParams?: (params: Record<string, unknown>) => void;
-    setText?: (text: string) => void;
-    show?: () => void;
-    showProgress?: (leaveActive?: boolean) => void;
-  };
+  MainButton?: TelegramButtonLike;
+  SecondaryButton?: TelegramButtonLike;
   offEvent?: (eventType: string, eventHandler: () => void) => void;
   onEvent?: (eventType: string, eventHandler: () => void) => void;
+  isFullscreen?: boolean;
+  isVersionAtLeast?: (version: string) => boolean;
+  openInvoice?: (url: string, callback?: (status: string) => void) => void;
   platform?: string;
+  requestFullscreen?: () => void;
+  requestFullScreen?: () => void;
 };
 
 type TmaChromeColorToken =
@@ -399,16 +420,92 @@ const scheduleMainButtonHide = (text = hiddenMainButtonText, delayMs = 120) => {
   }, 120);
 };
 
+const cancelScheduledSecondaryButtonHide = () => {
+  if (secondaryButtonHideTimeout === undefined || typeof window === "undefined") {
+    return;
+  }
+
+  window.clearTimeout(secondaryButtonHideTimeout);
+  secondaryButtonHideTimeout = undefined;
+};
+
+const hideTmaSecondaryButton = (text = hiddenSecondaryButtonText) => {
+  const safeText = text.trim() || hiddenSecondaryButtonText;
+
+  callIfAvailable(setSecondaryButtonParams, {
+    isEnabled: false,
+    isLoaderVisible: false,
+    isVisible: false,
+    position: "top",
+    text: safeText
+  });
+
+  const secondaryButton = getTelegramWebApp()?.SecondaryButton;
+
+  safe(undefined, () => secondaryButton?.hideProgress?.());
+  safe(undefined, () => secondaryButton?.disable?.());
+  safe(undefined, () => secondaryButton?.setText?.(safeText));
+  safe(undefined, () =>
+    secondaryButton?.setParams?.({
+      is_active: false,
+      is_progress_visible: false,
+      is_visible: false,
+      position: "top",
+      text: safeText
+    })
+  );
+  safe(undefined, () => secondaryButton?.hide?.());
+};
+
+const forceHideTmaSecondaryButton = (text = hiddenSecondaryButtonText) => {
+  cancelScheduledSecondaryButtonHide();
+  secondaryButtonVisibleCount = 0;
+  callIfAvailable(mountSecondaryButton);
+  hideTmaSecondaryButton(text);
+  callIfAvailable(unmountSecondaryButton);
+};
+
+const scheduleSecondaryButtonHide = (text = hiddenSecondaryButtonText, delayMs = 120) => {
+  if (!isTelegramEnvironment()) {
+    return;
+  }
+
+  if (typeof window === "undefined") {
+    hideTmaSecondaryButton(text);
+    return;
+  }
+
+  cancelScheduledSecondaryButtonHide();
+
+  if (delayMs <= 0) {
+    if (secondaryButtonVisibleCount === 0) {
+      hideTmaSecondaryButton(text);
+    }
+
+    return;
+  }
+
+  secondaryButtonHideTimeout = window.setTimeout(() => {
+    secondaryButtonHideTimeout = undefined;
+
+    if (secondaryButtonVisibleCount === 0) {
+      hideTmaSecondaryButton(text);
+    }
+  }, 120);
+};
+
 const syncTmaSafeAreaFallback = () => {
   if (typeof document === "undefined") {
     return;
   }
 
   const topInset = safe(0, () => viewportContentSafeAreaInsetTop());
-  const needsIosTopFallback = isTelegramIos() && topInset < 72;
+  const isFullscreen = getTelegramWebApp()?.isFullscreen === true;
+  const needsIosTopFallback = isTelegramIos() && isFullscreen && topInset < 72;
   const root = document.documentElement;
 
   root.style.setProperty(tmaTopOverlayFallbackCssVar, needsIosTopFallback ? "88px" : "0px");
+  root.dataset.tmaFullscreen = isFullscreen ? "true" : "false";
 
   const platform = getTelegramPlatform();
 
@@ -492,6 +589,35 @@ const disableTmaVerticalSwipes = () => {
   callIfAvailable(disableVerticalSwipes);
 };
 
+const requestTmaFullscreen = () => {
+  if (!isTelegramEnvironment()) {
+    return;
+  }
+
+  const webApp = getTelegramWebApp();
+
+  if (!webApp || webApp.isFullscreen) {
+    return;
+  }
+
+  const isSupported = safe(true, () => webApp.isVersionAtLeast?.("8.0") ?? true);
+
+  if (!isSupported) {
+    return;
+  }
+
+  safe(undefined, () => {
+    if (typeof webApp.requestFullscreen === "function") {
+      webApp.requestFullscreen();
+      window.setTimeout(syncTmaSafeAreaFallback, 80);
+      return;
+    }
+
+    webApp.requestFullScreen?.();
+    window.setTimeout(syncTmaSafeAreaFallback, 80);
+  });
+};
+
 const emitTmaImpact = (style: "light" | "medium" | "heavy" | "rigid" | "soft" = "light") =>
   callIfAvailable(hapticFeedbackImpactOccurred, style);
 
@@ -549,8 +675,16 @@ export const syncTmaTheme = () => {
 
   if (isTelegramEnvironment() && telegramWebApp?.onEvent) {
     safe(undefined, () => telegramWebApp.onEvent?.("themeChanged", refresh));
+    safe(undefined, () => telegramWebApp.onEvent?.("fullscreenChanged", refresh));
+    safe(undefined, () => telegramWebApp.onEvent?.("fullscreenFailed", refresh));
     cleanupFns.push(() =>
       safe(undefined, () => telegramWebApp.offEvent?.("themeChanged", refresh))
+    );
+    cleanupFns.push(() =>
+      safe(undefined, () => telegramWebApp.offEvent?.("fullscreenChanged", refresh))
+    );
+    cleanupFns.push(() =>
+      safe(undefined, () => telegramWebApp.offEvent?.("fullscreenFailed", refresh))
     );
   }
 
@@ -658,8 +792,11 @@ export const initTma = async () => {
   callIfAvailable(mountThemeParamsSync);
   callIfAvailable(mountBackButton);
   callIfAvailable(mountMainButton);
+  callIfAvailable(mountSecondaryButton);
   forceHideTmaMainButton();
+  forceHideTmaSecondaryButton();
   disableTmaVerticalSwipes();
+  requestTmaFullscreen();
   callIfAvailable(bindMiniAppCssVars);
   callIfAvailable(bindThemeParamsCssVars);
   callIfAvailable(enableClosingConfirmation);
@@ -764,8 +901,83 @@ export const configureTmaMainButton = (state: TmaButtonState | null, onClick: ()
   };
 };
 
+export const configureTmaSecondaryButton = (
+  state: TmaSecondaryButtonState | null,
+  onClick: () => void
+) => {
+  const isVisible = Boolean(state?.text.trim() && (state.visible ?? true));
+
+  if (!state) {
+    forceHideTmaSecondaryButton();
+    return () => undefined;
+  }
+
+  if (!isVisible) {
+    forceHideTmaSecondaryButton();
+    return () => undefined;
+  }
+
+  if (!isTelegramEnvironment()) {
+    return () => undefined;
+  }
+
+  const position = state.position ?? "bottom";
+
+  secondaryButtonVisibleCount += 1;
+  cancelScheduledSecondaryButtonHide();
+  callIfAvailable(mountSecondaryButton);
+  callIfAvailable(setSecondaryButtonParams, {
+    backgroundColor: state.color,
+    hasShineEffect: state.shine,
+    isEnabled: state.enabled ?? true,
+    isLoaderVisible: state.loading ?? false,
+    isVisible: true,
+    position,
+    text: state.text,
+    textColor: state.textColor
+  });
+
+  const secondaryButton = getTelegramWebApp()?.SecondaryButton;
+
+  safe(undefined, () =>
+    secondaryButton?.setParams?.({
+      color: state.color,
+      has_shine_effect: state.shine,
+      is_active: state.enabled ?? true,
+      is_progress_visible: state.loading ?? false,
+      is_visible: true,
+      position,
+      text: state.text,
+      text_color: state.textColor
+    })
+  );
+  safe(undefined, () => secondaryButton?.setText?.(state.text));
+  safe(undefined, () =>
+    (state.enabled ?? true) ? secondaryButton?.enable?.() : secondaryButton?.disable?.()
+  );
+  safe(undefined, () =>
+    state.loading ? secondaryButton?.showProgress?.(false) : secondaryButton?.hideProgress?.()
+  );
+  safe(undefined, () => secondaryButton?.show?.());
+
+  const cleanup = callIfAvailable(onSecondaryButtonClick, () => {
+    emitTmaImpact("light");
+    onClick();
+  }) as (() => void) | undefined;
+
+  return () => {
+    cleanup?.();
+    secondaryButtonVisibleCount = Math.max(0, secondaryButtonVisibleCount - 1);
+    scheduleSecondaryButtonHide(state.text);
+  };
+};
+
 export const hideTmaMainButtonNow = () => {
   forceHideTmaMainButton();
+};
+
+export const hideTmaSecondaryButtonNow = () => {
+  forceHideTmaSecondaryButton();
 };
 
 const getPopupButtonId = (button: TmaPopupButton) => ("id" in button ? button.id : undefined);
@@ -833,6 +1045,57 @@ export const openTmaTelegramLink = (url: string | URL) => {
   if (typeof window !== "undefined") {
     window.location.href = href;
   }
+};
+
+export const openTmaInvoice = async (url: string | URL) => {
+  const href = url.toString();
+
+  if (!isTelegramEnvironment()) {
+    if (typeof window !== "undefined") {
+      window.location.href = href;
+    }
+
+    return null;
+  }
+
+  const sdkInvoice = openInvoiceSdk as typeof openInvoiceSdk & {
+    ifAvailable?: (
+      url: string,
+      type: "url"
+    ) => [called: true, data: Promise<string>] | [called: false];
+  };
+  const sdkInvoiceStatus = callIfAvailable(sdkInvoice, href, "url") as
+    | Promise<string>
+    | string
+    | undefined;
+
+  if (sdkInvoiceStatus) {
+    return Promise.resolve(sdkInvoiceStatus);
+  }
+
+  const webApp = getTelegramWebApp();
+
+  if (!webApp?.openInvoice) {
+    if (typeof window !== "undefined") {
+      window.location.href = href;
+    }
+
+    return null;
+  }
+
+  return new Promise<string | null>((resolve) => {
+    try {
+      webApp.openInvoice?.(href, (status) => {
+        resolve(status);
+      });
+    } catch {
+      if (typeof window !== "undefined") {
+        window.location.href = href;
+      }
+
+      resolve(null);
+    }
+  });
 };
 
 export const tmaHaptics = {

@@ -1,64 +1,80 @@
 {
   "constructor": {
-    "title": "QR",
-    "subtitle": "Mehmon havolasi uchun QR’ni bezang. Telegram manzili avtomatik qo‘shiladi.",
+    "title": "Mehmonlar uchun QR",
+    "subtitle": "Stol, stoyka yoki plakat uchun chiroyli maket tayyorlang. Mehmon formasi havolasini o‘zimiz qo‘shamiz.",
     "appearance": "Ko‘rinish",
     "copy": "Matn",
     "fit": "Format",
     "style": "Uslub",
     "save": "Saqlash",
     "saved": "QR shablon saqlandi",
+    "downloadPdf": "PDF yuklab olish",
+    "sendPdfToChat": "PDF yuklab olish",
+    "copyLink": "Havolani nusxalash",
+    "autoSave": "O‘zgarishlar o‘zi saqlanadi",
+    "powered": "Powered by Izoh",
+    "preview": "PDF ko‘rinishi",
+    "text": {
+      "title": "Karta matni",
+      "defaultHeadline": "Bizni baholang",
+      "defaultCaption": "Nimani yaxshilash yoki kimni maqtash kerakligini yozing.",
+      "headlinePlaceholder": "Sarlavha",
+      "captionPlaceholder": "QR ostidagi qisqa matn"
+    },
     "context": {
       "title": "Kontekst",
       "placeholder": "4-stol, Bar, Kassa",
-      "hint": "Masalan: Stol 4, Bar yoki Kassa. Kontekst havolaga, keyin murojaat va bildirishnomaga tushadi."
+      "hint": "Har doim QR ichiga qo‘shiladi va murojaat qayerdan kelganini tushunishga yordam beradi.",
+      "showInLayout": "Maketda ko‘rsatish"
     },
     "formats": {
       "title": "O‘lcham",
+      "sizeHint": "O‘lcham: {{size}}.",
+      "sticker": {
+        "name": "Stiker",
+        "size": "60×60 mm",
+        "description": "Kichik nakleyka uchun. Faqat QR va kod ichidagi logotip."
+      },
       "table": {
         "name": "Stol uchun",
-        "size": "4.25×6\"",
-        "description": "Stol ustidagi karta uchun: mehmon ko‘radi va joyni ko‘p olmaydi."
+        "size": "A6",
+        "description": "Stol, menyu holderi yoki kutish joyi uchun asosiy format."
       },
-      "tent": {
+      "stand": {
         "name": "Stoyka",
         "size": "4×6\"",
         "description": "Kassa, bar yoki resepshendagi akril holder uchun."
       },
-      "sticker": {
-        "name": "Stiker",
-        "size": "2×2\"",
-        "description": "Stol, qadoq yoki olib ketish buyurtmasi uchun ixcham."
-      },
-      "a6": {
-        "name": "A6",
-        "size": "105×148 mm",
-        "description": "Stoyka, menyu holderi yoki promo zona uchun kichik karta."
+      "poster": {
+        "name": "Plakat",
+        "size": "A5",
+        "description": "Kirish, devor yoki navbat yonidagi ko‘rinadigan joy uchun."
       }
     },
-    "palette": {
-      "title": "Mavzu",
-      "brand": "Izoh",
-      "graphite": "Grafit",
-      "mint": "Yalpiz"
+    "colors": {
+      "title": "Ranglar",
+      "background": "Fon",
+      "paper": "QR foni",
+      "text": "Matn va QR"
+    },
+    "styles": {
+      "title": "Bezash"
     },
     "qrStyle": {
+      "title": "QR ko‘rinishi",
       "square": "Klassik",
       "rounded": "Yumshoq",
       "dots": "Nuqtalar"
     },
-    "copyPresets": {
-      "review": {
-        "name": "Izoh",
-        "description": "Havolani oching yoki QR’ni skanerlang va qisqa izoh qoldiring."
-      },
-      "complaint": {
-        "name": "Shikoyat",
-        "description": "Muammo haqida mas’ul odamga to‘g‘ridan-to‘g‘ri yozing."
-      },
-      "staff": {
-        "name": "Xodimlar",
-        "description": "Xodim yoki smena haqida fikr qoldirish mumkin."
+    "emoji": {
+      "title": "Emoji",
+      "themes": {
+        "calm": "Sokin",
+        "great": "Quvonchli",
+        "idea": "G‘oya",
+        "issue": "Muammo",
+        "none": "Emoji yo‘q",
+        "warm": "Iliq"
       }
     }
   }

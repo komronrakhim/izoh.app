@@ -18,3 +18,9 @@ export type TmaButtonState = {
   textColor?: `#${string}`;
   visible?: boolean;
 };
+
+export type TmaSecondaryButtonPosition = "left" | "right" | "top" | "bottom";
+
+export type TmaSecondaryButtonState = TmaButtonState & {
+  position?: TmaSecondaryButtonPosition;
+};

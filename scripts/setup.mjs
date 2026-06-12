@@ -127,7 +127,9 @@ const main = async () => {
   }
 
   log("Izoh is ready");
-  console.log("Run npm run dev:all to start the API and Mini App.");
+  console.log(
+    "Run npm run dev:all to start the API, Mini App, Notification Dispatcher, and Organization Deletion Worker."
+  );
 };
 
 main().catch((error) => {

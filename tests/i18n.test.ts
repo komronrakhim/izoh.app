@@ -14,8 +14,15 @@ describe("shared i18n", () => {
     const ru = createTranslator("ru");
     const uz = createTranslator("uz");
 
-    expect(ru("telegram.notifications.kind.complaint")).toBe("Жалоба");
-    expect(uz("telegram.notifications.kind.complaint")).toBe("Shikoyat");
+    expect(ru("telegram.notifications.headline.complaint")).toBe("Новая жалоба");
+    expect(uz("telegram.notifications.headline.complaint")).toBe("Yangi shikoyat");
+    expect(ru("telegram.notifications.fields.contact")).toBe("Контакт гостя");
+    expect(ru("telegram.groupConnect.success", { organizationName: "Izoh Cafe" })).toContain(
+      "Готово, я на связи"
+    );
+    expect(uz("telegram.groupConnect.errorInvalid")).toBe(
+      "Guruhni ulab bo‘lmadi. Bildirishnomalarni ochib, guruhni yana tanlang."
+    );
     expect(ru("admin.blocks.capabilities.title")).toBe("Формы");
     expect(ru("admin.blocks.staff.title")).toBe("Персонал");
     expect(ru("admin.capabilities.review.title")).toBe("Отзывы");

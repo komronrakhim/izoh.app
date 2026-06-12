@@ -8,6 +8,7 @@ const port = Number(process.env.PORT ?? 3000);
 serve(
   {
     fetch: createApiApp().fetch,
+    hostname: "0.0.0.0",
     port
   },
   (info) => {

@@ -1,7 +1,8 @@
 export const MEDIA_IMAGE_CONTENT_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 export const SUBMISSION_PHOTO_LIMIT = 4;
-export const SUBMISSION_PHOTO_MAX_BYTES = 8 * 1024 * 1024;
-export const LOGO_MAX_BYTES = 4 * 1024 * 1024;
+export const MEDIA_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
+export const SUBMISSION_PHOTO_MAX_BYTES = MEDIA_IMAGE_MAX_BYTES;
+export const LOGO_MAX_BYTES = MEDIA_IMAGE_MAX_BYTES;
 
 export type MediaImageContentType = (typeof MEDIA_IMAGE_CONTENT_TYPES)[number];
 
@@ -45,7 +46,7 @@ export const isSupportedImageContentType = (value: string): value is MediaImageC
   MEDIA_IMAGE_CONTENT_TYPES.includes(value as MediaImageContentType);
 
 export const getMediaImageSizeLimit = (kind: UploadImageAssetInput["kind"]) =>
-  kind === "SUBMISSION_PHOTO" ? SUBMISSION_PHOTO_MAX_BYTES : LOGO_MAX_BYTES;
+  MEDIA_IMAGE_MAX_BYTES;
 
 const createMediaHeaders = (initDataRaw?: string, headers?: HeadersInit) => {
   const nextHeaders = new Headers(headers);

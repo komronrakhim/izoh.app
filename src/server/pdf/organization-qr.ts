@@ -1,14 +1,47 @@
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
+import sharp from "sharp";
+import { fileURLToPath } from "node:url";
 
-import { createTranslator, type AppLocale } from "~/shared/i18n";
+import { IZOH_WORDMARK_PATHS, IZOH_WORDMARK_WIDTH } from "~/shared/brand";
+import type { AppLocale } from "~/shared/i18n";
+import {
+  QR_DEFAULT_DRAFT,
+  QR_EMOJI_THEME_BY_ID,
+  QR_FORMAT_BY_ID,
+  getQrAlignmentPatternCenters,
+  getQrEmojiScene,
+  getQrErrorCorrectionLevel,
+  getQrFormatLayout,
+  getQrPalette,
+  isQrAlignmentModule,
+  isQrFinderModule,
+  normalizeQrText,
+  type QrCustomColors,
+  type QrErrorCorrectionLevel,
+  type QrEmojiThemeId,
+  type QrFormatId,
+  type QrPalette,
+  type QrVisualStyle
+} from "~/shared/qr";
 
-export type OrganizationQrPdfFormat = "a4" | "sticker";
+export type OrganizationQrPdfTemplate = {
+  caption?: string;
+  context?: string;
+  customColors?: Partial<QrCustomColors>;
+  emojiEnabled?: boolean;
+  emojiThemeId?: QrEmojiThemeId;
+  formatId?: QrFormatId;
+  headline?: string;
+  qrStyle?: QrVisualStyle;
+  showContext?: boolean;
+};
 
 type RenderOrganizationQrPdfInput = {
-  format: OrganizationQrPdfFormat;
   locale: AppLocale;
+  organizationLogoUrl?: null | string;
   organizationName: string;
+  template?: OrganizationQrPdfTemplate;
   url: string;
 };
 
@@ -21,77 +54,608 @@ const collectPdf = (doc: PDFKit.PDFDocument) =>
     doc.on("error", reject);
   });
 
+const fontRegularPath = fileURLToPath(
+  new URL("../../assets/fonts/open-runde/OpenRunde-Regular.woff2", import.meta.url)
+);
+const fontMediumPath = fileURLToPath(
+  new URL("../../assets/fonts/open-runde/OpenRunde-Medium.woff2", import.meta.url)
+);
+const fontSemiboldPath = fileURLToPath(
+  new URL("../../assets/fonts/open-runde/OpenRunde-Semibold.woff2", import.meta.url)
+);
+const fontBoldPath = fileURLToPath(
+  new URL("../../assets/fonts/open-runde/OpenRunde-Bold.woff2", import.meta.url)
+);
+
+const registerFonts = (doc: PDFKit.PDFDocument) => {
+  doc.registerFont("OpenRunde", fontRegularPath);
+  doc.registerFont("OpenRunde-Medium", fontMediumPath);
+  doc.registerFont("OpenRunde-Semibold", fontSemiboldPath);
+  doc.registerFont("OpenRunde-Bold", fontBoldPath);
+};
+
+const normalizeFontText = (value: string) => value.replace(/\s+/g, " ").trim();
+
+const emojiImageCache = new Map<string, Promise<Buffer | null>>();
+const organizationLogoImageCache = new Map<string, Promise<Buffer | null>>();
+
+const getTwemojiCode = (emoji: string) =>
+  Array.from(emoji)
+    .map((char) => char.codePointAt(0)?.toString(16))
+    .filter((code): code is string => Boolean(code) && code !== "fe0f")
+    .join("-");
+
+const loadEmojiImage = (emoji: string) => {
+  const cached = emojiImageCache.get(emoji);
+
+  if (cached) {
+    return cached;
+  }
+
+  const image = (async () => {
+    const code = getTwemojiCode(emoji);
+
+    if (!code) {
+      return null;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 900);
+
+    try {
+      const response = await fetch(
+        `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${code}.svg`,
+        {
+          signal: controller.signal
+        }
+      );
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const svg = Buffer.from(await response.arrayBuffer());
+
+      return sharp(svg)
+        .resize({
+          fit: "contain",
+          height: 96,
+          width: 96
+        })
+        .png()
+        .toBuffer();
+    } catch {
+      return null;
+    } finally {
+      clearTimeout(timeout);
+    }
+  })();
+
+  emojiImageCache.set(emoji, image);
+
+  return image;
+};
+
+const loadOrganizationLogoImage = (url?: null | string) => {
+  const cleanUrl = url?.trim();
+
+  if (!cleanUrl) {
+    return Promise.resolve(null);
+  }
+
+  const cached = organizationLogoImageCache.get(cleanUrl);
+
+  if (cached) {
+    return cached;
+  }
+
+  const image = (async () => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 1200);
+
+    try {
+      const response = await fetch(cleanUrl, {
+        signal: controller.signal
+      });
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const buffer = Buffer.from(await response.arrayBuffer());
+
+      return sharp(buffer)
+        .rotate()
+        .resize({
+          fit: "cover",
+          height: 192,
+          width: 192
+        })
+        .png()
+        .toBuffer();
+    } catch {
+      return null;
+    } finally {
+      clearTimeout(timeout);
+    }
+  })();
+
+  organizationLogoImageCache.set(cleanUrl, image);
+
+  return image;
+};
+
 const drawCenteredText = (
   doc: PDFKit.PDFDocument,
   text: string,
   y: number,
+  width: number,
   options: PDFKit.Mixins.TextOptions = {}
 ) => {
   doc.text(text, 0, y, {
     align: "center",
-    width: doc.page.width,
+    width,
     ...options
   });
 };
 
+const createRoundedModulePath = (
+  x: number,
+  y: number,
+  size: number,
+  radius: number,
+  corners: {
+    bottomLeft: boolean;
+    bottomRight: boolean;
+    topLeft: boolean;
+    topRight: boolean;
+  }
+) => {
+  const x2 = x + size;
+  const y2 = y + size;
+  const topLeftRadius = corners.topLeft ? radius : 0;
+  const topRightRadius = corners.topRight ? radius : 0;
+  const bottomRightRadius = corners.bottomRight ? radius : 0;
+  const bottomLeftRadius = corners.bottomLeft ? radius : 0;
+
+  return [
+    `M ${x + topLeftRadius} ${y}`,
+    `H ${x2 - topRightRadius}`,
+    topRightRadius ? `Q ${x2} ${y} ${x2} ${y + topRightRadius}` : `L ${x2} ${y}`,
+    `V ${y2 - bottomRightRadius}`,
+    bottomRightRadius ? `Q ${x2} ${y2} ${x2 - bottomRightRadius} ${y2}` : `L ${x2} ${y2}`,
+    `H ${x + bottomLeftRadius}`,
+    bottomLeftRadius ? `Q ${x} ${y2} ${x} ${y2 - bottomLeftRadius}` : `L ${x} ${y2}`,
+    `V ${y + topLeftRadius}`,
+    topLeftRadius ? `Q ${x} ${y} ${x + topLeftRadius} ${y}` : `L ${x} ${y}`,
+    "Z"
+  ].join(" ");
+};
+
+const drawFinderPattern = ({
+  doc,
+  moduleSize,
+  palette,
+  x,
+  y
+}: {
+  doc: PDFKit.PDFDocument;
+  moduleSize: number;
+  palette: QrPalette;
+  x: number;
+  y: number;
+}) => {
+  doc.roundedRect(x, y, moduleSize * 7, moduleSize * 7, moduleSize * 2.2).fill(palette.foreground);
+  doc
+    .roundedRect(
+      x + moduleSize,
+      y + moduleSize,
+      moduleSize * 5,
+      moduleSize * 5,
+      moduleSize * 1.65
+    )
+    .fill(palette.paper);
+  doc
+    .roundedRect(
+      x + moduleSize * 2,
+      y + moduleSize * 2,
+      moduleSize * 3,
+      moduleSize * 3,
+      moduleSize * 0.86
+    )
+    .fill(palette.foreground);
+};
+
+const drawAlignmentPattern = ({
+  doc,
+  moduleSize,
+  palette,
+  x,
+  y
+}: {
+  doc: PDFKit.PDFDocument;
+  moduleSize: number;
+  palette: QrPalette;
+  x: number;
+  y: number;
+}) => {
+  doc.roundedRect(x, y, moduleSize * 5, moduleSize * 5, moduleSize * 1.35).fill(palette.foreground);
+  doc
+    .roundedRect(
+      x + moduleSize,
+      y + moduleSize,
+      moduleSize * 3,
+      moduleSize * 3,
+      moduleSize * 0.84
+    )
+    .fill(palette.paper);
+  doc
+    .roundedRect(
+      x + moduleSize * 2,
+      y + moduleSize * 2,
+      moduleSize,
+      moduleSize,
+      moduleSize * 0.28
+    )
+    .fill(palette.foreground);
+};
+
+const drawQrMatrix = ({
+  doc,
+  errorCorrectionLevel,
+  palette,
+  qrSize,
+  url,
+  x,
+  y
+}: {
+  doc: PDFKit.PDFDocument;
+  errorCorrectionLevel: QrErrorCorrectionLevel;
+  palette: QrPalette;
+  qrSize: number;
+  url: string;
+  x: number;
+  y: number;
+}) => {
+  const qr = QRCode.create(url, {
+    errorCorrectionLevel
+  });
+  const quietZone = 4;
+  const moduleCount = qr.modules.size;
+  const totalSize = moduleCount + quietZone * 2;
+  const moduleSize = qrSize / totalSize;
+  const alignmentCenters = getQrAlignmentPatternCenters(moduleCount);
+  const isStyledPatternModule = (row: number, col: number) =>
+    isQrFinderModule(row, col, moduleCount) ||
+    isQrAlignmentModule(row, col, moduleCount, alignmentCenters);
+  const isDarkDataModule = (row: number, col: number) =>
+    row >= 0 &&
+    col >= 0 &&
+    row < moduleCount &&
+    col < moduleCount &&
+    qr.modules.get(row, col) &&
+    !isStyledPatternModule(row, col);
+
+  doc.save();
+  doc.rect(x, y, qrSize, qrSize).fill(palette.paper);
+  doc.fillColor(palette.foreground);
+
+  for (let row = 0; row < moduleCount; row += 1) {
+    for (let col = 0; col < moduleCount; col += 1) {
+      if (!isDarkDataModule(row, col)) continue;
+
+      const moduleX = x + (col + quietZone) * moduleSize;
+      const moduleY = y + (row + quietZone) * moduleSize;
+      const hasTop = isDarkDataModule(row - 1, col);
+      const hasRight = isDarkDataModule(row, col + 1);
+      const hasBottom = isDarkDataModule(row + 1, col);
+      const hasLeft = isDarkDataModule(row, col - 1);
+
+      doc
+        .path(
+          createRoundedModulePath(moduleX, moduleY, moduleSize, moduleSize * 0.42, {
+            bottomLeft: !hasBottom && !hasLeft,
+            bottomRight: !hasBottom && !hasRight,
+            topLeft: !hasTop && !hasLeft,
+            topRight: !hasTop && !hasRight
+          })
+        )
+        .fill(palette.foreground);
+    }
+  }
+
+  for (const centerRow of alignmentCenters) {
+    for (const centerCol of alignmentCenters) {
+      if (
+        (centerRow === 6 && centerCol === 6) ||
+        (centerRow === 6 && centerCol === moduleCount - 7) ||
+        (centerRow === moduleCount - 7 && centerCol === 6)
+      ) {
+        continue;
+      }
+
+      drawAlignmentPattern({
+        doc,
+        moduleSize,
+        palette,
+        x: x + (centerCol + quietZone - 2) * moduleSize,
+        y: y + (centerRow + quietZone - 2) * moduleSize
+      });
+    }
+  }
+
+  drawFinderPattern({
+    doc,
+    moduleSize,
+    palette,
+    x: x + quietZone * moduleSize,
+    y: y + quietZone * moduleSize
+  });
+  drawFinderPattern({
+    doc,
+    moduleSize,
+    palette,
+    x: x + (quietZone + moduleCount - 7) * moduleSize,
+    y: y + quietZone * moduleSize
+  });
+  drawFinderPattern({
+    doc,
+    moduleSize,
+    palette,
+    x: x + quietZone * moduleSize,
+    y: y + (quietZone + moduleCount - 7) * moduleSize
+  });
+
+  doc.restore();
+};
+
+const drawLogo = ({
+  doc,
+  image,
+  name,
+  palette,
+  padding = 0,
+  paddingColor,
+  size,
+  x,
+  y
+}: {
+  doc: PDFKit.PDFDocument;
+  image?: Buffer | null;
+  name: string;
+  palette: QrPalette;
+  padding?: number;
+  paddingColor?: string;
+  size: number;
+  x: number;
+  y: number;
+}) => {
+  const radius = size / 2;
+  const centerX = x + radius;
+  const centerY = y + radius;
+
+  doc.save();
+
+  if (padding > 0) {
+    doc.circle(centerX, centerY, radius + padding).fill(paddingColor ?? palette.paper);
+  }
+
+  if (image) {
+    doc.save();
+    doc.circle(centerX, centerY, radius).clip();
+    doc.image(image, x, y, {
+      height: size,
+      width: size
+    });
+    doc.restore();
+    doc.restore();
+
+    return;
+  }
+
+  doc.circle(centerX, centerY, radius).fill(palette.text);
+  doc
+    .fillColor(palette.paper)
+    .font("OpenRunde-Bold")
+    .fontSize(size * 0.46)
+    .text((name.trim().slice(0, 1).toUpperCase() || "I").slice(0, 1), x, y + size * 0.25, {
+      align: "center",
+      width: size
+    });
+  doc.restore();
+};
+
+const drawIzohWordmark = ({
+  color,
+  doc,
+  opacity = 0.54,
+  width,
+  x,
+  y
+}: {
+  color: string;
+  doc: PDFKit.PDFDocument;
+  opacity?: number;
+  width: number;
+  x: number;
+  y: number;
+}) => {
+  const scale = width / IZOH_WORDMARK_WIDTH;
+
+  doc.save();
+  doc.translate(x, y);
+  doc.scale(scale);
+  doc.opacity(opacity);
+  doc.fillColor(color);
+
+  for (const path of IZOH_WORDMARK_PATHS) {
+    doc.path(path).fill();
+  }
+
+  doc.restore();
+};
+
 export const renderOrganizationQrPdf = async ({
-  format,
-  locale,
+  locale: _locale,
+  organizationLogoUrl,
   organizationName,
+  template = {},
   url
 }: RenderOrganizationQrPdfInput) => {
-  const isA4 = format === "a4";
+  const format = QR_FORMAT_BY_ID[template.formatId ?? QR_DEFAULT_DRAFT.formatId];
+  const palette = getQrPalette({
+    ...QR_DEFAULT_DRAFT.customColors,
+    ...template.customColors
+  });
+  const emojiTheme = QR_EMOJI_THEME_BY_ID[template.emojiThemeId ?? QR_DEFAULT_DRAFT.emojiThemeId];
+  const showEmoji =
+    format.allowEmoji && emojiTheme.id !== "none" && (template.emojiEnabled ?? true);
+  const headline = format.compact
+    ? ""
+    : format.allowCustomHeadline
+      ? normalizeFontText(normalizeQrText(template.headline, format.headlineMaxLength))
+      : normalizeFontText(organizationName);
+  const context = format.allowContext && template.showContext !== false
+    ? normalizeFontText(normalizeQrText(template.context, format.contextMaxLength))
+    : "";
+  const caption = format.allowCaption
+    ? normalizeFontText(normalizeQrText(template.caption, format.captionMaxLength))
+    : "";
+  const layout = getQrFormatLayout(format.id, {
+    hasCaption: Boolean(caption),
+    hasContext: Boolean(context),
+    hasHeadline: Boolean(headline)
+  });
+  const compact = layout.compact;
   const doc = new PDFDocument({
     margin: 0,
-    size: isA4 ? "A4" : [288, 288]
+    size: [format.widthPt, format.heightPt]
   });
   const result = collectPdf(doc);
-  const qr = await QRCode.toBuffer(url, {
-    errorCorrectionLevel: "M",
-    margin: 1,
-    type: "png",
-    width: isA4 ? 320 : 150
-  });
+  registerFonts(doc);
   const pageWidth = doc.page.width;
-  const t = createTranslator(locale);
+  const pageHeight = doc.page.height;
+  const emojiMarks = getQrEmojiScene(format.id);
+  const background = palette.background;
+  const textColor = palette.text;
+  const mutedColor = palette.muted;
+  const padding = layout.padding;
+  const qrSize = layout.qrSize;
+  const qrX = layout.qrX;
+  const qrY = layout.qrY;
+  const logoImage = await loadOrganizationLogoImage(organizationLogoUrl);
+  const compactLogoPadding = Math.max(3, layout.logoSize * 0.16);
+  const errorCorrectionLevel = getQrErrorCorrectionLevel(format.id);
 
-  doc.rect(0, 0, doc.page.width, doc.page.height).fill("#ffffff");
+  doc.rect(0, 0, pageWidth, pageHeight).fill(background);
 
-  if (isA4) {
-    doc.roundedRect(58, 64, pageWidth - 116, 710, 28).fillAndStroke("#f5f5f7", "#e5e5ea");
+  if (showEmoji) {
+    for (const [index, mark] of emojiMarks.entries()) {
+      const emoji = emojiTheme.emojis[index % emojiTheme.emojis.length];
+      const image = await loadEmojiImage(emoji);
 
-    doc.fillColor("#111113").font("Helvetica-Bold").fontSize(34);
-    drawCenteredText(doc, organizationName, 118);
+      if (!image) {
+        continue;
+      }
 
-    doc.image(qr, (pageWidth - 320) / 2, 214, {
-      height: 320,
-      width: 320
+      const size = Math.min(pageWidth, pageHeight) * mark.size;
+
+      const centerX = pageWidth * mark.x;
+      const centerY = pageHeight * mark.y;
+
+      doc.save();
+      doc.opacity(mark.opacity);
+      doc.rotate(mark.rotation, {
+        origin: [centerX, centerY]
+      });
+      doc.image(image, centerX - size / 2, centerY - size / 2, {
+        height: size,
+        width: size
+      });
+      doc.restore();
+    }
+  }
+
+  if (!compact) {
+    drawLogo({
+      doc,
+      image: logoImage,
+      name: organizationName,
+      palette,
+      size: layout.logoSize,
+      x: (pageWidth - layout.logoSize) / 2,
+      y: layout.logoY
     });
+  }
 
-    doc.fillColor("#111113").font("Helvetica-Bold").fontSize(24);
-    drawCenteredText(doc, t("pdf.organizationQr.cta"), 572);
+  if (headline) {
+    doc.fillColor(textColor).font("OpenRunde-Bold").fontSize(layout.headlineFontSize);
+    drawCenteredText(doc, headline, layout.headlineY, pageWidth, {
+      ellipsis: true,
+      height: layout.headlineHeight
+    });
+  }
 
-    doc.fillColor("#6e6e73").font("Helvetica").fontSize(14);
-    doc.text(t("pdf.organizationQr.caption"), 78, 616, {
+  if (context) {
+    doc.fillColor(mutedColor).font("OpenRunde-Semibold").fontSize(layout.contextFontSize);
+    drawCenteredText(doc, context, layout.contextY, pageWidth, {
+      ellipsis: true,
+      height: layout.contextHeight
+    });
+  }
+
+  doc.save();
+  doc
+    .roundedRect(
+      qrX - layout.qrSafePadding,
+      qrY - layout.qrSafePadding,
+      qrSize + layout.qrSafePadding * 2,
+      qrSize + layout.qrSafePadding * 2,
+      layout.qrRadius
+    )
+    .fill(palette.paper);
+  doc.restore();
+  drawQrMatrix({
+    doc,
+    errorCorrectionLevel,
+    palette,
+    qrSize,
+    url,
+    x: qrX,
+    y: qrY
+  });
+
+  if (compact) {
+    drawLogo({
+      doc,
+      image: logoImage,
+      name: organizationName,
+      padding: compactLogoPadding,
+      paddingColor: palette.paper,
+      palette,
+      size: layout.logoSize,
+      x: (pageWidth - layout.logoSize) / 2,
+      y: qrY + qrSize / 2 - layout.logoSize / 2
+    });
+  } else if (format.allowCaption && caption) {
+    doc.fillColor(mutedColor).font("OpenRunde-Medium").fontSize(layout.captionFontSize);
+    doc.text(caption, padding, layout.captionY, {
       align: "center",
-      width: pageWidth - 156
+      height: layout.captionHeight,
+      lineGap: Math.max(0, layout.captionLineHeight - layout.captionFontSize),
+      width: pageWidth - padding * 2
     });
+  }
 
-    doc.fillColor("#8e8e93").fontSize(11);
-    drawCenteredText(doc, t("pdf.organizationQr.powered"), 742);
-  } else {
-    doc.roundedRect(14, 14, pageWidth - 28, pageWidth - 28, 22).fillAndStroke("#f5f5f7", "#e5e5ea");
-
-    doc.fillColor("#111113").font("Helvetica-Bold").fontSize(17);
-    drawCenteredText(doc, organizationName, 44);
-
-    doc.image(qr, (pageWidth - 150) / 2, 82, {
-      height: 150,
-      width: 150
+  if (layout.footerLogoWidth > 0) {
+    drawIzohWordmark({
+      color: palette.muted,
+      doc,
+      opacity: compact ? 0.44 : undefined,
+      width: layout.footerLogoWidth,
+      x: (pageWidth - layout.footerLogoWidth) / 2,
+      y: layout.footerY
     });
-
-    doc.fillColor("#111113").font("Helvetica-Bold").fontSize(14);
-    drawCenteredText(doc, t("pdf.organizationQr.cta"), 240);
   }
 
   doc.end();

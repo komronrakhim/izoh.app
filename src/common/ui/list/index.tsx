@@ -6,6 +6,8 @@ import { cva } from "class-variance-authority";
 import { cn } from "~/common/utils";
 import { tmaHaptics } from "~/shared/tma";
 
+export type ListSpacing = "xs" | "sm" | "md";
+
 export type ListItem = {
   title: React.ReactNode;
   subtitle?: React.ReactNode;
@@ -18,13 +20,16 @@ export type ListItem = {
   href?: string;
   isAction?: boolean;
   onClick?: () => void;
+  separatorInsetClassName?: string;
+  spacing?: ListSpacing;
 };
 
 export type ListProps = {
   items: ListItem[];
   title?: string;
   hint?: React.ReactNode;
-  spacing?: "xs" | "sm" | "md";
+  spacing?: ListSpacing;
+  separatorInsetClassName?: string;
   className?: string;
 };
 
@@ -112,7 +117,14 @@ const beforeAddonVariants = cva("", {
   }
 });
 
-export const List = ({ items, title, hint, spacing = "sm", className }: ListProps) => {
+export const List = ({
+  items,
+  title,
+  hint,
+  spacing = "sm",
+  separatorInsetClassName = "ml-[60px]",
+  className
+}: ListProps) => {
   return (
     <div className="flex w-full flex-col gap-2.5">
       {title && (
@@ -132,10 +144,13 @@ export const List = ({ items, title, hint, spacing = "sm", className }: ListProp
 
           return (
             <React.Fragment key={i}>
-              <ListRow item={item} spacing={spacing} />
+              <ListRow item={item} spacing={item.spacing ?? spacing} />
               {!last && (
                 <div
-                  className="ml-[60px] h-px bg-foreground/[0.085] dark:bg-white/[0.105]"
+                  className={cn(
+                    "h-px bg-foreground/[0.085] dark:bg-white/[0.105]",
+                    item.separatorInsetClassName ?? separatorInsetClassName
+                  )}
                   aria-hidden="true"
                 />
               )}
@@ -154,7 +169,7 @@ export const ListRow = ({
   spacing = "sm"
 }: {
   item: ListItem;
-  spacing?: "xs" | "sm" | "md";
+  spacing?: ListSpacing;
 }) => {
   const isDisabled = item.disabled;
   const isAction = item.isAction ?? true;

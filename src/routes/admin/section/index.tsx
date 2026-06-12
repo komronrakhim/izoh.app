@@ -3,8 +3,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BarChart3,
   Bell,
+  BellOff,
   BellRing,
   Check,
+  ChevronRight,
   Clock3,
   CreditCard,
   EyeOff,
@@ -51,15 +53,16 @@ import {
   type SuggestionTopicId
 } from "~/shared/module-settings";
 import {
-  getDefaultNotificationSettings,
-  type NotificationSettingsPatch,
+  getDefaultOwnerNotificationTarget,
+  type NotificationTargetPatch,
   type OrganizationNotificationMode,
-  type OrganizationNotificationSettings
+  type OrganizationNotificationsPayload,
+  type OrganizationNotificationTarget
 } from "~/shared/notifications";
 import { queryKeys } from "~/shared/query";
 import { PageTransition } from "~/shared/router/page-transition";
 import { type StaffMemberItem, type StaffMembersPayload } from "~/shared/staff";
-import { useTma, useTmaBackButton } from "~/shared/tma";
+import { openTmaTelegramLink, useTma, useTmaBackButton } from "~/shared/tma";
 
 const sectionIconMap = {
   analytics: BarChart3,
@@ -382,15 +385,27 @@ export const AdminSection = () => {
   const notificationSettingsQuery = useQuery({
     enabled: section === "notifications" && queriesEnabled,
     queryFn: () =>
-      fetchApiJson<OrganizationNotificationSettings>(
-        `/api/organizations/${organization!.id}/notifications/settings`,
+      fetchApiJson<OrganizationNotificationsPayload>(
+        `/api/organizations/${organization!.id}/notifications`,
         {
           initDataRaw: tma.initDataRaw
         }
       ),
     queryKey: organization
       ? queryKeys.notificationSettings(organization.id, tma.initDataRaw)
-      : ["organization", "notification-settings", "idle"]
+      : ["organization", "notification-settings", "idle"],
+    refetchInterval: (query) => {
+      const data = query.state.data as OrganizationNotificationsPayload | undefined;
+      const hasActiveGroup = data?.targets.some(
+        (target) => target.type === "TELEGRAM_GROUP" && target.status === "ACTIVE"
+      );
+      const hasActiveConnectLink = Boolean(
+        data?.groupConnectLink && Date.parse(data.groupConnectLink.expiresAt) > Date.now()
+      );
+
+      return hasActiveConnectLink && !hasActiveGroup ? 1500 : false;
+    },
+    refetchOnWindowFocus: true
   });
   const staffMembersQuery = useQuery({
     enabled: section === "staff" && queriesEnabled,
@@ -413,8 +428,26 @@ export const AdminSection = () => {
     suggestionSettingsQuery.data?.settings ?? getDefaultModuleSettings("suggestion");
   const staffSettings = staffSettingsQuery.data?.settings ?? getDefaultModuleSettings("staff");
   const notificationSettings =
-    notificationSettingsQuery.data ?? getDefaultNotificationSettings(params.organizationId);
+    notificationSettingsQuery.data ??
+    ({
+      groupConnectLink: null,
+      organizationId: params.organizationId,
+      targets: [
+        getDefaultOwnerNotificationTarget({
+          organizationId: params.organizationId
+        })
+      ]
+    } satisfies OrganizationNotificationsPayload);
+  const ownerNotificationTarget =
+    notificationSettings.targets.find((target) => target.type === "OWNER_DM") ??
+    getDefaultOwnerNotificationTarget({
+      organizationId: params.organizationId
+    });
+  const groupNotificationTarget = notificationSettings.targets.find(
+    (target) => target.type === "TELEGRAM_GROUP"
+  );
   const staffMembers = staffMembersQuery.data?.items ?? [];
+  const hasStaffMembers = staffMembers.length > 0;
   const isGuestMenuLoading = Boolean(
     guestMenuItemId &&
     ((organization && guestMenuItemQuery.isLoading) || (!organization && isOrganizationsLoading))
@@ -586,21 +619,28 @@ export const AdminSection = () => {
       .catch(() => undefined);
   };
 
-  const updateNotificationSettings = (patch: NotificationSettingsPatch) => {
+  const updateNotificationTarget = (targetId: string, patch: NotificationTargetPatch) => {
     if (!organization) return;
 
-    queryClient.setQueryData<OrganizationNotificationSettings>(
+    queryClient.setQueryData<OrganizationNotificationsPayload>(
       queryKeys.notificationSettings(organization.id, tma.initDataRaw),
       {
         ...notificationSettings,
-        ...patch
+        targets: notificationSettings.targets.map((target) =>
+          target.id === targetId
+            ? {
+                ...target,
+                ...patch
+              }
+            : target
+        )
       }
     );
 
     const mutationId = (notificationMutationIdRef.current += 1);
 
-    void fetchApiJson<OrganizationNotificationSettings>(
-      `/api/organizations/${organization.id}/notifications/settings`,
+    void fetchApiJson<OrganizationNotificationsPayload>(
+      `/api/organizations/${organization.id}/notifications/targets/${targetId}`,
       {
         body: JSON.stringify(patch),
         headers: {
@@ -612,11 +652,66 @@ export const AdminSection = () => {
     )
       .then((nextSettings) => {
         if (mutationId === notificationMutationIdRef.current) {
-          queryClient.setQueryData<OrganizationNotificationSettings>(
+          queryClient.setQueryData<OrganizationNotificationsPayload>(
             queryKeys.notificationSettings(organization.id, tma.initDataRaw),
             nextSettings
           );
         }
+      })
+      .catch(() => undefined);
+  };
+
+  const openGroupConnectLink = () => {
+    if (!organization) return;
+
+    tma.haptics.selection();
+
+    if (
+      notificationSettings.groupConnectLink?.telegramUrl &&
+      Date.parse(notificationSettings.groupConnectLink.expiresAt) > Date.now()
+    ) {
+      openTmaTelegramLink(notificationSettings.groupConnectLink.telegramUrl);
+
+      return;
+    }
+
+    void fetchApiJson<OrganizationNotificationsPayload>(
+      `/api/organizations/${organization.id}/notifications/group-connect-link`,
+      {
+        initDataRaw: tma.initDataRaw,
+        method: "POST"
+      }
+    )
+      .then((nextSettings) => {
+        queryClient.setQueryData<OrganizationNotificationsPayload>(
+          queryKeys.notificationSettings(organization.id, tma.initDataRaw),
+          nextSettings
+        );
+
+        const telegramUrl = nextSettings.groupConnectLink?.telegramUrl;
+
+        if (telegramUrl) {
+          openTmaTelegramLink(telegramUrl);
+        }
+      })
+      .catch(() => undefined);
+  };
+
+  const disconnectGroupNotifications = () => {
+    if (!organization) return;
+
+    void fetchApiJson<OrganizationNotificationsPayload>(
+      `/api/organizations/${organization.id}/notifications/group`,
+      {
+        initDataRaw: tma.initDataRaw,
+        method: "DELETE"
+      }
+    )
+      .then((nextSettings) => {
+        queryClient.setQueryData<OrganizationNotificationsPayload>(
+          queryKeys.notificationSettings(organization.id, tma.initDataRaw),
+          nextSettings
+        );
       })
       .catch(() => undefined);
   };
@@ -701,10 +796,8 @@ export const AdminSection = () => {
     complaintSettings.categoriesEnabled
   ].filter(Boolean).length;
   const complaintDetailLockEnabled = enabledComplaintDetailCount <= 1;
-  const complaintPhotosLocked =
-    complaintSettings.photosEnabled && complaintDetailLockEnabled;
-  const complaintCommentLocked =
-    complaintSettings.commentRequired && complaintDetailLockEnabled;
+  const complaintPhotosLocked = complaintSettings.photosEnabled && complaintDetailLockEnabled;
+  const complaintCommentLocked = complaintSettings.commentRequired && complaintDetailLockEnabled;
   const complaintCategoriesLocked =
     complaintSettings.categoriesEnabled && complaintDetailLockEnabled;
 
@@ -946,9 +1039,7 @@ export const AdminSection = () => {
             },
             disabled: isLastSelected,
             isAction: false,
-            subtitle: t(
-              `admin.moduleSettings.complaint.categoryOptions.${categoryId}.subtitle`
-            ),
+            subtitle: t(`admin.moduleSettings.complaint.categoryOptions.${categoryId}.subtitle`),
             title: t(`admin.moduleSettings.complaint.categoryOptions.${categoryId}.title`)
           };
         })
@@ -1170,50 +1261,47 @@ export const AdminSection = () => {
       : [];
   const staffMemberItems =
     section === "staff"
+      ? staffMembers.map((staffMember) => ({
+          addon: {
+            before: staffMember.avatarUrl ? (
+              <Avatar
+                alt={staffMember.displayName}
+                className={`size-11 rounded-full ${staffMember.isActive ? "" : "opacity-60 grayscale"}`}
+                name={staffMember.displayName}
+                seed={staffMember.id}
+                src={staffMember.avatarUrl}
+              />
+            ) : (
+              <span
+                aria-label={staffMember.displayName}
+                className={`iz-glass iz-liquid-control grid size-11 place-items-center rounded-full bg-surface-2 text-muted ring-1 ring-border/60 ${staffMember.isActive ? "" : "opacity-60 grayscale"}`}
+                role="img"
+              >
+                <UserRound size={19} strokeWidth={1.85} />
+              </span>
+            ),
+            after: (
+              <span className="inline-flex items-center gap-1.5">
+                {!staffMember.isActive ? (
+                  <span className="ios-caption-1 inline-flex items-center gap-1 font-medium text-muted">
+                    <EyeOff size={13} strokeWidth={2.35} />
+                    {t("admin.moduleSettings.staff.inactive")}
+                  </span>
+                ) : null}
+                <ChevronRight aria-hidden="true" className="text-muted/84" size={17} />
+              </span>
+            )
+          },
+          href: organization ? `/admin/${organization.id}/staff/${staffMember.id}` : undefined,
+          separatorInsetClassName: "ml-[76px]",
+          spacing: "md" as const,
+          subtitle: staffMember.roleTitle || undefined,
+          title: staffMember.displayName
+        }))
+      : [];
+  const staffActionItems =
+    section === "staff"
       ? [
-          ...(staffMembers.length > 0
-            ? staffMembers.map((staffMember) => ({
-                addon: {
-                  before: staffMember.avatarUrl ? (
-                    <Avatar
-                      alt={staffMember.displayName}
-                      className={`size-[30px] rounded-[9px] ${staffMember.isActive ? "" : "opacity-60 grayscale"}`}
-                      initialsClassName="ios-caption-1"
-                      name={staffMember.displayName}
-                      seed={staffMember.id}
-                      src={staffMember.avatarUrl}
-                    />
-                  ) : (
-                    <ModuleSettingIcon tone={staffMember.isActive ? "staff" : "inactive"}>
-                      <UserRound size={15} strokeWidth={2.35} />
-                    </ModuleSettingIcon>
-                  ),
-                  after: staffMember.isActive ? undefined : (
-                    <span className="ios-caption-1 inline-flex items-center gap-1 font-medium text-muted">
-                      <EyeOff size={13} strokeWidth={2.35} />
-                      {t("admin.moduleSettings.staff.inactive")}
-                    </span>
-                  )
-                },
-                href: organization
-                  ? `/admin/${organization.id}/staff/${staffMember.id}`
-                  : undefined,
-                subtitle: staffMember.roleTitle || undefined,
-                title: staffMember.displayName
-              }))
-            : [
-                {
-                  addon: {
-                    before: (
-                      <ModuleSettingIcon tone="empty">
-                        <UsersRound size={15} strokeWidth={2.35} />
-                      </ModuleSettingIcon>
-                    )
-                  },
-                  isAction: false,
-                  title: t("admin.moduleSettings.staff.empty.title")
-                }
-              ]),
           {
             addon: {
               before: (
@@ -1228,84 +1316,156 @@ export const AdminSection = () => {
           }
         ]
       : [];
-  const canDisableOwnerDm =
-    notificationSettings.telegramGroupEnabled && Boolean(notificationSettings.telegramGroupChatId);
-  const notificationModeItems =
-    section === "notifications"
-      ? notificationModes.map((mode) => {
-          const active = notificationSettings.mode === mode;
+  const getNotificationModeItems = (target: OrganizationNotificationTarget) =>
+    notificationModes.map((mode) => {
+      const active = target.mode === mode;
 
-          return {
-            addon: {
-              before: (
-                <ModuleSettingIcon
-                  tone={mode === "OFF" ? "off" : mode === "IMPORTANT_ONLY" ? "important" : "send"}
-                >
-                  {mode === "OFF" ? (
-                    <Bell size={15} strokeWidth={2.35} />
-                  ) : mode === "IMPORTANT_ONLY" ? (
-                    <BellRing size={15} strokeWidth={2.35} />
-                  ) : (
-                    <Send size={15} strokeWidth={2.35} />
-                  )}
-                </ModuleSettingIcon>
-              ),
-              after: active ? <Check size={16} strokeWidth={2.5} /> : undefined
-            },
-            onClick: () => updateNotificationSettings({ mode }),
-            title: t(`admin.notificationSettings.mode.${mode}.title`)
-          };
-        })
-      : [];
-  const notificationDeliveryItems =
-    section === "notifications"
-      ? [
-          {
-            addon: {
-              before: (
-                <ModuleSettingIcon tone="person">
-                  <UserRound size={15} strokeWidth={2.35} />
-                </ModuleSettingIcon>
-              ),
-              after: (
-                <Toggle
-                  aria-label={t("admin.notificationSettings.delivery.owner.title")}
-                  checked={notificationSettings.ownerDmEnabled}
-                  disabled={!canDisableOwnerDm && notificationSettings.ownerDmEnabled}
-                  onCheckedChange={(ownerDmEnabled) =>
-                    updateNotificationSettings({ ownerDmEnabled })
-                  }
-                />
-              )
-            },
-            isAction: false,
-            title: t("admin.notificationSettings.delivery.owner.title")
-          },
-          {
-            addon: {
-              before: (
-                <ModuleSettingIcon tone="group">
-                  <UsersRound size={15} strokeWidth={2.35} />
-                </ModuleSettingIcon>
-              ),
-              after: notificationSettings.telegramGroupChatId ? (
-                <Toggle
-                  aria-label={t("admin.notificationSettings.delivery.group.title")}
-                  checked={notificationSettings.telegramGroupEnabled}
-                  onCheckedChange={(telegramGroupEnabled) =>
-                    updateNotificationSettings({ telegramGroupEnabled })
-                  }
-                />
+      return {
+        addon: {
+          before: (
+            <ModuleSettingIcon
+              tone={mode === "OFF" ? "off" : mode === "IMPORTANT_ONLY" ? "important" : "send"}
+            >
+              {mode === "OFF" ? (
+                <Bell size={15} strokeWidth={2.35} />
+              ) : mode === "IMPORTANT_ONLY" ? (
+                <BellRing size={15} strokeWidth={2.35} />
               ) : (
-                <span className="ios-subhead font-medium text-muted">
-                  {t("admin.notificationSettings.delivery.group.empty")}
-                </span>
-              )
+                <Send size={15} strokeWidth={2.35} />
+              )}
+            </ModuleSettingIcon>
+          ),
+          after: active ? <Check size={16} strokeWidth={2.5} /> : undefined
+        },
+        onClick: () =>
+          updateNotificationTarget(
+            target.id,
+            target.type === "OWNER_DM"
+              ? {
+                  complaintEnabled: true,
+                  mode,
+                  reviewEnabled: true,
+                  suggestionEnabled: true
+                }
+              : { mode }
+          ),
+        title: t(`admin.notificationSettings.mode.${mode}.title`)
+      };
+    });
+  const getNotificationTypeItems = (target: OrganizationNotificationTarget) => [
+    {
+      addon: {
+        before: (
+          <ModuleSettingIcon tone="rating">
+            <Star size={15} strokeWidth={2.35} />
+          </ModuleSettingIcon>
+        ),
+        after: (
+          <Toggle
+            aria-label={t("admin.notificationSettings.types.review")}
+            checked={target.reviewEnabled}
+            disabled={target.type === "OWNER_DM" && target.mode === "OFF"}
+            onCheckedChange={(reviewEnabled) =>
+              updateNotificationTarget(target.id, { reviewEnabled })
+            }
+          />
+        )
+      },
+      isAction: false,
+      title: t("admin.notificationSettings.types.review")
+    },
+    {
+      addon: {
+        before: (
+          <ModuleSettingIcon tone="warning">
+            <MessageCircleWarning size={15} strokeWidth={2.35} />
+          </ModuleSettingIcon>
+        ),
+        after: (
+          <Toggle
+            aria-label={t("admin.notificationSettings.types.complaint")}
+            checked={target.complaintEnabled}
+            disabled={target.type === "OWNER_DM" && target.mode === "OFF"}
+            onCheckedChange={(complaintEnabled) =>
+              updateNotificationTarget(target.id, { complaintEnabled })
+            }
+          />
+        )
+      },
+      isAction: false,
+      title: t("admin.notificationSettings.types.complaint")
+    },
+    {
+      addon: {
+        before: (
+          <ModuleSettingIcon tone="suggestion">
+            <Lightbulb size={15} strokeWidth={2.35} />
+          </ModuleSettingIcon>
+        ),
+        after: (
+          <Toggle
+            aria-label={t("admin.notificationSettings.types.suggestion")}
+            checked={target.suggestionEnabled}
+            disabled={target.type === "OWNER_DM" && target.mode === "OFF"}
+            onCheckedChange={(suggestionEnabled) =>
+              updateNotificationTarget(target.id, { suggestionEnabled })
+            }
+          />
+        )
+      },
+      isAction: false,
+      title: t("admin.notificationSettings.types.suggestion")
+    }
+  ];
+  const ownerNotificationItems =
+    section === "notifications" ? getNotificationModeItems(ownerNotificationTarget) : [];
+  const groupNotificationItems =
+    section === "notifications"
+      ? groupNotificationTarget?.status === "ACTIVE"
+        ? [
+            {
+              addon: {
+                before: (
+                  <ModuleSettingIcon tone="group">
+                    <UsersRound size={15} strokeWidth={2.35} />
+                  </ModuleSettingIcon>
+                ),
+                after: (
+                  <span className="ios-subhead font-medium text-muted">
+                    {groupNotificationTarget.telegramChatTitle ??
+                      t("admin.notificationSettings.group.fallbackTitle")}
+                  </span>
+                )
+              },
+              isAction: false,
+              title: t("admin.notificationSettings.group.connected")
             },
-            isAction: false,
-            title: t("admin.notificationSettings.delivery.group.title")
-          }
-        ]
+            ...getNotificationTypeItems(groupNotificationTarget),
+            {
+              addon: {
+                before: (
+                  <ModuleSettingIcon tone="off">
+                    <BellOff size={15} strokeWidth={2.35} />
+                  </ModuleSettingIcon>
+                )
+              },
+              onClick: disconnectGroupNotifications,
+              title: t("admin.notificationSettings.group.disconnect")
+            }
+          ]
+        : [
+            {
+              addon: {
+                before: (
+                  <ModuleSettingIcon tone="group">
+                    <UsersRound size={15} strokeWidth={2.35} />
+                  </ModuleSettingIcon>
+                )
+              },
+              onClick: openGroupConnectLink,
+              title: t("admin.notificationSettings.group.connect")
+            }
+          ]
       : [];
   const isCurrentSettingsLoading =
     isOrganizationLoading ||
@@ -1453,36 +1613,40 @@ export const AdminSection = () => {
                       hint={t("admin.moduleSettings.staff.selection.hint")}
                       items={staffTargetItems}
                     />
-                    <List
-                      title={t("admin.moduleSettings.staff.people.title")}
-                      hint={t("admin.moduleSettings.staff.people.hint")}
-                      items={staffMemberItems}
-                    />
+                    <section className="grid gap-2.5">
+                      <List
+                        title={t("admin.moduleSettings.staff.people.title")}
+                        hint={
+                          hasStaffMembers ? undefined : t("admin.moduleSettings.staff.people.hint")
+                        }
+                        items={staffActionItems}
+                      />
+                      {hasStaffMembers ? (
+                        <List
+                          hint={t("admin.moduleSettings.staff.people.hint")}
+                          items={staffMemberItems}
+                        />
+                      ) : null}
+                    </section>
                   </>
                 ) : section === "notifications" ? (
                   <>
                     <List
-                      title={t("admin.notificationSettings.mode.title")}
-                      hint={t("admin.notificationSettings.mode.hint")}
-                      items={notificationModeItems}
+                      title={t("admin.notificationSettings.owner.title")}
+                      hint={t("admin.notificationSettings.owner.hint")}
+                      items={ownerNotificationItems}
                     />
-                    <AnimatePresence initial={false}>
-                      {notificationSettings.mode !== "OFF" ? (
-                        <motion.div
-                          key="notification-delivery"
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          initial={{ opacity: 0 }}
-                          transition={{ duration: 0.18, ease: "easeOut" }}
-                        >
-                          <List
-                            title={t("admin.notificationSettings.delivery.title")}
-                            hint={t("admin.notificationSettings.delivery.hint")}
-                            items={notificationDeliveryItems}
-                          />
-                        </motion.div>
-                      ) : null}
-                    </AnimatePresence>
+                    <List
+                      title={t("admin.notificationSettings.group.title")}
+                      hint={
+                        groupNotificationTarget?.status === "ACTIVE"
+                          ? t("admin.notificationSettings.group.hintConnected")
+                          : groupNotificationTarget?.status === "DISCONNECTED"
+                            ? t("admin.notificationSettings.group.hintDisconnected")
+                            : t("admin.notificationSettings.group.hintEmpty")
+                      }
+                      items={groupNotificationItems}
+                    />
                   </>
                 ) : (
                   <List

@@ -32,7 +32,7 @@ export type StaffTarget = {
   avatarUrl?: null | string;
   icon: ComponentType<{ size?: number; strokeWidth?: number }>;
   id: string;
-  subtitle: string;
+  subtitle?: string;
   targetType: StaffTargetType;
   title: string;
   tone: string;

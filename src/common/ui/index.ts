@@ -14,3 +14,4 @@ export * from "./select";
 export * from "./scroll-to-top";
 export * from "./list";
 export * from "./pending-screen";
+export * from "./star-currency-icon";

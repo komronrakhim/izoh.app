@@ -1,12 +1,18 @@
-import type { AppLocale, Prisma } from "../../../prisma/generated/prisma/client";
+import type { AppLocale, Prisma, PrismaClient } from "../../../prisma/generated/prisma/client";
 
 import { type DomainDb, getDomainDb } from "~/server/domain/shared";
-import type { AdminOrganization } from "~/shared/admin/organizations";
+import {
+  createInitialOrganizationSubscriptionData,
+  isOrganizationSubscriptionActive
+} from "~/server/domain/subscriptions";
+import { MAX_ADMIN_ORGANIZATIONS, type AdminOrganization } from "~/shared/admin/organizations";
 import {
   DEFAULT_ORGANIZATION_PRESET_ID,
   getOrganizationPresetItems,
   type OrganizationPresetId
 } from "~/shared/organization-presets";
+import { createReadableSlug } from "~/shared/slug";
+import { normalizeTimeZone } from "~/shared/time-zone";
 
 const toAdminOrganization = ({
   logoUrl,
@@ -21,6 +27,7 @@ const toAdminOrganization = ({
     locale: AppLocale;
     name: string;
     slug: string;
+    subscription?: Parameters<typeof isOrganizationSubscriptionActive>[0];
   };
   role: AdminOrganization["role"];
 }): AdminOrganization => ({
@@ -31,22 +38,18 @@ const toAdminOrganization = ({
   logoUrl,
   name: organization.name,
   role,
-  slug: organization.slug
+  slug: organization.slug,
+  subscriptionActive: isOrganizationSubscriptionActive(organization.subscription)
 });
 
-const getSlugBase = (name: string) => {
-  const slug = name
-    .trim()
-    .toLowerCase()
-    .replace(/['’]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+export const getOrganizationSlugBase = (name: string) => {
+  const slug = createReadableSlug(name);
 
   return slug || `org-${Date.now().toString(36)}`;
 };
 
 const getUniqueOrganizationSlug = async (name: string, db: DomainDb) => {
-  const base = getSlugBase(name);
+  const base = getOrganizationSlugBase(name);
 
   for (let attempt = 0; attempt < 25; attempt += 1) {
     const slug = attempt === 0 ? base : `${base}-${attempt + 1}`;
@@ -69,6 +72,9 @@ const getUniqueOrganizationSlug = async (name: string, db: DomainDb) => {
 
 export const getAdminOrganizations = async (userId: string, db: DomainDb = getDomainDb()) => {
   const organizations = await db.organization.findMany({
+    include: {
+      subscription: true
+    },
     orderBy: {
       created_at: "asc"
     },
@@ -124,21 +130,39 @@ export const createAdminOrganization = async (
     locale,
     name,
     ownerUserId,
-    presetId = DEFAULT_ORGANIZATION_PRESET_ID
+    presetId = DEFAULT_ORGANIZATION_PRESET_ID,
+    timeZone
   }: {
     contactText?: string;
     locale: AppLocale;
     name: string;
     ownerUserId: string;
     presetId?: OrganizationPresetId;
+    timeZone?: string;
   },
   db: DomainDb = getDomainDb()
 ) => {
   const cleanName = name.trim();
   const cleanContactText = contactText?.trim() ?? "";
+  const organizationTimeZone = normalizeTimeZone(timeZone);
+  const activeOrganizationsCount = await db.organization.count({
+    where: {
+      owner_user_id: ownerUserId,
+      status: "ACTIVE"
+    }
+  });
+
+  if (activeOrganizationsCount >= MAX_ADMIN_ORGANIZATIONS) {
+    throw new Error("Organization limit reached.");
+  }
+
   const slug = await getUniqueOrganizationSlug(cleanName, db);
+  const subscriptionStartedAt = new Date();
 
   const organization = await db.organization.create({
+    include: {
+      subscription: true
+    },
     data: {
       contact_text: cleanContactText,
       locale,
@@ -150,13 +174,30 @@ export const createAdminOrganization = async (
         }))
       },
       name: cleanName,
-      notification_setting: {
-        create: {}
+      notification_targets: {
+        create: {
+          recipient_user_id: ownerUserId,
+          type: "OWNER_DM"
+        }
       },
       owner_user_id: ownerUserId,
-      slug
+      slug,
+      subscription: {
+        create: createInitialOrganizationSubscriptionData(subscriptionStartedAt)
+      },
+      time_zone: organizationTimeZone
     }
   });
+
+  if (organization.subscription) {
+    await db.organizationSubscriptionEvent.create({
+      data: {
+        organization_id: organization.id,
+        subscription_id: organization.subscription.id,
+        type: "TRIAL_STARTED"
+      }
+    });
+  }
 
   const item = toAdminOrganization({
     organization,
@@ -212,6 +253,9 @@ export const updateAdminOrganizationLogo = async (
   }
 
   const updatedOrganization = await db.organization.update({
+    include: {
+      subscription: true
+    },
     data: {
       logo_media_asset_id: logoAsset.id
     },
@@ -225,5 +269,57 @@ export const updateAdminOrganizationLogo = async (
       organization: updatedOrganization,
       role: "OWNER"
     })
+  };
+};
+
+export const enqueueAdminOrganizationDeletion = async (
+  {
+    organizationId,
+    requestedByUserId
+  }: {
+    organizationId: string;
+    requestedByUserId?: string;
+  },
+  db: PrismaClient = getDomainDb() as PrismaClient
+) => {
+  const organization = await db.organization.findFirst({
+    select: {
+      id: true,
+      name: true,
+      slug: true
+    },
+    where: {
+      id: organizationId,
+      status: "ACTIVE"
+    }
+  });
+
+  if (!organization) {
+    throw new Error("Organization is not available.");
+  }
+
+  const job = await db.$transaction(async (tx) => {
+    await tx.organization.update({
+      data: {
+        status: "DELETING"
+      },
+      where: {
+        id: organization.id
+      }
+    });
+
+    return tx.organizationDeletionJob.create({
+      data: {
+        organization_id: organization.id,
+        organization_name: organization.name,
+        organization_slug: organization.slug,
+        requested_by_user_id: requestedByUserId
+      }
+    });
+  });
+
+  return {
+    jobId: job.id,
+    ok: true
   };
 };

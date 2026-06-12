@@ -2,22 +2,17 @@ import type { AppLocale, SubmissionKind } from "../../../prisma/generated/prisma
 
 import { getDomainDb, type DomainDb } from "~/server/domain/shared";
 import { createTranslator, fromPrismaLocale } from "~/shared/i18n";
-import {
-  getDefaultNotificationSettings,
-  isImportantSubmission,
-  shouldSendNotification
-} from "~/shared/notifications";
+import { isImportantSubmission } from "~/shared/notifications";
+import { getRatingEmoji, getRatingLabelKey, normalizeRatingValue } from "~/shared/ratings";
 import { safeParseSubmissionMetadata } from "~/shared/submissions";
 import { getTelegramBot } from "./bot";
 
-const kindLabel = (kind: SubmissionKind, locale: AppLocale) => {
-  const t = createTranslator(fromPrismaLocale(locale));
-
-  if (kind === "REVIEW") return t("telegram.notifications.kind.review");
-  if (kind === "COMPLAINT") return t("telegram.notifications.kind.complaint");
-
-  return t("telegram.notifications.kind.suggestion");
-};
+export class TelegramPermanentDeliveryError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "TelegramPermanentDeliveryError";
+  }
+}
 
 const escapeHtml = (value: string) =>
   value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
@@ -38,38 +33,22 @@ const getHeadlineEmoji = ({ kind, rating }: { kind: SubmissionKind; rating: null
   return "⭐";
 };
 
-const getDetailIcon = (
-  field: "type" | "rating" | "signal" | "topics" | "staff" | "contact" | "source"
-) => {
-  const icons = {
-    type: "🎯",
-    rating: "🧮",
-    signal: "🚨",
-    topics: "🏷️",
-    staff: "👤",
-    contact: "📞",
-    source: "🌐"
-  } as const;
+const formatLabeledLine = (icon: string, label: string, value: string) =>
+  `${icon} ${label}: ${value}`;
 
-  return icons[field];
-};
-
-const formatDetailLine = (icon: string, label: string, value: string) =>
-  `${icon} <b>${label}</b>: ${value}`;
-
-const formatRatingVisual = (rating: number) => {
-  const value = Math.max(1, Math.min(5, Math.round(rating)));
-  return `${"★".repeat(value)}${"☆".repeat(5 - value)}`;
-};
-
-const buildSection = (title: string, lines: (string | null)[]) => {
-  const filtered = lines.filter(Boolean) as string[];
-
-  if (filtered.length === 0) {
-    return [];
+const formatCompactList = (values: string[], visibleCount = 3) => {
+  if (values.length <= visibleCount) {
+    return values.join(" · ");
   }
 
-  return [`<b>${title}</b>`, ...filtered, ""];
+  return [...values.slice(0, visibleCount), `+${values.length - visibleCount}`].join(" · ");
+};
+
+const formatRatingText = ({ locale, rating }: { locale: AppLocale; rating: number }) => {
+  const t = createTranslator(fromPrismaLocale(locale));
+  const value = normalizeRatingValue(rating);
+
+  return `${getRatingEmoji(value)} ${t(getRatingLabelKey(value))}`;
 };
 
 const getTopicLabels = ({
@@ -140,12 +119,10 @@ type NotificationSubmission = {
 export const formatSubmissionNotificationText = ({
   locale,
   maxLength = 3800,
-  photoCount = 0,
   submission
 }: {
   locale: AppLocale;
   maxLength?: number;
-  photoCount?: number;
   submission: NotificationSubmission;
 }) => {
   const t = createTranslator(fromPrismaLocale(locale));
@@ -184,254 +161,187 @@ export const formatSubmissionNotificationText = ({
 
     return null;
   })();
-  const important = isImportantSubmission({
-    kind: submission.kind,
-    rating: submission.rating
-  });
-
   return compactHtmlMessage({
     maxLength,
     build: (bodyMaxLength) => {
       const bodyText = trimPlainText(submission.body_text.trim(), bodyMaxLength);
-      const guestLines: (string | null)[] = [
+      const headlineParts = [
+        `${getHeadlineEmoji(submission)} <b>${escapeHtml(t(getHeadlineKey(submission)))}</b>`,
+        submission.rating
+          ? escapeHtml(
+              formatRatingText({
+                locale,
+                rating: submission.rating
+              })
+            )
+          : null
+      ].filter(Boolean);
+      const detailLines = [
+        topicLabels.length > 0 ? `🏷 ${escapeHtml(formatCompactList(topicLabels))}` : null,
+        staffLabel ? `👤 ${escapeHtml(staffLabel)}` : null,
+        submission.qr_context ? `📍 ${escapeHtml(submission.qr_context)}` : null,
         submission.customer_display_name
-          ? formatDetailLine(
+          ? formatLabeledLine(
               "🪪",
               escapeHtml(t("telegram.notifications.fields.customer")),
               escapeHtml(submission.customer_display_name)
             )
           : null,
         submission.customer_contact_phone
-          ? formatDetailLine(
-              getDetailIcon("contact"),
+          ? formatLabeledLine(
+              "📞",
               escapeHtml(t("telegram.notifications.fields.contact")),
               escapeHtml(submission.customer_contact_phone)
             )
           : null
-      ];
-      const summaryLines = [
-        formatDetailLine(
-          getDetailIcon("type"),
-          escapeHtml(t("telegram.notifications.fields.kind")),
-          escapeHtml(kindLabel(submission.kind, locale))
-        ),
-        submission.rating
-          ? formatDetailLine(
-              getDetailIcon("rating"),
-              escapeHtml(t("telegram.notifications.fields.rating")),
-              `<b>${escapeHtml(formatRatingVisual(submission.rating))}</b> (${escapeHtml(String(submission.rating))}/5)`
-            )
-          : null,
-        submission.qr_context
-          ? formatDetailLine(
-              getDetailIcon("source"),
-              escapeHtml(t("telegram.notifications.fields.source")),
-              escapeHtml(submission.qr_context)
-            )
-          : null,
-        important
-          ? formatDetailLine(
-              getDetailIcon("signal"),
-              escapeHtml(t("telegram.notifications.fields.signal")),
-              escapeHtml(
-                t(
-                  submission.kind === "REVIEW"
-                    ? "telegram.notifications.signals.lowRating"
-                    : "telegram.notifications.signals.important"
-                )
-              )
-            )
-          : null,
-        photoCount > 0
-          ? formatDetailLine(
-              "🖼️",
-              escapeHtml(t("telegram.notifications.fields.attachments")),
-              escapeHtml(String(photoCount))
-            )
-          : null
       ].filter(Boolean);
-
-      const detailLines = [
-        topicLabels.length > 0
-          ? formatDetailLine(
-              getDetailIcon("topics"),
-              escapeHtml(t("telegram.notifications.fields.topics")),
-              escapeHtml(topicLabels.join(", "))
-            )
-          : null,
-        staffLabel
-          ? formatDetailLine(
-              getDetailIcon("staff"),
-              escapeHtml(t("telegram.notifications.fields.staff")),
-              escapeHtml(staffLabel)
-            )
-          : null,
-      ].filter(Boolean);
+      const messageText = bodyText
+        ? `<i>${escapeHtml(bodyText)}</i>`
+        : escapeHtml(t(`telegram.notifications.emptyText.${submission.kind}`));
 
       return [
-        `${getHeadlineEmoji(submission)} <b>${escapeHtml(t(getHeadlineKey(submission)))}</b>`,
+        `🏪 <b>${escapeHtml(submission.organization.name)}</b>`,
+        headlineParts.join(" · "),
         "",
-        ...buildSection(`🧭 ${escapeHtml(t("telegram.notifications.sections.summary"))}`, summaryLines),
-        ...buildSection(`🏪 ${escapeHtml(t("telegram.notifications.sections.place"))}`, [
-          escapeHtml(submission.organization.name)
-        ]),
-        ...buildSection(`👤 ${escapeHtml(t("telegram.notifications.sections.guest"))}`, guestLines),
-        ...buildSection(`🧾 ${escapeHtml(t("telegram.notifications.sections.details"))}`, [
-          ...detailLines
-        ]),
-        ...buildSection(`💬 ${escapeHtml(t("telegram.notifications.sections.message"))}`, [
-          bodyText
-            ? `<i>${escapeHtml(bodyText)}</i>`
-            : `<i>${escapeHtml(t("telegram.notifications.emptyText"))}</i>`
-        ]),
+        messageText,
+        detailLines.length > 0 ? "" : null,
+        ...detailLines,
         ""
-      ].join("\n");
+      ]
+        .filter((line): line is string => line !== null)
+        .join("\n");
     }
   });
 };
 
-export const notifySubmissionRecipients = async (
-  submissionId: string,
+export const sendTelegramNotificationDelivery = async (
+  deliveryId: string,
   db: DomainDb = getDomainDb()
 ) => {
-  const submission = await db.submission.findUnique({
+  const delivery = await db.telegramNotificationDelivery.findUnique({
     include: {
-      attachments: {
+      recipient_user: true,
+      submission: {
         include: {
-          media_asset: true
-        },
-        orderBy: {
-          sort_order: "asc"
-        },
-        take: 4
-      },
-      organization: {
-        include: {
-          notification_setting: true,
-          owner: true
+          attachments: {
+            include: {
+              media_asset: true
+            },
+            orderBy: {
+              sort_order: "asc"
+            },
+            take: 4
+          },
+          organization: true,
+          target_staff_member: true
         }
       },
-      target_staff_member: true
+      target: {
+        include: {
+          recipient_user: true
+        }
+      }
     },
     where: {
-      id: submissionId
+      id: deliveryId
     }
   });
 
-  if (!submission) {
-    throw new Error("Submission was not found.");
+  if (!delivery) {
+    throw new TelegramPermanentDeliveryError("Notification delivery was not found.");
   }
 
-  const setting = submission.organization.notification_setting;
-  const notificationSettings = {
-    ...getDefaultNotificationSettings(submission.organization.id),
-    ...(setting
-      ? {
-          mode: setting.mode,
-          ownerDmEnabled: setting.owner_dm_enabled,
-          telegramGroupChatId: setting.telegram_group_chat_id?.toString() ?? null,
-          telegramGroupEnabled: setting.telegram_group_enabled,
-          telegramGroupTitle: setting.telegram_group_title
-        }
-      : {})
-  };
+  if (
+    delivery.target.status !== "ACTIVE" ||
+    (delivery.target.type === "OWNER_DM" && delivery.target.mode === "OFF")
+  ) {
+    await db.telegramNotificationDelivery.update({
+      data: {
+        locked_until: null,
+        status: "SKIPPED"
+      },
+      where: {
+        id: delivery.id
+      }
+    });
 
-  if (!shouldSendNotification(notificationSettings, submission)) {
-    return;
+    return {
+      status: "SKIPPED" as const
+    };
   }
 
-  const targets = [
-    ...(notificationSettings.ownerDmEnabled
-      ? [
-          {
-            chatId: submission.organization.owner.telegram_id,
-            locale: submission.organization.owner.locale,
-            recipientUserId: submission.organization.owner_user_id,
-            targetType: "OWNER_DM" as const
-          }
-        ]
-      : []),
-    ...(notificationSettings.telegramGroupEnabled && setting?.telegram_group_chat_id
-      ? [
-          {
-            chatId: setting.telegram_group_chat_id,
-            locale: submission.organization.locale,
-            recipientUserId: null,
-            targetType: "TELEGRAM_GROUP" as const
-          }
-        ]
-      : [])
-  ];
+  const recipientUser = delivery.target.recipient_user ?? delivery.recipient_user;
+  const chatId =
+    delivery.target.type === "OWNER_DM"
+      ? recipientUser?.telegram_id
+      : delivery.target.telegram_chat_id;
+  const locale =
+    delivery.target.type === "OWNER_DM"
+      ? (recipientUser?.locale ?? delivery.submission.organization.locale)
+      : delivery.submission.organization.locale;
 
-  if (targets.length === 0) {
-    return;
+  if (!chatId) {
+    throw new TelegramPermanentDeliveryError("Notification target has no Telegram chat.");
   }
 
   const bot = getTelegramBot();
+  const photoUrls = delivery.submission.attachments
+    .map((attachment) => attachment.media_asset.public_url)
+    .slice(0, 4);
+  const text = formatSubmissionNotificationText({
+    locale,
+    maxLength: photoUrls.length > 0 ? 1000 : 3800,
+    submission: delivery.submission
+  });
+  const sentAt = new Date();
 
-  for (const target of targets) {
-    const locale = target.locale;
-    const photoUrls = submission.attachments
-      .map((attachment) => attachment.media_asset.public_url)
-      .slice(0, 4);
-    const text = formatSubmissionNotificationText({
-      locale,
-      photoCount: photoUrls.length,
-      maxLength: photoUrls.length > 0 ? 1000 : 3800,
-      submission
+  if (photoUrls.length > 0) {
+    const messages = await bot.api.sendMediaGroup(
+      chatId.toString(),
+      photoUrls.map((url, index) => ({
+        caption: index === 0 ? text : undefined,
+        media: url,
+        parse_mode: index === 0 ? "HTML" : undefined,
+        type: "photo" as const
+      }))
+    );
+
+    await db.telegramNotificationDelivery.update({
+      data: {
+        locked_until: null,
+        sent_at: sentAt,
+        status: "SENT",
+        telegram_chat_id: chatId,
+        telegram_message_ids: messages.map((message) => message.message_id)
+      },
+      where: {
+        id: delivery.id
+      }
     });
 
-    try {
-      if (photoUrls.length > 0) {
-        const messages = await bot.api.sendMediaGroup(
-          target.chatId.toString(),
-          photoUrls.map((url, index) => ({
-            caption: index === 0 ? text : undefined,
-            media: url,
-            parse_mode: index === 0 ? "HTML" : undefined,
-            type: "photo" as const
-          }))
-        );
-
-        await db.telegramNotificationDelivery.create({
-          data: {
-            recipient_user_id: target.recipientUserId,
-            sent_at: new Date(),
-            status: "SENT",
-            submission_id: submission.id,
-            target_type: target.targetType,
-            telegram_chat_id: target.chatId,
-            telegram_message_ids: messages.map((message) => message.message_id)
-          }
-        });
-      } else {
-        const message = await bot.api.sendMessage(target.chatId.toString(), text, {
-          parse_mode: "HTML"
-        });
-
-        await db.telegramNotificationDelivery.create({
-          data: {
-            recipient_user_id: target.recipientUserId,
-            sent_at: new Date(),
-            status: "SENT",
-            submission_id: submission.id,
-            target_type: target.targetType,
-            telegram_chat_id: target.chatId,
-            telegram_message_ids: [message.message_id]
-          }
-        });
-      }
-    } catch (error) {
-      await db.telegramNotificationDelivery.create({
-        data: {
-          error: error instanceof Error ? error.message : "Unknown Telegram delivery error.",
-          recipient_user_id: target.recipientUserId,
-          status: "FAILED",
-          submission_id: submission.id,
-          target_type: target.targetType,
-          telegram_chat_id: target.chatId
-        }
-      });
-    }
+    return {
+      status: "SENT" as const
+    };
   }
+
+  const message = await bot.api.sendMessage(chatId.toString(), text, {
+    parse_mode: "HTML"
+  });
+
+  await db.telegramNotificationDelivery.update({
+    data: {
+      locked_until: null,
+      sent_at: sentAt,
+      status: "SENT",
+      telegram_chat_id: chatId,
+      telegram_message_ids: [message.message_id]
+    },
+    where: {
+      id: delivery.id
+    }
+  });
+
+  return {
+    status: "SENT" as const
+  };
 };

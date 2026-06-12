@@ -7,9 +7,8 @@ import { randomUUID } from "node:crypto";
 
 import { getDomainDb, type DomainDb } from "~/server/domain/shared";
 import {
-  LOGO_MAX_BYTES,
+  MEDIA_IMAGE_MAX_BYTES,
   MEDIA_UPLOAD_EXPIRES_IN_SECONDS,
-  SUBMISSION_PHOTO_MAX_BYTES,
   isSupportedImageContentType
 } from "./constants";
 import { buildFinalStorageKey, buildTempStorageKey } from "./keys";
@@ -51,11 +50,7 @@ type FinalizeMediaUploadSessionInput = {
   sessionId: string;
 };
 
-const getSizeLimitBytes = (kind: MediaAssetKind) => {
-  if (kind === "SUBMISSION_PHOTO") return SUBMISSION_PHOTO_MAX_BYTES;
-
-  return LOGO_MAX_BYTES;
-};
+const getSizeLimitBytes = () => MEDIA_IMAGE_MAX_BYTES;
 
 const assertUploadKindIsImage = (kind: MediaAssetKind) => {
   if (kind !== "ORGANIZATION_LOGO" && kind !== "STAFF_AVATAR" && kind !== "SUBMISSION_PHOTO") {
@@ -116,7 +111,7 @@ export const createMediaUploadSession = async (
   const sessionId = randomUUID();
   const tempStorageKey = buildTempStorageKey(sessionId);
   const expiresAt = addSeconds(now, MEDIA_UPLOAD_EXPIRES_IN_SECONDS);
-  const sizeLimitBytes = getSizeLimitBytes(input.kind);
+  const sizeLimitBytes = getSizeLimitBytes();
 
   const uploadUrl = useLocalStorage
     ? getLocalUploadUrl(sessionId)

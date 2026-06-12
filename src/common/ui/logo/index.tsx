@@ -1,20 +1,42 @@
+import type { SVGProps } from "react";
+
 import { cn } from "~/common/utils";
+import { IZOH_WORDMARK_PATHS, IZOH_WORDMARK_VIEW_BOX } from "~/shared/brand";
 
 type LogoProps = {
-  variant?: "mark" | "full";
+  variant?: "mark" | "wordmark" | "full";
   className?: string;
+};
+
+type LogoWordmarkProps = SVGProps<SVGSVGElement> & {
+  ariaTitle?: string;
+};
+
+export const LogoWordmark = ({ ariaTitle, className, ...props }: LogoWordmarkProps) => {
+  const isDecorative = !ariaTitle;
+
+  return (
+    <svg
+      aria-hidden={isDecorative ? "true" : undefined}
+      className={cn("h-auto w-full", className)}
+      fill="none"
+      role={isDecorative ? undefined : "img"}
+      viewBox={IZOH_WORDMARK_VIEW_BOX}
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      {ariaTitle ? <title>{ariaTitle}</title> : null}
+      {IZOH_WORDMARK_PATHS.map((path) => (
+        <path key={path} d={path} fill="currentColor" />
+      ))}
+    </svg>
+  );
 };
 
 const LogoFull = ({ className }: { className?: string }) => {
   return (
-    <span
-      className={cn(
-        "ios-title-2 inline-flex shrink-0 items-center gap-2 font-brand font-semibold tracking-normal",
-        className
-      )}
-    >
-      <LogoMark className="size-7 text-primary" />
-      <span>Wall</span>
+    <span className={cn("inline-flex h-8 w-[4.625rem] shrink-0 items-center", className)}>
+      <LogoWordmark className="h-full w-full" />
     </span>
   );
 };
@@ -45,8 +67,8 @@ const LogoMark = ({ className }: { className?: string }) => {
 };
 
 export const Logo = ({ variant = "mark", className }: LogoProps) => {
-  if (variant === "full") {
-    return <LogoFull className={cn("h-8 w-[7rem]", className)} />;
+  if (variant === "full" || variant === "wordmark") {
+    return <LogoFull className={cn("h-8 w-[4.625rem]", className)} />;
   }
 
   return <LogoMark className={cn("size-8", className)} />;

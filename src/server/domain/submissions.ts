@@ -4,9 +4,10 @@ import type {
   SubmissionKind
 } from "../../../prisma/generated/prisma/client";
 
+import { enqueueSubmissionNotifications } from "~/server/domain/notification-deliveries";
 import { getDomainDb, type DomainDb } from "~/server/domain/shared";
+import { isOrganizationSubscriptionActive } from "~/server/domain/subscriptions";
 import { SUBMISSION_PHOTO_LIMIT } from "~/server/media";
-import { notifySubmissionRecipients } from "~/server/telegram";
 import { DEFAULT_GUEST_MENU_ENABLED_BY_ID } from "~/shared/guest-menu";
 import {
   parseModuleSettingsConfig,
@@ -88,7 +89,8 @@ const assertSubmissionAvailability = async ({
   let staffTargetSnapshot: SubmissionMetadata["staffTargetSnapshot"];
   const organization = await db.organization.findUnique({
     include: {
-      module_settings: true
+      module_settings: true,
+      subscription: true
     },
     where: {
       id: organizationId
@@ -97,6 +99,13 @@ const assertSubmissionAvailability = async ({
 
   if (!organization || organization.status !== "ACTIVE") {
     throw new Error("Organization is not available.");
+  }
+
+  if (
+    organization.subscription !== undefined &&
+    !isOrganizationSubscriptionActive(organization.subscription)
+  ) {
+    throw new Error("Organization subscription is inactive.");
   }
 
   const itemId = kindToItemId(kind);
@@ -360,20 +369,32 @@ const assertAttachments = async ({
   return assets;
 };
 
-const notifySubmissionBestEffort = async (submissionId: string, db: DomainDb) => {
+const enqueueSubmissionNotificationsBestEffort = async (
+  {
+    kind,
+    organizationId,
+    rating,
+    submissionId
+  }: {
+    kind: SubmissionKind;
+    organizationId: string;
+    rating?: null | number;
+    submissionId: string;
+  },
+  db: DomainDb
+) => {
   try {
-    await notifySubmissionRecipients(submissionId, db);
-  } catch (error) {
-    await db.telegramNotificationDelivery
-      .create({
-        data: {
-          error: error instanceof Error ? error.message : "Unknown Telegram delivery error.",
-          status: "FAILED",
-          submission_id: submissionId,
-          target_type: "OWNER_DM"
-        }
-      })
-      .catch(() => undefined);
+    await enqueueSubmissionNotifications(
+      {
+        kind,
+        organizationId,
+        rating,
+        submissionId
+      },
+      db
+    );
+  } catch {
+    // Submission creation must stay fast for guests. The dispatcher handles queued deliveries.
   }
 };
 
@@ -694,7 +715,15 @@ export const createSubmission = async (
     });
   }
 
-  await notifySubmissionBestEffort(submission.id, db);
+  await enqueueSubmissionNotificationsBestEffort(
+    {
+      kind: submission.kind,
+      organizationId: organization.id,
+      rating: submission.rating,
+      submissionId: submission.id
+    },
+    db
+  );
 
   return submission;
 };

@@ -16,7 +16,7 @@ export const WizardShell = ({ children, className, style }: WizardShellProps) =>
     )}
     style={style}
   >
-    <div className="relative z-10 mx-auto flex min-h-[var(--iz-visual-viewport-height,100dvh)] w-full max-w-[560px] flex-col px-4 pb-[18px] pt-0">
+    <div className="relative z-10 mx-auto flex min-h-[var(--iz-visual-viewport-height,100dvh)] w-full max-w-[560px] flex-col px-4 pb-[18px] pt-[max(22px,var(--iz-content-safe-top))]">
       {children}
     </div>
   </main>

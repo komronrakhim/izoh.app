@@ -7,7 +7,8 @@
     "hubTitle": "Joylaringiz",
     "hubHint": "Sozlamalar va murojaatlarni ochish uchun joyni tanlang.",
     "listTitle": "Joylar",
-    "listHint": "Har bir joyning formasi, havolasi va bildirishnomalari alohida.",
+    "listHint": "Bitta akkauntda {{count}} tagacha joy yuritish mumkin. Har birining formasi, havolasi va bildirishnomalari alohida.",
+    "listLimitHint": "Hozir {{count}} tagacha joy yuritish mumkin. Limitga yetdingiz.",
     "select": "Joyni tanlash",
     "introTitle": "Izoh’ga xush kelibsiz",
     "introHint": "Mehmonlar nima yoqqani va nimani yaxshilash mumkinligini tez ayta oladi.",
@@ -23,10 +24,6 @@
       {
         "title": "Siz asosiy narsani ko‘rasiz",
         "hint": "Baho, matn, rasm va xodim ismi vaziyatni tez tushunishga yordam beradi."
-      },
-      {
-        "title": "O‘zingizga moslang",
-        "hint": "Mehmon uchun kerakli variantlarni qoldiring, forma sodda va tushunarli bo‘ladi."
       }
     ],
     "introAction": "Joy qo‘shish",
@@ -59,6 +56,17 @@
     "logoAction": "Logotip tanlash",
     "logoSelected": "Logotip tayyor",
     "logoRemove": "Logotipni olib tashlash",
+    "logoUpdateError": "Logotip yangilanmadi. Qayta urinib ko‘ring.",
+    "openGuestForm": "Mehmon formasi",
+    "dangerTitle": "O‘chirish",
+    "dangerHint": "O‘chirishni qaytarib bo‘lmaydi.",
+    "delete": "Joyni o‘chirish",
+    "deleteError": "Joy o‘chirilmadi. Qayta urinib ko‘ring.",
+    "deletePopup": {
+      "title": "Joyni o‘chirasizmi?",
+      "message": "«{{name}}» va joyga tegishli barcha ma’lumotlar o‘chiriladi: murojaatlar, xodimlar, media, QR kontekstlar, bildirishnomalar va sozlamalar. Buni qaytarib bo‘lmaydi.",
+      "confirm": "O‘chirish"
+    },
     "logoErrors": {
       "type": "Bu rasmni qo‘shib bo‘lmadi. Boshqa rasmni sinab ko‘ring.",
       "size": "Rasm juda og‘ir. Yengilroq rasmni sinab ko‘ring."
@@ -127,12 +135,16 @@
     "qr": "QR-kod",
     "qrHint": "Mehmon kirishini bezash va yuklab olish.",
     "notifications": "Bildirishnomalar",
+    "subscription": "Obuna",
     "locale": "Til"
   },
   "values": {
+    "active": "Faol",
+    "inactive": "Faol emas",
     "enabled": "Yoqilgan",
     "disabled": "O‘chirilgan",
     "setup": "Sozlash",
+    "open": "Ochish",
     "download": "Yuklab olish",
     "required": "Majburiy",
     "optional": "Ixtiyoriy"
@@ -189,6 +201,90 @@
       "REVIEW": "Izohlar",
       "COMPLAINT": "Shikoyatlar",
       "SUGGESTION": "Takliflar"
+    }
+  },
+  "analytics": {
+    "title": "Analitika",
+    "loadErrorTitle": "Analitika ochilmadi",
+    "loadErrorHint": "Ulanishni tekshirib, qayta urinib ko‘ring.",
+    "retry": "Qayta urinish",
+    "periods": {
+      "7D": "7 kun",
+      "30D": "30 kun",
+      "90D": "90 kun"
+    },
+    "tabs": {
+      "overview": "Umumiy",
+      "mood": "Kayfiyat",
+      "topics": "Mavzular",
+      "team": "Jamoa",
+      "contexts": "Joylar",
+      "time": "Vaqt"
+    },
+    "trend": {
+      "up": "O‘tgan davrga nisbatan +{{count}}",
+      "down": "O‘tgan davrga nisbatan -{{count}}",
+      "flat": "O‘zgarish yo‘q"
+    },
+    "overview": {
+      "total": "Jami murojaatlar",
+      "insightsTitle": "Nima ko‘rinmoqda",
+      "detailsTitle": "Tafsilotlar"
+    },
+    "insights": {
+      "total": "Tanlangan davrda {{count}} ta murojaat.",
+      "empty": "Hozircha ma’lumot kam. Mehmonlar yozishni boshlasa, xulosalar shu yerda chiqadi.",
+      "complaintTopic": "Shikoyatlarda ko‘proq «{{topic}}» uchraydi.",
+      "suggestionTopic": "Takliflarda ko‘proq «{{topic}}» haqida yozishadi.",
+      "staff": "Eng ko‘p rahmat aytilgan: {{name}}.",
+      "context": "Eng ko‘p murojaat «{{context}}» joyidan kelmoqda."
+    },
+    "metrics": {
+      "reviews": "Izohlar",
+      "complaints": "Shikoyatlar",
+      "suggestions": "Takliflar",
+      "mood": "O‘rtacha kayfiyat"
+    },
+    "engagement": {
+      "withText": "Matn bilan",
+      "withPhotos": "Rasm bilan",
+      "withContact": "Kontakt bilan"
+    },
+    "mood": {
+      "positive": "Ijobiy",
+      "neutral": "Neytral",
+      "negative": "Past",
+      "average": "O‘rtacha",
+      "distribution": "Baholar bo‘yicha"
+    },
+    "topics": {
+      "complaints": "Shikoyatlarda",
+      "suggestions": "Takliflarda"
+    },
+    "team": {
+      "thanks": "Minnatdorchilik",
+      "mentions": "Eslatishlar",
+      "teamThanks": "Jamoaviy",
+      "attention": "Signal",
+      "people": "Kimga rahmat aytishadi",
+      "personMeta": "{{mentions}} marta eslatilgan, {{complaints}} signal",
+      "personMetaWithRole": "{{role}} · {{mentions}} marta eslatilgan, {{complaints}} signal"
+    },
+    "contexts": {
+      "title": "Qayerdan yozishadi",
+      "meta": "{{complaints}} shikoyat, {{lowReviews}} past baho"
+    },
+    "time": {
+      "peak": "Ko‘proq shu vaqtda yozishadi",
+      "noPeak": "Hozircha ma’lumot yo‘q",
+      "weekdays": "Hafta kunlari bo‘yicha"
+    },
+    "empty": {
+      "reviews": "Hozircha baholi izohlar yo‘q.",
+      "complaint": "Mehmonlar mavzu tanlasa, shikoyat mavzulari shu yerda chiqadi.",
+      "suggestion": "Mehmonlar mavzu tanlasa, taklif mavzulari shu yerda chiqadi.",
+      "team": "Mehmonlar xodimlarni tanlay boshlasa, minnatdorchilik va eslatishlar shu yerda chiqadi.",
+      "contexts": "Havola yoki QR stol, kassa yoki boshqa joy uchun yaratilsa, kontekstlar shu yerda chiqadi."
     }
   },
   "moduleSettings": {
@@ -415,8 +511,6 @@
   },
   "notificationSettings": {
     "mode": {
-      "title": "Qachon yuboriladi",
-      "hint": "Bot qanchalik tez-tez yozishini tanlang. Muhimlari — shikoyatlar va 3 yoki undan past baholi izohlar.",
       "ALL": {
         "title": "Barcha murojaatlar"
       },
@@ -427,18 +521,114 @@
         "title": "Yubormaslik"
       }
     },
-    "delivery": {
-      "title": "Qayerga keladi",
-      "hint": "Odatda bildirishnomalar sizga shaxsiy xabarga keladi. Guruh ulansa, u yerga ham yuborish mumkin.",
-      "owner": {
-        "title": "Shaxsiy xabarga"
-      },
-      "group": {
-        "title": "Telegram guruhga",
-        "empty": "Ulanmagan",
-        "fallbackTitle": "guruh"
-      }
+    "types": {
+      "review": "Izohlar",
+      "complaint": "Shikoyatlar",
+      "suggestion": "Takliflar"
+    },
+    "owner": {
+      "title": "Shaxsiy xabarlar",
+      "hint": "Hammasini, faqat muhimlarini oling yoki o‘chiring. Muhimlari — shikoyatlar va past baholar."
+    },
+    "group": {
+      "title": "Guruh",
+      "hintEmpty": "Guruhni tanlang. Bot u yerga qo‘shilib, bildirishnomalarni o‘zi ulaydi.",
+      "hintConnected": "Guruhga qaysi murojaatlar borishini tanlang.",
+      "hintDisconnected": "Bot guruhdan olib tashlangan. Kerak bo‘lsa, guruhni qayta ulang.",
+      "connect": "Guruhni tanlash",
+      "connected": "Ulangan",
+      "disconnect": "Guruhni uzish",
+      "fallbackTitle": "guruh"
     }
+  },
+  "subscription": {
+    "title": "Obuna",
+    "heroTitle": "Mehmon formasi doim tayyor",
+    "heroSubtitle": "Murojaatlarni yig‘ing, xabarlarni oling va mehmon kirishini faol saqlang.",
+    "trialBadge": "7 kun bepul",
+    "activeBadge": "Kirish faol",
+    "activeUntil": "{{date}} gacha",
+    "activeNoPeriod": "Muddatsiz",
+    "activeHeroTitle": "Obuna faol",
+    "activeHeroSubtitle": "Havola va QR ishlayapti, mehmonlar murojaat qoldiradi, xabarlar kelishda davom etadi.",
+    "activePlanLabel": "Tarif",
+    "activePeriodLabel": "Muddat",
+    "from": "oyiga",
+    "heroChips": {
+      "form": "Forma",
+      "notifications": "Xabarlar",
+      "entry": "Havola va QR"
+    },
+    "statusTitle": "Kirish",
+    "statuses": {
+      "TRIALING": "Sinov davri",
+      "ACTIVE": "Faol",
+      "EXPIRED": "Tugagan",
+      "CANCELED": "To‘xtatilgan",
+      "GRANTED": "Berilgan"
+    },
+    "statusHints": {
+      "TRIALING": "Sinov davri {{date}} gacha amal qiladi.",
+      "ACTIVE": "Mehmon formasi {{date}} gacha faol.",
+      "EXPIRED": "Mehmon formasi hozir mavjud emas. Murojaatlarni qabul qilish uchun obunani to‘lang.",
+      "CANCELED": "Obuna to‘xtatilgan. Xohlagan vaqtda qayta to‘lash mumkin.",
+      "GRANTED": "Kirish qo‘lda berilgan va {{date}} gacha amal qiladi."
+    },
+    "statusHintsNoDate": {
+      "TRIALING": "Sinov davri faol.",
+      "ACTIVE": "Mehmon formasi faol.",
+      "EXPIRED": "Mehmon formasi hozir mavjud emas. Murojaatlarni qabul qilish uchun obunani to‘lang.",
+      "CANCELED": "Obuna to‘xtatilgan. Xohlagan vaqtda qayta to‘lash mumkin.",
+      "GRANTED": "Kirish qo‘lda berilgan."
+    },
+    "currentPlanFallback": "Faol kirish",
+    "plansTitle": "Tarif",
+    "plans": {
+      "MONTHLY": {
+        "title": "Oy",
+        "subtitle": "Boshlash uchun qulay"
+      },
+      "ANNUAL": {
+        "title": "Yil",
+        "subtitle": "Doimiy ish uchun",
+        "badge": "Foydaliroq"
+      }
+    },
+    "benefits": {
+      "activeTitle": "Nimalar ochiq",
+      "activeHint": "Bularning barchasi bu joy uchun allaqachon ishlayapti.",
+      "previewTitle": "Nimalar kiradi",
+      "previewHint": "To‘lovdan keyin bu imkoniyatlarning hammasi shu joy uchun ochiladi.",
+      "items": {
+        "entry": {
+          "title": "Havola va QR",
+          "subtitle": "Mehmonlar havola yoki QR orqali formani ochib, kerakli bo‘limni tanlaydi."
+        },
+        "notifications": {
+          "title": "Xabarlar",
+          "subtitle": "Yangi murojaatlar sozlamalaringiz bo‘yicha shaxsiy chatga yoki guruhga keladi."
+        },
+        "feed": {
+          "title": "Murojaatlar lentasi",
+          "subtitle": "Izohlar, shikoyatlar va takliflar bitta qulay ro‘yxatda saqlanadi."
+        },
+        "media": {
+          "title": "Rasmlar",
+          "subtitle": "Vaziyatni tezroq tushunishga yordam bersa, mehmon rasm qo‘sha oladi."
+        },
+        "staff": {
+          "title": "Xodimlar",
+          "subtitle": "Xodimlar yoqilsa, mehmon xodimni yoki jamoani tanlay oladi."
+        },
+        "languages": {
+          "title": "Tillar",
+          "subtitle": "Forma va xabarlar mehmon hamda egasi tanlagan tilga moslashadi."
+        }
+      }
+    },
+    "plansHint": "Birinchi 7 kun allaqachon ochiq. To‘lov sinov davridan keyin forma to‘xtamasligi uchun kerak.",
+    "payAction": "To‘lash {{amount}}",
+    "payError": "To‘lov ochilmadi. Qayta urinib ko‘ring."
   },
   "sections": {
     "show": "Mehmonlarga ko‘rsatish",
@@ -465,7 +655,7 @@
     },
     "notifications": {
       "hint": "Bot qaysi murojaatlarni darhol yuborishi va qayerga kelishini sozlang.",
-      "rows": ["Barcha murojaatlar", "Faqat muhimlari", "Shaxsiy xabar"]
+      "rows": ["Shaxsiy xabarlar", "Guruh", "Murojaat turlari"]
     },
     "qr": {
       "hint": "Mehmon havolasi avtomatik yaratiladi. QR uni stol, stoyka yoki stikerda chiroyli joylashtirish uchun kerak.",

@@ -15,6 +15,7 @@ import { Avatar } from "~/common/components";
 import { Button, Input } from "~/common/ui";
 import { cn } from "~/common/utils";
 import {
+  MAX_ADMIN_ORGANIZATIONS,
   useAdminOrganization,
   type AdminOrganization,
   type AdminOrganizationLocale
@@ -28,6 +29,7 @@ import {
   type OrganizationPresetId
 } from "~/shared/organization-presets";
 import { PageTransition } from "~/shared/router/page-transition";
+import { getBrowserTimeZone } from "~/shared/time-zone";
 import { useTma, useTmaBackButton, useTmaMainButton } from "~/shared/tma";
 
 const toAdminOrganizationLocale = (locale: AppLocale): AdminOrganizationLocale =>
@@ -66,7 +68,7 @@ export const AdminOrganizationCreatePage = () => {
   const navigate = useNavigate();
   const tma = useTma();
   const { locale, t } = useI18n();
-  const { createOrganization, refreshOrganizations, setActiveOrganizationId } =
+  const { createOrganization, organizations, refreshOrganizations, setActiveOrganizationId } =
     useAdminOrganization();
   const [name, setName] = React.useState("");
   const [contactText, setContactText] = React.useState("");
@@ -85,6 +87,8 @@ export const AdminOrganizationCreatePage = () => {
 
   const cleanName = name.trim();
   const cleanContactText = contactText.trim();
+  const isOrganizationLimitReached =
+    !createdOrganization && organizations.length >= MAX_ADMIN_ORGANIZATIONS;
 
   const goBack = React.useCallback(() => {
     if (isSaving) {
@@ -97,6 +101,16 @@ export const AdminOrganizationCreatePage = () => {
   }, [isSaving, navigate]);
 
   useTmaBackButton(true, goBack);
+
+  React.useEffect(() => {
+    if (!isOrganizationLimitReached) {
+      return;
+    }
+
+    void navigate({
+      to: "/admin"
+    });
+  }, [isOrganizationLimitReached, navigate]);
 
   React.useEffect(
     () => () => {
@@ -184,7 +198,7 @@ export const AdminOrganizationCreatePage = () => {
   );
 
   const saveOrganization = React.useCallback(async () => {
-    if (!cleanName || isSaving) {
+    if (!cleanName || isSaving || isOrganizationLimitReached) {
       return;
     }
 
@@ -198,7 +212,8 @@ export const AdminOrganizationCreatePage = () => {
           businessType,
           contactText: cleanContactText,
           locale: toAdminOrganizationLocale(locale),
-          name: cleanName
+          name: cleanName,
+          timeZone: getBrowserTimeZone()
         }));
 
       if (!organization) {
@@ -231,6 +246,7 @@ export const AdminOrganizationCreatePage = () => {
     createdOrganization,
     cleanName,
     cleanContactText,
+    isOrganizationLimitReached,
     isSaving,
     locale,
     navigate,

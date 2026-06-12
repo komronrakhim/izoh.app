@@ -26,6 +26,10 @@ export const queryKeys = {
     ["organization", organizationId, "module-settings", moduleId, initDataRaw] as const,
   notificationSettings: (organizationId: string, initDataRaw: string) =>
     ["organization", organizationId, "notification-settings", initDataRaw] as const,
+  subscription: (organizationId: string, initDataRaw: string) =>
+    ["organization", organizationId, "subscription", initDataRaw] as const,
+  analytics: (organizationId: string, period: string, initDataRaw: string) =>
+    ["organization", organizationId, "analytics", period, initDataRaw] as const,
   organizationQrLink: (organizationId: string, context: string, initDataRaw: string) =>
     ["organization", organizationId, "qr-link", context, initDataRaw] as const,
   guestEntryConfig: (startParam: string) => ["guest-entry", startParam] as const,

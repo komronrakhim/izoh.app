@@ -84,6 +84,8 @@ const main = async () => {
 
   console.log(`Starting API on ${apiProxyTarget}`);
   console.log(`Starting Mini App on http://localhost:${appPort}`);
+  console.log("Starting Notification Dispatcher");
+  console.log("Starting Organization Deletion Worker");
 
   spawnProcess({
     args: ["run", "dev:api"],
@@ -93,11 +95,21 @@ const main = async () => {
     name: "API"
   });
   spawnProcess({
-    args: ["run", "dev", "--", "--port", String(appPort)],
+    args: ["run", "dev:web", "--", "--port", String(appPort)],
     env: {
       VITE_API_PROXY_TARGET: apiProxyTarget
     },
     name: "Mini App"
+  });
+  spawnProcess({
+    args: ["run", "dev:notification-dispatcher"],
+    env: {},
+    name: "Notification Dispatcher"
+  });
+  spawnProcess({
+    args: ["run", "dev:organization-deletion-worker"],
+    env: {},
+    name: "Organization Deletion Worker"
   });
 };
 

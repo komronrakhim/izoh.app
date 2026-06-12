@@ -16,6 +16,7 @@ type CreateAdminOrganizationInput = {
   contactText?: string;
   locale: AdminOrganizationLocale;
   name: string;
+  timeZone?: string;
 };
 
 type AdminOrganizationsPayload = {
@@ -107,13 +108,20 @@ export const AdminOrganizationProvider = ({ children }: { children: React.ReactN
   }, [organizationsQuery]);
 
   const createOrganizationMutation = useMutation({
-    mutationFn: ({ businessType, contactText, locale, name }: CreateAdminOrganizationInput) =>
+    mutationFn: ({
+      businessType,
+      contactText,
+      locale,
+      name,
+      timeZone
+    }: CreateAdminOrganizationInput) =>
       fetchApiJson<CreateAdminOrganizationPayload>("/api/admin/organizations", {
         body: JSON.stringify({
           businessType,
           contactText,
           locale,
-          name
+          name,
+          timeZone
         }),
         headers: {
           "Content-Type": "application/json"

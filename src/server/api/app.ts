@@ -1,8 +1,10 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
+import { InputFile } from "grammy";
 import { z } from "zod";
 
 import { getPrisma } from "~/server/db";
+import { getOrganizationAnalytics } from "~/server/domain/analytics";
 import {
   getOrganizationGuestMenu,
   updateOrganizationGuestMenuItem
@@ -13,12 +15,18 @@ import {
 } from "~/server/domain/module-settings";
 import {
   createAdminOrganization,
+  enqueueAdminOrganizationDeletion,
   getAdminOrganizations,
   updateAdminOrganizationLogo
 } from "~/server/domain/organizations";
 import {
+  connectTelegramGroupByToken,
+  createOrganizationNotificationGroupConnectLink,
+  disconnectOrganizationNotificationGroup,
   getOrganizationNotificationSettings,
-  updateOrganizationNotificationSettings
+  markTelegramGroupDisconnectedByChatId,
+  TelegramGroupConnectError,
+  updateOrganizationNotificationTarget
 } from "~/server/domain/notification-settings";
 import { getGuestEntryConfig } from "~/server/domain/guest-entry-config";
 import {
@@ -37,6 +45,12 @@ import {
   getOrganizationSubmissions,
   getSubmissionAdminItem
 } from "~/server/domain/submissions";
+import {
+  answerSubscriptionPreCheckoutQuery,
+  applySuccessfulSubscriptionPayment,
+  createOrganizationSubscriptionInvoice,
+  getOrganizationSubscriptionPayload
+} from "~/server/domain/subscriptions";
 import { syncUserFromTelegram } from "~/server/domain/users";
 import {
   createGuestEntryStartParam,
@@ -51,17 +65,30 @@ import {
   headLocalMediaObject,
   putLocalMediaObject
 } from "~/server/media";
-import { validateTelegramInitData } from "~/server/telegram";
+import { renderOrganizationQrPdf } from "~/server/pdf";
+import { getTelegramBot, validateTelegramInitData } from "~/server/telegram";
 import { getOptionalEnv, getRequiredEnv } from "~/server/config/env";
 import { isGuestMenuItemId } from "~/shared/guest-menu";
-import { normalizeAppLocale, toPrismaLocale } from "~/shared/i18n/config";
+import { fromPrismaLocale, normalizeAppLocale, toPrismaLocale } from "~/shared/i18n/config";
+import { createTranslator } from "~/shared/i18n/server";
 import {
   DEFAULT_ORGANIZATION_PRESET_ID,
   ORGANIZATION_PRESET_IDS
 } from "~/shared/organization-presets";
 import { createSubmissionRequestSchema, submissionKindSchema } from "~/shared/submissions";
+import { isAdminAnalyticsPeriod } from "~/shared/analytics";
+import {
+  QR_DEFAULT_CUSTOM_COLORS,
+  QR_FORMATS,
+  QR_VISUAL_STYLES,
+  createQrPdfFileName,
+  type QrFormatId
+} from "~/shared/qr";
+import { SUBSCRIPTION_PLANS, getAnnualSubscriptionDiscountPercent } from "~/shared/subscriptions";
+import { TIME_ZONE_MAX_LENGTH } from "~/shared/time-zone";
 
 const telegramInitDataHeader = "X-Telegram-Init-Data";
+const telegramWebhookSecretHeader = "X-Telegram-Bot-Api-Secret-Token";
 
 const mediaUploadSchema = z.object({
   contentType: z.string(),
@@ -84,7 +111,8 @@ const adminOrganizationSchema = z.object({
   businessType: z.enum(ORGANIZATION_PRESET_IDS).default(DEFAULT_ORGANIZATION_PRESET_ID),
   contactText: z.string().trim().max(120).optional(),
   locale: z.enum(["ru", "uz", "RU", "UZ"]).optional(),
-  name: z.string().trim().min(2).max(80)
+  name: z.string().trim().min(2).max(80),
+  timeZone: z.string().trim().max(TIME_ZONE_MAX_LENGTH).optional()
 });
 
 const adminOrganizationLogoSchema = z.object({
@@ -107,6 +135,34 @@ const staffMemberPatchSchema = z
   .refine((input) => Object.keys(input).length > 0, {
     message: "At least one staff member field is required."
   });
+
+const subscriptionInvoiceSchema = z.object({
+  planCode: z.enum(["MONTHLY", "ANNUAL"])
+});
+
+const qrHexColorSchema = z.string().regex(/^#[0-9a-f]{6}$/i);
+const qrCaptionMaxLength = Math.max(...QR_FORMATS.map((format) => format.captionMaxLength));
+const qrHeadlineMaxLength = Math.max(...QR_FORMATS.map((format) => format.headlineMaxLength));
+
+const organizationQrPdfSchema = z.object({
+  caption: z.string().trim().max(qrCaptionMaxLength).optional(),
+  context: z.string().trim().max(80).optional(),
+  customColors: z
+    .object({
+      background: qrHexColorSchema.default(QR_DEFAULT_CUSTOM_COLORS.background),
+      paper: qrHexColorSchema.default(QR_DEFAULT_CUSTOM_COLORS.paper),
+      text: qrHexColorSchema.default(QR_DEFAULT_CUSTOM_COLORS.text)
+    })
+    .optional(),
+  emojiEnabled: z.boolean().optional(),
+  emojiThemeId: z.enum(["calm", "great", "idea", "issue", "none", "warm"]).optional(),
+  formatId: z
+    .enum(QR_FORMATS.map((format) => format.id) as [QrFormatId, ...QrFormatId[]])
+    .optional(),
+  headline: z.string().trim().max(qrHeadlineMaxLength).optional(),
+  qrStyle: z.enum(QR_VISUAL_STYLES).optional(),
+  showContext: z.boolean().optional()
+});
 
 const isNonProduction = () => process.env.NODE_ENV !== "production";
 
@@ -207,6 +263,203 @@ const getAdminAccessStatus = (error: Error) => {
   return null;
 };
 
+type TelegramWebhookUpdate = {
+  message?: {
+    chat?: {
+      id?: number | string;
+      title?: string;
+      type?: string;
+    };
+    from?: {
+      id?: number | string;
+      language_code?: string;
+    };
+    successful_payment?: {
+      currency?: string;
+      invoice_payload?: string;
+      is_first_recurring?: boolean;
+      is_recurring?: boolean;
+      provider_payment_charge_id?: string;
+      subscription_expiration_date?: number;
+      telegram_payment_charge_id?: string;
+      total_amount?: number;
+    };
+    text?: string;
+  };
+  my_chat_member?: {
+    chat?: {
+      id?: number | string;
+      title?: string;
+      type?: string;
+    };
+    new_chat_member?: {
+      status?: string;
+    };
+  };
+  pre_checkout_query?: {
+    currency?: string;
+    id?: string;
+    invoice_payload?: string;
+    total_amount?: number;
+  };
+};
+
+const parseTelegramBigIntId = (value: number | string | undefined) => {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  const normalized = String(value).trim();
+
+  if (!/^-?\d+$/.test(normalized)) {
+    return null;
+  }
+
+  return BigInt(normalized);
+};
+
+export const parseTelegramGroupConnectTokenCommand = (text: string | undefined) => {
+  const [command, token] = (text ?? "").trim().split(/\s+/);
+
+  if (!command) {
+    return null;
+  }
+
+  const normalizedCommand = command.split("@")[0]?.toLowerCase();
+
+  if (normalizedCommand !== "/start" || !token) {
+    return null;
+  }
+
+  return token.trim().toUpperCase();
+};
+
+const sendTelegramWebhookMessage = async ({ chatId, text }: { chatId: bigint; text: string }) => {
+  try {
+    await getTelegramBot().api.sendMessage(chatId.toString(), text);
+  } catch (error) {
+    console.warn("Telegram webhook confirmation message failed", {
+      chatId: chatId.toString(),
+      error: error instanceof Error ? error.message : String(error)
+    });
+    // Webhook processing should not fail just because the confirmation message could not be sent.
+  }
+};
+
+const handleTelegramWebhookUpdate = async (
+  update: TelegramWebhookUpdate,
+  db: NonNullable<ReturnType<typeof getPrisma>>
+) => {
+  const preCheckoutQuery = update.pre_checkout_query;
+
+  if (preCheckoutQuery?.id && preCheckoutQuery.invoice_payload) {
+    await answerSubscriptionPreCheckoutQuery(
+      {
+        currency: preCheckoutQuery.currency ?? "",
+        id: preCheckoutQuery.id,
+        invoicePayload: preCheckoutQuery.invoice_payload,
+        totalAmount: preCheckoutQuery.total_amount ?? 0
+      },
+      db
+    );
+
+    return;
+  }
+
+  const successfulPayment = update.message?.successful_payment;
+
+  if (
+    successfulPayment?.invoice_payload &&
+    successfulPayment.telegram_payment_charge_id &&
+    successfulPayment.currency === "XTR"
+  ) {
+    await applySuccessfulSubscriptionPayment(
+      {
+        invoicePayload: successfulPayment.invoice_payload,
+        isFirstRecurring: successfulPayment.is_first_recurring,
+        isRecurring: successfulPayment.is_recurring,
+        providerPaymentChargeId: successfulPayment.provider_payment_charge_id,
+        rawPayload: successfulPayment,
+        subscriptionExpirationDate: successfulPayment.subscription_expiration_date
+          ? new Date(successfulPayment.subscription_expiration_date * 1000)
+          : undefined,
+        telegramPaymentChargeId: successfulPayment.telegram_payment_charge_id,
+        totalAmount: successfulPayment.total_amount ?? 0
+      },
+      db
+    );
+
+    return;
+  }
+
+  const membership = update.my_chat_member;
+  const newStatus = membership?.new_chat_member?.status;
+  const membershipChatId = parseTelegramBigIntId(membership?.chat?.id);
+
+  if (membershipChatId && (newStatus === "left" || newStatus === "kicked")) {
+    await markTelegramGroupDisconnectedByChatId(
+      {
+        telegramChatId: membershipChatId
+      },
+      db
+    );
+
+    return;
+  }
+
+  const token = parseTelegramGroupConnectTokenCommand(update.message?.text);
+
+  if (!token) {
+    return;
+  }
+
+  const chatId = parseTelegramBigIntId(update.message?.chat?.id);
+  const userId = parseTelegramBigIntId(update.message?.from?.id);
+
+  if (!chatId) {
+    return;
+  }
+
+  const chatType = update.message?.chat?.type;
+
+  if (chatType !== "group" && chatType !== "supergroup") return;
+
+  try {
+    const connectResult = await connectTelegramGroupByToken(
+      {
+        token,
+        telegramChatId: chatId,
+        telegramChatTitle: update.message?.chat?.title,
+        telegramUserId: userId ?? undefined
+      },
+      db
+    );
+    const t = createTranslator(fromPrismaLocale(connectResult.ownerLocale));
+
+    await sendTelegramWebhookMessage({
+      chatId,
+      text: t("telegram.groupConnect.success", {
+        organizationName: connectResult.organizationName
+      })
+    });
+  } catch (error) {
+    const connectError = error instanceof TelegramGroupConnectError ? error : null;
+    const errorLocale = connectError?.ownerLocale
+      ? fromPrismaLocale(connectError.ownerLocale)
+      : normalizeAppLocale(update.message?.from?.language_code);
+    const t = createTranslator(errorLocale);
+
+    await sendTelegramWebhookMessage({
+      chatId,
+      text: t(
+        connectError?.reason === "OWNER_MISMATCH"
+          ? "telegram.groupConnect.errorOwner"
+          : "telegram.groupConnect.errorInvalid"
+      )
+    });
+  }
+};
+
 const resolveSubmissionGuestContext = async ({
   db,
   organizationId,
@@ -276,8 +529,13 @@ export const createApiApp = () => {
   app.use(
     "*",
     cors({
-      allowHeaders: ["Content-Type", "Authorization", telegramInitDataHeader],
-      allowMethods: ["GET", "POST", "PUT", "PATCH", "OPTIONS"],
+      allowHeaders: [
+        "Content-Type",
+        "Authorization",
+        telegramInitDataHeader,
+        telegramWebhookSecretHeader
+      ],
+      allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       credentials: true,
       origin: (origin) => origin
     })
@@ -289,6 +547,30 @@ export const createApiApp = () => {
       service: "izoh"
     })
   );
+
+  app.post("/api/telegram/webhook", async (c) => {
+    const expectedSecret = getOptionalEnv("TELEGRAM_WEBHOOK_SECRET");
+    const receivedSecret = c.req.header(telegramWebhookSecretHeader);
+    const db = getPrisma();
+
+    if (!expectedSecret && !isNonProduction()) {
+      return c.json({ error: "Telegram webhook secret is not configured." }, 503);
+    }
+
+    if (expectedSecret && receivedSecret !== expectedSecret) {
+      return c.json({ error: "Invalid Telegram webhook secret." }, 401);
+    }
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    await handleTelegramWebhookUpdate((await c.req.json()) as TelegramWebhookUpdate, db);
+
+    return c.json({
+      ok: true
+    });
+  });
 
   app.get("/api/admin/organizations", async (c) => {
     const db = getPrisma();
@@ -310,6 +592,10 @@ export const createApiApp = () => {
     } catch (error) {
       if (error instanceof Error && error.message.includes("Telegram")) {
         return c.json({ error: error.message }, 401);
+      }
+
+      if (error instanceof Error && error.message.includes("Organization limit reached")) {
+        return c.json({ error: error.message }, 400);
       }
 
       throw error;
@@ -341,7 +627,8 @@ export const createApiApp = () => {
             locale,
             name: input.name,
             ownerUserId: user.id,
-            presetId: input.businessType
+            presetId: input.businessType,
+            timeZone: input.timeZone
           },
           db
         )
@@ -349,6 +636,37 @@ export const createApiApp = () => {
     } catch (error) {
       if (error instanceof Error && error.message.includes("Telegram")) {
         return c.json({ error: error.message }, 401);
+      }
+
+      throw error;
+    }
+  });
+
+  app.delete("/api/admin/organizations/:organizationId", async (c) => {
+    const organizationId = c.req.param("organizationId");
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    try {
+      const user = await requireOrganizationOwner({ c, db, organizationId });
+
+      return c.json(
+        await enqueueAdminOrganizationDeletion(
+          {
+            organizationId,
+            requestedByUserId: user?.id
+          },
+          db
+        )
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        const status = getAdminAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
       }
 
       throw error;
@@ -452,6 +770,114 @@ export const createApiApp = () => {
       startParam,
       url: getTelegramMiniAppUrl(startParam)
     });
+  });
+
+  app.post("/api/organizations/:organizationId/qr-pdf", async (c) => {
+    const organizationId = c.req.param("organizationId");
+    const shouldSendToChat = c.req.query("delivery") === "chat";
+    const input = organizationQrPdfSchema.parse(await c.req.json());
+    const qrContext = normalizeGuestContext(input.context);
+    const db = getPrisma();
+    let contextCode: string | undefined;
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    try {
+      const user = await requireOrganizationOwner({ c, db, organizationId });
+      const organization = await db.organization.findUnique({
+        select: {
+          id: true,
+          locale: true,
+          logo_media_asset_id: true,
+          name: true,
+          slug: true
+        },
+        where: {
+          id: organizationId
+        }
+      });
+
+      if (!organization) {
+        return c.json({ error: "Organization is not available." }, 404);
+      }
+
+      if (qrContext) {
+        const guestContext = await getOrCreateOrganizationGuestContext(
+          {
+            label: qrContext,
+            organizationId: organization.id
+          },
+          db
+        );
+
+        contextCode = guestContext?.code;
+      }
+
+      const logoAsset = organization.logo_media_asset_id
+        ? await db.mediaAsset.findFirst({
+            select: {
+              public_url: true
+            },
+            where: {
+              id: organization.logo_media_asset_id,
+              kind: "ORGANIZATION_LOGO",
+              owner_id: organization.id,
+              owner_type: "ORGANIZATION",
+              status: "READY"
+            }
+          })
+        : null;
+      const startParam = createGuestEntryStartParam({
+        contextCode,
+        organizationRef: organization.slug
+      });
+      const pdf = await renderOrganizationQrPdf({
+        locale: fromPrismaLocale(organization.locale),
+        organizationLogoUrl: logoAsset?.public_url ?? null,
+        organizationName: organization.name,
+        template: {
+          ...input,
+          context: qrContext
+        },
+        url: getTelegramMiniAppUrl(startParam)
+      });
+      const fileName = createQrPdfFileName({
+        context: qrContext,
+        organizationName: organization.name,
+        organizationSlug: organization.slug
+      });
+
+      if (shouldSendToChat) {
+        if (!user) {
+          return c.json({ error: "Telegram user is required." }, 401);
+        }
+
+        await getTelegramBot().api.sendDocument(
+          user.telegram_id.toString(),
+          new InputFile(pdf, fileName)
+        );
+
+        return c.json({ ok: true });
+      }
+
+      return new Response(new Uint8Array(pdf), {
+        headers: {
+          "Cache-Control": "no-store",
+          "Content-Disposition": `attachment; filename="${fileName}"`,
+          "Content-Type": "application/pdf"
+        }
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const status = getAdminAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      throw error;
+    }
   });
 
   const handleGuestEntryConfigRequest = async (c: Context) => {
@@ -848,7 +1274,7 @@ export const createApiApp = () => {
     }
   });
 
-  app.get("/api/organizations/:organizationId/notifications/settings", async (c) => {
+  app.get("/api/organizations/:organizationId/notifications", async (c) => {
     const organizationId = c.req.param("organizationId");
     const db = getPrisma();
 
@@ -875,8 +1301,9 @@ export const createApiApp = () => {
     }
   });
 
-  app.patch("/api/organizations/:organizationId/notifications/settings", async (c) => {
+  app.patch("/api/organizations/:organizationId/notifications/targets/:targetId", async (c) => {
     const organizationId = c.req.param("organizationId");
+    const targetId = c.req.param("targetId");
     const patch = await c.req.json();
     const db = getPrisma();
 
@@ -888,10 +1315,11 @@ export const createApiApp = () => {
       await requireOrganizationOwner({ c, db, organizationId });
 
       return c.json(
-        await updateOrganizationNotificationSettings(
+        await updateOrganizationNotificationTarget(
           {
             organizationId,
-            patch
+            patch,
+            targetId
           },
           db
         )
@@ -906,9 +1334,165 @@ export const createApiApp = () => {
       if (
         error instanceof Error &&
         (error.message.includes("Organization is not available") ||
-          error.message.includes("Telegram group"))
+          error.message.includes("Notification target"))
       ) {
         return c.json({ error: error.message }, 400);
+      }
+
+      throw error;
+    }
+  });
+
+  app.post("/api/organizations/:organizationId/notifications/group-connect-link", async (c) => {
+    const organizationId = c.req.param("organizationId");
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    try {
+      const user = await requireOrganizationOwner({ c, db, organizationId });
+      const createdByUserId =
+        user?.id ??
+        (
+          await db.organization.findUnique({
+            select: {
+              owner_user_id: true
+            },
+            where: {
+              id: organizationId
+            }
+          })
+        )?.owner_user_id;
+
+      if (!createdByUserId) {
+        return c.json({ error: "Organization is not available." }, 404);
+      }
+
+      return c.json(
+        await createOrganizationNotificationGroupConnectLink(
+          {
+            createdByUserId,
+            organizationId
+          },
+          db
+        )
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        const status = getAdminAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      if (error instanceof Error && error.message.includes("Organization is not available")) {
+        return c.json({ error: error.message }, 404);
+      }
+
+      throw error;
+    }
+  });
+
+  app.delete("/api/organizations/:organizationId/notifications/group", async (c) => {
+    const organizationId = c.req.param("organizationId");
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    try {
+      await requireOrganizationOwner({ c, db, organizationId });
+
+      return c.json(await disconnectOrganizationNotificationGroup(organizationId, db));
+    } catch (error) {
+      if (error instanceof Error) {
+        const status = getAdminAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      if (error instanceof Error && error.message.includes("Organization is not available")) {
+        return c.json({ error: error.message }, 404);
+      }
+
+      throw error;
+    }
+  });
+
+  app.get("/api/organizations/:organizationId/subscription", async (c) => {
+    const organizationId = c.req.param("organizationId");
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    try {
+      await requireOrganizationOwner({ c, db, organizationId });
+
+      return c.json({
+        annualDiscountPercent: getAnnualSubscriptionDiscountPercent(),
+        plans: SUBSCRIPTION_PLANS,
+        subscription: await getOrganizationSubscriptionPayload(organizationId, db)
+      });
+    } catch (error) {
+      const status = error instanceof Error ? getAdminAccessStatus(error) : null;
+
+      if (status) {
+        return c.json({ error: error instanceof Error ? error.message : "Access denied." }, status);
+      }
+
+      throw error;
+    }
+  });
+
+  app.post("/api/organizations/:organizationId/subscription/invoices", async (c) => {
+    const organizationId = c.req.param("organizationId");
+    const input = subscriptionInvoiceSchema.parse(await c.req.json());
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    try {
+      const user = await requireOrganizationOwner({ c, db, organizationId });
+      const organization = await db.organization.findFirst({
+        select: {
+          locale: true
+        },
+        where: {
+          id: organizationId,
+          status: "ACTIVE"
+        }
+      });
+
+      if (!organization) {
+        return c.json({ error: "Organization is not available." }, 404);
+      }
+
+      return c.json(
+        await createOrganizationSubscriptionInvoice(
+          {
+            locale: organization.locale,
+            organizationId,
+            payerUserId: user?.id,
+            planCode: input.planCode
+          },
+          db
+        )
+      );
+    } catch (error) {
+      const status = error instanceof Error ? getAdminAccessStatus(error) : null;
+
+      if (status) {
+        return c.json({ error: error instanceof Error ? error.message : "Access denied." }, status);
+      }
+
+      if (error instanceof Error && error.message.includes("TELEGRAM_BOT_TOKEN")) {
+        return c.json({ error: "Telegram bot is not configured." }, 503);
       }
 
       throw error;
@@ -947,6 +1531,46 @@ export const createApiApp = () => {
         return c.json({ error: "Invalid submissions filter." }, 400);
       }
 
+      if (error instanceof Error) {
+        const status = getAdminAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      if (error instanceof Error && error.message.includes("Organization is not available")) {
+        return c.json({ error: error.message }, 404);
+      }
+
+      throw error;
+    }
+  });
+
+  app.get("/api/organizations/:organizationId/analytics", async (c) => {
+    const organizationId = c.req.param("organizationId");
+    const periodQuery = c.req.query("period")?.trim() || "30D";
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    if (!isAdminAnalyticsPeriod(periodQuery)) {
+      return c.json({ error: "Invalid analytics period." }, 400);
+    }
+
+    try {
+      await requireOrganizationOwner({ c, db, organizationId });
+
+      return c.json(
+        await getOrganizationAnalytics(
+          {
+            organizationId,
+            period: periodQuery
+          },
+          db
+        )
+      );
+    } catch (error) {
       if (error instanceof Error) {
         const status = getAdminAccessStatus(error);
 

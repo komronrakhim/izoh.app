@@ -1,11 +1,8 @@
-import { existsSync } from "node:fs";
-import { readdir } from "node:fs/promises";
-import { join, dirname, resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const migrationsDir = join(rootDir, "prisma", "migrations");
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 const args = new Set(process.argv.slice(2));
 
@@ -38,40 +35,9 @@ const ensureRequiredEnv = () => {
   }
 };
 
-const hasMigrations = async () => {
-  if (!existsSync(migrationsDir)) {
-    return false;
-  }
-
-  const items = await readdir(migrationsDir, {
-    withFileTypes: true
-  });
-
-  return items.some((entry) => entry.isDirectory());
-};
-
 const applyMigrations = async (skipMigration = false) => {
   if (skipMigration) {
     console.log("Skipping migration step by flag.");
-    return;
-  }
-
-  const useMigrations = await hasMigrations();
-
-  if (!useMigrations) {
-    console.log("No Prisma migrations found. Falling back to db:push.");
-    await run(npmCommand, ["run", "db:push"]);
-    return;
-  }
-
-  if (args.has("--fallback-to-push")) {
-    try {
-      await run(npmCommand, ["run", "db:migrate:deploy"]);
-    } catch (error) {
-      console.log("Migration deploy failed, falling back to db:push.");
-      await run(npmCommand, ["run", "db:push"]);
-    }
-
     return;
   }
 

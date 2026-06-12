@@ -30,13 +30,15 @@ describe("Telegram submission notifications", () => {
 
     const normalized = normalizeTelegramText(message);
 
+    expect(normalized).toContain("🏪 Coffee Place");
     expect(normalized).toContain("Низкая оценка");
-    expect(normalized).toContain("Тип: Отзыв");
-    expect(normalized).toContain("(2/5)");
-    expect(normalized).toContain("Сигнал: нужна внимательность");
-    expect(normalized).toContain("Откуда: Стол 4");
-    expect(normalized).toContain("Кого касается: Komron · Кассир");
-    expect(normalized).toContain("Контакт: @guest");
+    expect(normalized).toContain("🙁 Не очень");
+    expect(normalized).not.toContain("2/5");
+    expect(normalized).not.toContain("Тип:");
+    expect(normalized).not.toContain("Сигнал:");
+    expect(normalized).toContain("📍 Стол 4");
+    expect(normalized).toContain("👤 Komron · Кассир");
+    expect(normalized).toContain("Контакт гостя: @guest");
     expect(message).toContain("Кофе был холодный &lt;script&gt;");
   });
 
@@ -49,7 +51,7 @@ describe("Telegram submission notifications", () => {
         customer_contact_phone: null,
         kind: "COMPLAINT",
         metadata: {
-          complaintCategoryIds: ["wait"],
+          complaintCategoryIds: ["wait", "service", "quality", "cleanliness"],
           wizardChoiceId: "issue"
         },
         organization: {
@@ -63,10 +65,11 @@ describe("Telegram submission notifications", () => {
 
     const normalized = normalizeTelegramText(message);
 
+    expect(normalized).toContain("🏪 Coffee Place");
     expect(normalized).toContain("Yangi shikoyat");
-    expect(normalized).toContain("Turi: Shikoyat");
-    expect(normalized).toContain("Mavzular: Kutish");
-    expect(normalized).toContain("Qayerdan: Bar");
+    expect(normalized).not.toContain("Turi:");
+    expect(normalized).toContain("🏷 Kutish · Xizmat · Sifat · +1");
+    expect(normalized).toContain("📍 Bar");
   });
 
   it("formats neutral staff targets without requiring a staff member row", () => {
@@ -93,7 +96,7 @@ describe("Telegram submission notifications", () => {
 
     const normalized = normalizeTelegramText(message);
 
-    expect(normalized).toContain("Кого касается: не указано");
+    expect(normalized).toContain("👤 Сотрудник не указан");
   });
 
   it("formats staff snapshots after the staff member row is gone", () => {
@@ -125,7 +128,8 @@ describe("Telegram submission notifications", () => {
 
     const normalized = normalizeTelegramText(message);
 
-    expect(normalized).toContain("Кого касается: Aziza · Бариста");
+    expect(normalized).toContain("⭐ Новый отзыв · 😍 Отлично");
+    expect(normalized).toContain("👤 Aziza · Бариста");
   });
 
   it("keeps media captions inside the requested limit", () => {

@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import * as React from "react";
 
 import { cn } from "~/common/utils";
@@ -30,6 +30,7 @@ export const WizardRatingStep = ({
 }: WizardRatingStepProps) => {
   const shouldReduceMotion = useReducedMotion();
   const [confettiRunId, setConfettiRunId] = React.useState(0);
+  const [pickerRun, setPickerRun] = React.useState({ id: 0, value: rating });
   const selectedRatingSceneEmojis = getRatingSceneEmojis(rating);
   const orbitEmojis = selectedRatingSceneEmojis.slice(0, ratingScenePositions.length);
   const ratingHint =
@@ -37,18 +38,16 @@ export const WizardRatingStep = ({
       ? t("customer.wizard.rating.hints.5_noSpecificTargets")
       : t(`customer.wizard.rating.hints.${rating}`);
 
-  React.useEffect(() => {
+  const handleRatingClick = (value: number) => {
+    onRatingChange(value);
+
     if (!shouldReduceMotion) {
       setConfettiRunId((current) => current + 1);
+      setPickerRun((current) => ({
+        id: current.id + 1,
+        value
+      }));
     }
-  }, [shouldReduceMotion]);
-
-  const handleRatingClick = (value: number) => {
-    if (value !== rating) {
-      setConfettiRunId((current) => current + 1);
-    }
-
-    onRatingChange(value);
   };
 
   return (
@@ -223,142 +222,92 @@ export const WizardRatingStep = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-1.5 rounded-[26px] bg-surface-2 p-1.5 ring-1 ring-foreground/[0.05]">
-        {ratingOptions.map(({ emoji, value }) => {
-          const isSelected = value === rating;
-          const shouldPulse = isSelected && confettiRunId > 0 && !shouldReduceMotion;
+      <LayoutGroup id="wizard-rating-picker">
+        <div className="grid grid-cols-5 gap-1.5 rounded-[26px] bg-surface-2 p-1.5 ring-1 ring-foreground/[0.05]">
+          {ratingOptions.map(({ emoji, value }) => {
+            const isSelected = value === rating;
+            const shouldPulse =
+              isSelected && pickerRun.value === value && pickerRun.id > 0 && !shouldReduceMotion;
 
-          return (
-            <motion.button
-              key={value}
-              type="button"
-              aria-label={t(`customer.wizard.rating.labels.${value}`)}
-              aria-pressed={isSelected}
-              onClick={() => handleRatingClick(value)}
-              whileTap={
-                shouldReduceMotion
-                  ? undefined
-                  : {
-                      scale: 0.94,
-                      transition: {
-                        type: "tween",
-                        duration: 0.12,
-                        ease: [0.22, 1, 0.36, 1]
-                      }
-                    }
-              }
-              whileHover={
-                shouldReduceMotion
-                  ? undefined
-                  : {
-                      y: -1,
-                      transition: {
-                        type: "tween",
-                        duration: 0.18,
-                        ease: [0.22, 1, 0.36, 1]
-                      }
-                    }
-              }
-              transition={{
-                type: "tween",
-                duration: 0.2,
-                ease: [0.22, 1, 0.36, 1]
-              }}
-              className={cn(
-                "ios-touch-target relative z-10 grid h-14 place-items-center rounded-[20px] text-[28px] leading-none transition-[opacity,transform] active:scale-95 sm:h-16 sm:text-[30px]",
-                isSelected ? "opacity-100" : "opacity-[0.58]"
-              )}
-            >
-              {isSelected ? (
-                <motion.span
-                  className="absolute inset-0 rounded-[20px] bg-surface shadow-[0_8px_22px_rgba(15,23,42,0.1)] ring-1 ring-foreground/[0.07] dark:bg-surface-3 dark:shadow-none"
-                  layoutId="wizard-rating-active-pill"
-                  transition={{
-                    type: "tween",
-                    duration: 0.18,
-                    ease: [0.22, 1, 0.36, 1]
-                  }}
-                />
-              ) : null}
-              {shouldPulse ? (
-                <motion.span
-                  key={`rating-tap-${value}-${confettiRunId}`}
-                  className="absolute inset-1 rounded-[16px] bg-[var(--wizard-accent)]"
-                  initial={{
-                    opacity: 0.18,
-                    scale: 0.78
-                  }}
-                  animate={{
-                    opacity: 0,
-                    scale: 1.28
-                  }}
-                  transition={{
-                    duration: 0.32,
-                    ease: [0.16, 1, 0.3, 1]
-                  }}
-                />
-              ) : null}
-              <motion.span
-                key={isSelected ? `selected-${value}-${confettiRunId}` : `option-${value}`}
-                aria-hidden="true"
-                className="relative z-10"
-                initial={{
-                  scale: isSelected ? 0.92 : 1,
-                  y: isSelected ? 8 : 0,
-                  x: isSelected ? -1 : 0,
-                  opacity: isSelected ? 0.94 : 0.78
-                }}
-                animate={
-                  shouldPulse
-                    ? {
-                        opacity: [1, 0.98, 1],
-                        scale: [0.84, 1.2, 1.1],
-                        y: [5, -10, -3],
-                        x: [1, -2, 0]
-                      }
-                    : isSelected
-                      ? {
-                          scale: 1.16,
-                          y: -5,
-                          x: 0,
-                          opacity: 1
-                        }
-                      : {
-                          scale: 1,
-                          y: 0,
-                          x: 0,
-                          opacity: 0.78
-                        }
-                }
+            return (
+              <motion.button
+                key={value}
+                type="button"
+                aria-label={t(`customer.wizard.rating.labels.${value}`)}
+                aria-pressed={isSelected}
+                onClick={() => handleRatingClick(value)}
                 whileTap={
                   shouldReduceMotion
                     ? undefined
                     : {
-                        scale: 0.96,
-                        y: 0,
+                        scale: 0.94,
                         transition: {
                           type: "tween",
-                          duration: 0.1,
+                          duration: 0.12,
+                          ease: [0.22, 1, 0.36, 1]
+                        }
+                      }
+                }
+                whileHover={
+                  shouldReduceMotion
+                    ? undefined
+                    : {
+                        y: -1,
+                        transition: {
+                          type: "tween",
+                          duration: 0.18,
                           ease: [0.22, 1, 0.36, 1]
                         }
                       }
                 }
                 transition={{
                   type: "tween",
-                  duration: shouldPulse ? 0.45 : 0.22,
-                  delay: shouldReduceMotion ? 0 : isSelected ? 0.06 : 0,
+                  duration: 0.2,
                   ease: [0.22, 1, 0.36, 1]
                 }}
-                style={{
-                  transformOrigin: "50% 70%"
-                }}
+                className={cn(
+                  "ios-touch-target relative z-10 grid h-14 place-items-center rounded-[20px] text-[28px] leading-none transition-[opacity,transform] active:scale-95 sm:h-16 sm:text-[30px]",
+                  isSelected ? "opacity-100" : "opacity-[0.58]"
+                )}
               >
-                {emoji}
-              </motion.span>
-            </motion.button>
-          );
-        })}
-      </div>
+                {isSelected ? (
+                  <motion.span
+                    className="absolute inset-0 rounded-[20px] bg-surface shadow-[0_8px_22px_rgba(15,23,42,0.1)] ring-1 ring-foreground/[0.07] dark:bg-surface-3 dark:shadow-none"
+                    layoutId="wizard-rating-active-pill"
+                    transition={{
+                      type: "tween",
+                      duration: 0.18,
+                      ease: [0.22, 1, 0.36, 1]
+                    }}
+                  />
+                ) : null}
+                {shouldPulse ? (
+                  <span
+                    key={`rating-tap-${value}-${pickerRun.id}`}
+                    className="iz-rating-picker-ripple absolute inset-1 rounded-[16px] bg-[var(--wizard-accent)]"
+                  />
+                ) : null}
+                <span
+                  key={isSelected ? `selected-${value}-${pickerRun.id}` : `option-${value}`}
+                  aria-hidden="true"
+                  className={cn(
+                    "relative z-10 origin-[50%_70%] transition-[opacity,transform] duration-200 ease-out",
+                    isSelected
+                      ? "translate-y-0 scale-[1.16] opacity-100"
+                      : "translate-y-0 scale-100 opacity-[0.78]",
+                    shouldPulse && "iz-rating-picker-pop"
+                  )}
+                  style={{
+                    transformOrigin: "50% 70%"
+                  }}
+                >
+                  {emoji}
+                </span>
+              </motion.button>
+            );
+          })}
+        </div>
+      </LayoutGroup>
     </div>
   );
 };

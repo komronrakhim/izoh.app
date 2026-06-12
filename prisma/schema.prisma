@@ -26,6 +26,13 @@ enum UserSystemRole {
 enum OrganizationStatus {
   ACTIVE
   ARCHIVED
+  DELETING
+}
+
+enum OrganizationDeletionJobStatus {
+  PENDING
+  DONE
+  FAILED
 }
 
 enum OrganizationModule {
@@ -79,6 +86,11 @@ enum OrganizationNotificationMode {
   OFF
 }
 
+enum OrganizationNotificationTargetStatus {
+  ACTIVE
+  DISCONNECTED
+}
+
 enum TelegramDeliveryStatus {
   PENDING
   SENT
@@ -89,6 +101,45 @@ enum TelegramDeliveryStatus {
 enum TelegramNotificationTargetType {
   OWNER_DM
   TELEGRAM_GROUP
+}
+
+enum SubscriptionPlanCode {
+  MONTHLY
+  ANNUAL
+}
+
+enum OrganizationSubscriptionStatus {
+  TRIALING
+  ACTIVE
+  EXPIRED
+  CANCELED
+  GRANTED
+}
+
+enum OrganizationSubscriptionSource {
+  TRIAL
+  TELEGRAM_STARS
+  ADMIN_GRANT
+}
+
+enum OrganizationSubscriptionPaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  CANCELED
+}
+
+enum OrganizationSubscriptionEventType {
+  TRIAL_STARTED
+  INVOICE_CREATED
+  PAYMENT_PAID
+  PAYMENT_FAILED
+  REFUNDED
+  ADMIN_GRANTED
+  EXPIRED
+  CANCELED
+  RENEWED
 }
 
 enum BroadcastTargetKind {
@@ -124,12 +175,18 @@ model User {
   locale_source LocaleSource   @default(TELEGRAM)
   system_role   UserSystemRole @default(USER)
 
-  owned_organizations     Organization[]                 @relation("OwnedOrganizations")
-  customer_submissions    Submission[]                   @relation("CustomerSubmissions")
-  media_upload_sessions   MediaUploadSession[]
-  notification_deliveries TelegramNotificationDelivery[] @relation("RecipientUserDeliveries")
-  created_broadcasts      Broadcast[]                    @relation("CreatedBroadcasts")
-  broadcast_recipients    BroadcastRecipient[]
+  owned_organizations               Organization[]                              @relation("OwnedOrganizations")
+  customer_submissions              Submission[]                                @relation("CustomerSubmissions")
+  media_upload_sessions             MediaUploadSession[]
+  notification_targets              OrganizationNotificationTarget[]            @relation("RecipientUserNotificationTargets")
+  notification_group_connect_tokens OrganizationNotificationGroupConnectToken[] @relation("NotificationGroupConnectTokensCreated")
+  notification_deliveries           TelegramNotificationDelivery[]              @relation("RecipientUserDeliveries")
+  subscription_grants               OrganizationSubscription[]                  @relation("GrantedOrganizationSubscriptions")
+  subscription_payments             OrganizationSubscriptionPayment[]           @relation("SubscriptionPaymentsByUser")
+  subscription_events               OrganizationSubscriptionEvent[]             @relation("SubscriptionEventsByUser")
+  created_broadcasts                Broadcast[]                                 @relation("CreatedBroadcasts")
+  broadcast_recipients              BroadcastRecipient[]
+  organization_deletion_jobs        OrganizationDeletionJob[]                   @relation("OrganizationDeletionJobsRequested")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -150,37 +207,185 @@ model Organization {
   contact_text        String             @default("")
   logo_media_asset_id String?
   locale              AppLocale          @default(RU)
+  time_zone           String             @default("UTC")
 
-  owner                User                             @relation("OwnedOrganizations", fields: [owner_user_id], references: [id], onDelete: Cascade)
-  module_settings      OrganizationModuleSetting[]
-  notification_setting OrganizationNotificationSetting?
-  guest_contexts       OrganizationGuestContext[]
-  staff_members        StaffMember[]
-  submissions          Submission[]
+  owner                             User                                        @relation("OwnedOrganizations", fields: [owner_user_id], references: [id], onDelete: Cascade)
+  module_settings                   OrganizationModuleSetting[]
+  notification_targets              OrganizationNotificationTarget[]
+  notification_group_connect_tokens OrganizationNotificationGroupConnectToken[]
+  subscription                      OrganizationSubscription?
+  subscription_payments             OrganizationSubscriptionPayment[]
+  subscription_events               OrganizationSubscriptionEvent[]
+  guest_contexts                    OrganizationGuestContext[]
+  staff_members                     StaffMember[]
+  submissions                       Submission[]
+  deletion_jobs                     OrganizationDeletionJob[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   @@index([owner_user_id, status])
   @@index([status, created_at])
+  @@index([time_zone])
 }
 
-model OrganizationNotificationSetting {
-  id                     String                       @id @default(cuid())
-  organization_id        String                       @unique
-  mode                   OrganizationNotificationMode @default(ALL)
-  owner_dm_enabled       Boolean                      @default(true)
-  telegram_group_enabled Boolean                      @default(false)
-  telegram_group_chat_id BigInt?
-  telegram_group_title   String?
+model OrganizationDeletionJob {
+  id                   String                        @id @default(cuid())
+  organization_id      String?
+  requested_by_user_id String?
+  organization_name    String
+  organization_slug    String
+  storage_objects      Json?
+  status               OrganizationDeletionJobStatus @default(PENDING)
+  attempt_count        Int                           @default(0)
+  next_attempt_at      DateTime                      @default(now())
+  locked_until         DateTime?
+  error                String?
+  started_at           DateTime?
+  completed_at         DateTime?
+  failed_at            DateTime?
 
-  organization Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  organization      Organization? @relation(fields: [organization_id], references: [id], onDelete: SetNull)
+  requested_by_user User?         @relation("OrganizationDeletionJobsRequested", fields: [requested_by_user_id], references: [id], onDelete: SetNull)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  @@index([mode])
-  @@index([telegram_group_enabled])
+  @@index([organization_id, created_at])
+  @@index([requested_by_user_id, created_at])
+  @@index([status, next_attempt_at, locked_until])
+}
+
+model OrganizationNotificationTarget {
+  id                  String                               @id @default(cuid())
+  organization_id     String
+  type                TelegramNotificationTargetType
+  status              OrganizationNotificationTargetStatus @default(ACTIVE)
+  mode                OrganizationNotificationMode         @default(ALL)
+  review_enabled      Boolean                              @default(true)
+  complaint_enabled   Boolean                              @default(true)
+  suggestion_enabled  Boolean                              @default(true)
+  telegram_chat_id    BigInt?
+  telegram_chat_title String?
+  recipient_user_id   String?
+  connected_at        DateTime?
+  disconnected_at     DateTime?
+  last_error          String?
+
+  organization   Organization                   @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  recipient_user User?                          @relation("RecipientUserNotificationTargets", fields: [recipient_user_id], references: [id], onDelete: Cascade)
+  deliveries     TelegramNotificationDelivery[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([organization_id, status])
+  @@index([organization_id, type])
+  @@index([type, status])
+  @@index([telegram_chat_id])
+}
+
+model OrganizationNotificationGroupConnectToken {
+  id                 String    @id @default(cuid())
+  organization_id    String
+  token              String    @unique
+  created_by_user_id String
+  expires_at         DateTime
+  used_at            DateTime?
+
+  organization    Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  created_by_user User         @relation("NotificationGroupConnectTokensCreated", fields: [created_by_user_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([organization_id, created_at])
+  @@index([created_by_user_id, created_at])
+  @@index([token, expires_at])
+}
+
+model OrganizationSubscription {
+  id                         String                         @id @default(cuid())
+  organization_id            String                         @unique
+  status                     OrganizationSubscriptionStatus @default(TRIALING)
+  plan_code                  SubscriptionPlanCode?
+  source                     OrganizationSubscriptionSource @default(TRIAL)
+  trial_started_at           DateTime?
+  trial_ends_at              DateTime?
+  current_period_started_at  DateTime?
+  current_period_ends_at     DateTime?
+  cancel_at_period_end       Boolean                        @default(false)
+  telegram_payment_charge_id String?
+  granted_by_user_id         String?
+  grant_reason               String?
+
+  organization    Organization                      @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  granted_by_user User?                             @relation("GrantedOrganizationSubscriptions", fields: [granted_by_user_id], references: [id], onDelete: SetNull)
+  payments        OrganizationSubscriptionPayment[]
+  events          OrganizationSubscriptionEvent[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([status, current_period_ends_at])
+  @@index([source, status])
+  @@index([granted_by_user_id, created_at])
+}
+
+model OrganizationSubscriptionPayment {
+  id                           String                                @id @default(cuid())
+  organization_id              String
+  subscription_id              String
+  payer_user_id                String?
+  plan_code                    SubscriptionPlanCode
+  amount_stars                 Int
+  currency                     String                                @default("XTR")
+  status                       OrganizationSubscriptionPaymentStatus @default(PENDING)
+  telegram_invoice_payload     String
+  telegram_payment_charge_id   String?                               @unique
+  provider_payment_charge_id   String?
+  is_recurring                 Boolean                               @default(false)
+  is_first_recurring           Boolean                               @default(false)
+  subscription_expiration_date DateTime?
+  raw_payload                  Json?
+  paid_at                      DateTime?
+  refunded_at                  DateTime?
+
+  organization Organization                    @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  subscription OrganizationSubscription        @relation(fields: [subscription_id], references: [id], onDelete: Cascade)
+  payer_user   User?                           @relation("SubscriptionPaymentsByUser", fields: [payer_user_id], references: [id], onDelete: SetNull)
+  events       OrganizationSubscriptionEvent[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([organization_id, status, created_at])
+  @@index([subscription_id, status, created_at])
+  @@index([payer_user_id, status, created_at])
+  @@index([telegram_invoice_payload, status, created_at])
+}
+
+model OrganizationSubscriptionEvent {
+  id              String                            @id @default(cuid())
+  organization_id String
+  subscription_id String?
+  payment_id      String?
+  actor_user_id   String?
+  type            OrganizationSubscriptionEventType
+  metadata        Json?
+
+  organization Organization                     @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  subscription OrganizationSubscription?        @relation(fields: [subscription_id], references: [id], onDelete: SetNull)
+  payment      OrganizationSubscriptionPayment? @relation(fields: [payment_id], references: [id], onDelete: SetNull)
+  actor_user   User?                            @relation("SubscriptionEventsByUser", fields: [actor_user_id], references: [id], onDelete: SetNull)
+
+  created_at DateTime @default(now())
+
+  @@index([organization_id, created_at])
+  @@index([subscription_id, created_at])
+  @@index([payment_id, created_at])
+  @@index([actor_user_id, created_at])
+  @@index([type, created_at])
 }
 
 model OrganizationModuleSetting {
@@ -258,6 +463,7 @@ model Submission {
   updated_at DateTime @updatedAt
 
   @@index([organization_id, created_at])
+  @@index([organization_id, kind, created_at])
   @@index([kind, created_at])
   @@index([target_staff_member_id, created_at])
   @@index([customer_user_id, created_at])
@@ -342,23 +548,31 @@ model MediaAsset {
 model TelegramNotificationDelivery {
   id                   String                         @id @default(cuid())
   submission_id        String
+  target_id            String
   target_type          TelegramNotificationTargetType @default(OWNER_DM)
   recipient_user_id    String?
   status               TelegramDeliveryStatus         @default(PENDING)
   telegram_chat_id     BigInt?
   telegram_message_ids Json?
   error                String?
+  attempt_count        Int                            @default(0)
+  next_attempt_at      DateTime                       @default(now())
+  locked_until         DateTime?
+  failed_at            DateTime?
   sent_at              DateTime?
 
-  submission     Submission @relation(fields: [submission_id], references: [id], onDelete: Cascade)
-  recipient_user User?      @relation("RecipientUserDeliveries", fields: [recipient_user_id], references: [id], onDelete: Cascade)
+  submission     Submission                     @relation(fields: [submission_id], references: [id], onDelete: Cascade)
+  target         OrganizationNotificationTarget @relation(fields: [target_id], references: [id], onDelete: Cascade)
+  recipient_user User?                          @relation("RecipientUserDeliveries", fields: [recipient_user_id], references: [id], onDelete: Cascade)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   @@index([submission_id, status])
+  @@index([target_id, status, created_at])
   @@index([recipient_user_id, status, created_at])
   @@index([target_type, status, created_at])
+  @@index([status, next_attempt_at, locked_until])
 }
 
 model Broadcast {

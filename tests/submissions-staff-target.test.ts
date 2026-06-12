@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { enqueueSubmissionNotifications } from "~/server/domain/notification-deliveries";
 import { createSubmission } from "~/server/domain/submissions";
-import { notifySubmissionRecipients } from "~/server/telegram";
 import type { SubmissionMetadata } from "~/shared/submissions";
 
-vi.mock("~/server/telegram", () => ({
-  notifySubmissionRecipients: vi.fn(async () => undefined)
+vi.mock("~/server/domain/notification-deliveries", () => ({
+  enqueueSubmissionNotifications: vi.fn(async () => 0)
 }));
 
-const notifySubmissionRecipientsMock = vi.mocked(notifySubmissionRecipients);
+const enqueueSubmissionNotificationsMock = vi.mocked(enqueueSubmissionNotifications);
 
 const createMockDb = ({
   activeStaffCount = 0,
@@ -79,7 +79,7 @@ const createMockDb = ({
 
 describe("submission staff targeting", () => {
   beforeEach(() => {
-    notifySubmissionRecipientsMock.mockResolvedValue(undefined);
+    enqueueSubmissionNotificationsMock.mockResolvedValue(0);
   });
 
   it("rejects unavailable staff members", async () => {
@@ -357,14 +357,8 @@ describe("submission staff targeting", () => {
     ).rejects.toThrow("Complaint topic is not available");
   });
 
-  it("does not fail submission creation when Telegram notification delivery fails", async () => {
-    notifySubmissionRecipientsMock.mockRejectedValueOnce(new Error("Bot token missing"));
-
-    const db = createMockDb({}) as {
-      telegramNotificationDelivery: {
-        create: ReturnType<typeof vi.fn>;
-      };
-    };
+  it("does not fail submission creation when notification enqueue fails", async () => {
+    enqueueSubmissionNotificationsMock.mockRejectedValueOnce(new Error("Database lock timeout"));
 
     await expect(
       createSubmission(
@@ -374,21 +368,11 @@ describe("submission staff targeting", () => {
           organizationId: "org_1",
           rating: 5
         },
-        db as never
+        createMockDb({})
       )
     ).resolves.toMatchObject({
       id: "submission_1"
     });
-
-    expect(db.telegramNotificationDelivery.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          error: "Bot token missing",
-          status: "FAILED",
-          submission_id: "submission_1"
-        })
-      })
-    );
   });
 
   it("attaches ready photos and reassigns media assets to the created submission", async () => {

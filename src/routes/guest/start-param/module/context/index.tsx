@@ -323,7 +323,7 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
             avatarUrl: staffMember.avatarUrl,
             icon: UserRound,
             id: staffMember.id,
-            subtitle: staffMember.roleTitle || t("customer.staffTarget.employeeSubtitle"),
+            subtitle: staffMember.roleTitle || undefined,
             targetType: "employee" as const,
             title: staffMember.displayName,
             tone: "bg-[#AF52DE] text-white"
@@ -336,7 +336,6 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
               {
                 icon: UsersRound,
                 id: TEAM_STAFF_TARGET_ID,
-                subtitle: t("customer.staffTarget.teamSubtitle"),
                 targetType: "team" as const,
                 title: t("customer.staffTarget.teamTitle"),
                 tone: "bg-[#007AFF] text-white"

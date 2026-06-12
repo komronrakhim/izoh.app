@@ -1,3 +1,5 @@
+import { Check } from "lucide-react";
+
 import { Avatar } from "~/common/components";
 import { cn } from "~/common/utils";
 import type { GuestEntryChannelId } from "~/shared/guest-entry";
@@ -84,15 +86,24 @@ export const WizardDetailsStep = ({
                 aria-pressed={active}
                 onClick={() => onSelectStaffTarget(target.id)}
                 className={cn(
-                  "ios-touch-target grid h-[132px] justify-items-center gap-2 rounded-[26px] bg-surface-2 p-3 text-center ring-1 ring-foreground/[0.06] transition-[box-shadow,transform] active:scale-[0.985]",
-                  active && "ring-2 ring-[color:var(--wizard-accent)]"
+                  "ios-touch-target relative grid min-h-[148px] content-start justify-items-center gap-2.5 rounded-[28px] bg-surface-2 p-3.5 text-center ring-1 ring-foreground/[0.06] transition-[background-color,box-shadow,ring-color,transform] active:scale-[0.985]",
+                  active &&
+                    "bg-[color-mix(in_srgb,var(--wizard-accent)_9%,var(--iz-surface-2))] shadow-[0_14px_30px_color-mix(in_srgb,var(--wizard-accent)_16%,transparent)] ring-2 ring-[color:var(--wizard-accent)] dark:shadow-none"
                 )}
               >
+                {active ? (
+                  <span className="absolute right-2.5 top-2.5 grid size-6 place-items-center rounded-full bg-[color:var(--wizard-accent)] text-white shadow-[0_8px_18px_color-mix(in_srgb,var(--wizard-accent)_28%,transparent)]">
+                    <Check size={13} strokeWidth={2.8} />
+                  </span>
+                ) : null}
                 {target.avatarUrl ? (
                   <Avatar
                     alt={target.title}
-                    className="size-[54px] rounded-[20px]"
-                    initialsClassName="ios-subhead"
+                    className={cn(
+                      "size-16 rounded-full ring-1 ring-foreground/[0.06]",
+                      active && "ring-2 ring-[color:var(--wizard-accent)]"
+                    )}
+                    initialsClassName="ios-title-3"
                     name={target.title}
                     seed={target.id}
                     src={target.avatarUrl}
@@ -100,20 +111,22 @@ export const WizardDetailsStep = ({
                 ) : (
                   <span
                     className={cn(
-                      "grid size-[54px] place-items-center rounded-[20px]",
+                      "grid size-16 place-items-center rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.24)]",
                       target.tone
                     )}
                   >
-                    <Icon size={22} strokeWidth={2.35} />
+                    <Icon size={25} strokeWidth={2.35} />
                   </span>
                 )}
-                <span className="grid min-w-0 gap-0.5">
-                  <span className="ios-subhead max-w-[128px] truncate font-semibold text-foreground">
+                <span className="grid min-w-0 max-w-full gap-0.5">
+                  <span className="ios-subhead max-w-[132px] truncate font-semibold text-foreground">
                     {target.title}
                   </span>
-                  <span className="ios-caption-1 max-w-[128px] truncate text-muted">
-                    {target.subtitle}
-                  </span>
+                  {target.subtitle ? (
+                    <span className="ios-caption-1 max-w-[132px] truncate text-muted">
+                      {target.subtitle}
+                    </span>
+                  ) : null}
                 </span>
               </button>
             );

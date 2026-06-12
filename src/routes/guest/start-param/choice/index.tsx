@@ -49,7 +49,7 @@ export const CustomerWizardChoicePage = () => {
         />
       ) : null}
 
-      <div className="flex flex-1 flex-col pt-4">
+      <div className="flex flex-1 flex-col pt-1">
         <motion.section
           key={wizard.getStepContentKey("choice")}
           className="grid content-start gap-5"

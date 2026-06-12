@@ -2,11 +2,12 @@ import * as React from "react";
 import {
   configureTmaBackButton,
   configureTmaMainButton,
+  configureTmaSecondaryButton,
   initTma,
   syncTmaTheme,
   tmaHaptics
 } from "./sdk";
-import type { TmaButtonState, TmaLaunchContext } from "./types";
+import type { TmaButtonState, TmaLaunchContext, TmaSecondaryButtonState } from "./types";
 
 const keyboardHeightCssVar = "--iz-keyboard-height";
 const keyboardScrollSpaceCssVar = "--iz-keyboard-scroll-space";
@@ -233,5 +234,30 @@ export const useTmaMainButton = (state: TmaButtonState | null, onClick: () => vo
 
   useBrowserLayoutEffect(() => {
     return configureTmaMainButton(state, () => onClickRef.current());
+  }, [stateKey]);
+};
+
+export const useTmaSecondaryButton = (
+  state: TmaSecondaryButtonState | null,
+  onClick: () => void
+) => {
+  const onClickRef = React.useRef(onClick);
+  const stateKey = JSON.stringify([
+    state?.color ?? null,
+    state?.enabled ?? null,
+    state?.loading ?? null,
+    state?.position ?? null,
+    state?.shine ?? null,
+    state?.text ?? null,
+    state?.textColor ?? null,
+    state?.visible ?? null
+  ]);
+
+  React.useEffect(() => {
+    onClickRef.current = onClick;
+  }, [onClick]);
+
+  useBrowserLayoutEffect(() => {
+    return configureTmaSecondaryButton(state, () => onClickRef.current());
   }, [stateKey]);
 };

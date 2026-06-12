@@ -20,6 +20,7 @@ import {
   type StaffModuleSettings
 } from "~/shared/module-settings";
 import type { StaffMemberItem } from "~/shared/staff";
+import { isOrganizationSubscriptionActive } from "~/server/domain/subscriptions";
 
 const toStaffMemberItem = (
   staffMember: {
@@ -124,7 +125,8 @@ export const getGuestEntryConfig = async (
         where: {
           is_active: true
         }
-      }
+      },
+      subscription: true
     },
     where: {
       OR: [
@@ -154,6 +156,29 @@ export const getGuestEntryConfig = async (
 
   if (guestEntryPayload.contextCode && !guestContext) {
     throw new Error("Guest entry context is not available.");
+  }
+
+  if (
+    organization.subscription !== undefined &&
+    !isOrganizationSubscriptionActive(organization.subscription)
+  ) {
+    return {
+      channels: [],
+      organization: {
+        description: organization.description,
+        id: organization.id,
+        locale: organization.locale,
+        logoUrl: null,
+        name: organization.name
+      },
+      staff: {
+        enabled: false,
+        items: [],
+        settings: getDefaultModuleSettings("staff")
+      },
+      qrContext: guestContext?.label,
+      startParam
+    };
   }
 
   const settingsByModule = new Map(

@@ -24,6 +24,7 @@ import { fetchApiJson } from "~/shared/api";
 import { useAdminOrganization } from "~/shared/admin";
 import { useI18n } from "~/shared/i18n/react";
 import { queryKeys } from "~/shared/query";
+import { getRatingEmoji, getRatingLabelKey } from "~/shared/ratings";
 import { PageTransition } from "~/shared/router/page-transition";
 import { openTmaTelegramLink, tmaHaptics, useTma, useTmaBackButton } from "~/shared/tma";
 import type {
@@ -131,18 +132,10 @@ const getRatingTone = (rating: number): "danger" | "success" | "warning" => {
   return "success";
 };
 
-const ratingEmojiByValue: Record<number, string> = {
-  1: "😡",
-  2: "😕",
-  3: "🙂",
-  4: "😊",
-  5: "😍"
-};
-
 const getRatingText = (
   rating: number,
   t: (key: string, options?: Record<string, unknown>) => string
-) => `${ratingEmojiByValue[rating] ?? "🙂"} ${t(`customer.wizard.rating.labels.${rating}`)}`;
+) => `${getRatingEmoji(rating)} ${t(getRatingLabelKey(rating))}`;
 
 const isImportantSubmission = (submission: AdminSubmissionItem) =>
   submission.kind === "COMPLAINT" ||

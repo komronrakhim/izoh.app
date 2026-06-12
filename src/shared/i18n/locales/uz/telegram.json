@@ -1,4 +1,9 @@
 {
+  "groupConnect": {
+    "success": "Tayyor, men aloqadaman ✨\n\n«{{organizationName}}» bildirishnomalari endi shu guruhga keladi.\nMehmon izoh, shikoyat yoki taklif qoldirsa, uni shu yerga yuboraman.",
+    "errorOwner": "Bu guruhni joy egasi tanlashi kerak.",
+    "errorInvalid": "Guruhni ulab bo‘lmadi. Bildirishnomalarni ochib, guruhni yana tanlang."
+  },
   "notifications": {
     "headline": {
       "review": "Yangi izoh",
@@ -6,39 +11,18 @@
       "complaint": "Yangi shikoyat",
       "suggestion": "Yangi taklif"
     },
-    "sections": {
-      "summary": "Qisqacha",
-      "place": "Joy",
-      "guest": "Mijoz",
-      "details": "Tafsilotlar",
-      "message": "Xabar"
-    },
     "fields": {
-      "kind": "Turi",
       "customer": "Mijoz",
-      "type": "Turi",
-      "organization": "Joy",
-      "source": "Qayerdan",
-      "rating": "Baho",
-      "attachments": "Foto",
-      "signal": "Signal",
-      "topics": "Mavzular",
-      "staff": "Kimga tegishli",
-      "contact": "Kontakt"
+      "contact": "Mehmon kontakti"
     },
     "staffTarget": {
-      "team": "butun jamoa",
-      "unknown": "aniq emas"
+      "team": "Butun jamoa",
+      "unknown": "Xodim ko‘rsatilmagan"
     },
-    "signals": {
-      "lowRating": "e'tibor kerak",
-      "important": "muhim murojaat"
-    },
-    "emptyText": "Izohsiz",
-    "kind": {
-      "review": "Izoh",
-      "complaint": "Shikoyat",
-      "suggestion": "Taklif"
+    "emptyText": {
+      "REVIEW": "Mehmon baho qoldirdi, izoh yozmadi.",
+      "COMPLAINT": "Mehmon shikoyat yubordi, izoh yozmadi.",
+      "SUGGESTION": "Mehmon taklif yubordi, izoh yozmadi."
     }
   }
 }

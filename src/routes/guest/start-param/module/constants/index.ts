@@ -1,6 +1,9 @@
 import type { GuestEntryChannelId } from "~/shared/guest-entry";
+import { ratingOptions, type RatingValue } from "~/shared/ratings";
 
 import type { WizardChoiceId } from "../types";
+
+export { ratingOptions, type RatingValue };
 
 export const choiceToneClassNames = {
   great: "bg-[#FFB000] text-white",
@@ -87,31 +90,6 @@ export const doneTransition = {
     ease: [0.22, 1, 0.36, 1]
   }
 } as const;
-
-export const ratingOptions = [
-  {
-    emoji: "😡",
-    value: 1
-  },
-  {
-    emoji: "🙁",
-    value: 2
-  },
-  {
-    emoji: "😐",
-    value: 3
-  },
-  {
-    emoji: "🙂",
-    value: 4
-  },
-  {
-    emoji: "😍",
-    value: 5
-  }
-] as const;
-
-export type RatingValue = (typeof ratingOptions)[number]["value"];
 
 type RatingScenePosition = {
   delay: number;

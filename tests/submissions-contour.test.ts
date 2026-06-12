@@ -6,8 +6,8 @@ import {
   getSubmissionAdminItem
 } from "~/server/domain/submissions";
 
-vi.mock("~/server/telegram", () => ({
-  notifySubmissionRecipients: vi.fn(async () => undefined)
+vi.mock("~/server/domain/notification-deliveries", () => ({
+  enqueueSubmissionNotifications: vi.fn(async () => 0)
 }));
 
 const createContourDb = () => {
