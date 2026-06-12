@@ -8,6 +8,7 @@ import { enqueueSubmissionNotifications } from "~/server/domain/notification-del
 import { getDomainDb, type DomainDb } from "~/server/domain/shared";
 import { isOrganizationSubscriptionActive } from "~/server/domain/subscriptions";
 import { SUBMISSION_PHOTO_LIMIT } from "~/server/media";
+import { getMediaPublicUrl } from "~/server/media/public-url";
 import { DEFAULT_GUEST_MENU_ENABLED_BY_ID } from "~/shared/guest-menu";
 import {
   parseModuleSettingsConfig,
@@ -166,7 +167,9 @@ const assertSubmissionAvailability = async ({
       const avatarAsset = staffMember.avatar_media_asset_id
         ? await db.mediaAsset.findFirst({
             select: {
-              public_url: true
+              bucket: true,
+              public_url: true,
+              storage_key: true
             },
             where: {
               id: staffMember.avatar_media_asset_id,
@@ -178,7 +181,7 @@ const assertSubmissionAvailability = async ({
 
       if (typeof staffMember.display_name === "string" && staffMember.display_name.trim()) {
         staffTargetSnapshot = {
-          avatarUrl: avatarAsset?.public_url ?? null,
+          avatarUrl: avatarAsset ? getMediaPublicUrl(avatarAsset) : null,
           displayName: staffMember.display_name,
           id: staffMember.id,
           roleTitle: staffMember.role_title
@@ -403,7 +406,9 @@ export const toAdminSubmissionItem = (submission: {
   attachments: Array<{
     id: string;
     media_asset: {
+      bucket: string;
       public_url: string;
+      storage_key: string;
     };
     sort_order: number;
   }>;
@@ -430,7 +435,7 @@ export const toAdminSubmissionItem = (submission: {
   return {
     attachments: submission.attachments.map((attachment) => ({
       id: attachment.id,
-      publicUrl: attachment.media_asset.public_url,
+      publicUrl: getMediaPublicUrl(attachment.media_asset),
       sortOrder: attachment.sort_order
     })),
     bodyText: submission.body_text,
@@ -510,7 +515,9 @@ export const getOrganizationSubmissions = async (
           include: {
             media_asset: {
               select: {
-                public_url: true
+                bucket: true,
+                public_url: true,
+                storage_key: true
               }
             }
           },
@@ -588,7 +595,9 @@ export const getSubmissionAdminItem = async (
         include: {
           media_asset: {
             select: {
-              public_url: true
+              bucket: true,
+              public_url: true,
+              storage_key: true
             }
           }
         },

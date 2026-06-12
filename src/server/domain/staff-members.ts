@@ -1,4 +1,5 @@
 import { getDomainDb, type DomainDb } from "~/server/domain/shared";
+import { getMediaPublicUrl } from "~/server/media/public-url";
 import type { StaffMemberItem, StaffMembersPayload } from "~/shared/staff";
 
 type StaffMemberInput = {
@@ -60,8 +61,10 @@ const getAvatarUrlByAssetId = async (avatarMediaAssetIds: Array<null | string>, 
 
   const assets = await db.mediaAsset.findMany({
     select: {
+      bucket: true,
       id: true,
-      public_url: true
+      public_url: true,
+      storage_key: true
     },
     where: {
       id: {
@@ -72,7 +75,7 @@ const getAvatarUrlByAssetId = async (avatarMediaAssetIds: Array<null | string>, 
     }
   });
 
-  return new Map(assets.map((asset) => [asset.id, asset.public_url]));
+  return new Map(assets.map((asset) => [asset.id, getMediaPublicUrl(asset)]));
 };
 
 const assertStaffAvatarAsset = async ({

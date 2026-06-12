@@ -67,6 +67,7 @@ import {
   headLocalMediaObject,
   putLocalMediaObject
 } from "~/server/media";
+import { getMediaPublicUrl } from "~/server/media/public-url";
 import { renderOrganizationQrPdf } from "~/server/pdf";
 import {
   getTelegramBot,
@@ -964,7 +965,9 @@ export const createApiApp = () => {
       const logoAsset = organization.logo_media_asset_id
         ? await db.mediaAsset.findFirst({
             select: {
-              public_url: true
+              bucket: true,
+              public_url: true,
+              storage_key: true
             },
             where: {
               id: organization.logo_media_asset_id,
@@ -981,7 +984,7 @@ export const createApiApp = () => {
       });
       const pdf = await renderOrganizationQrPdf({
         locale: fromPrismaLocale(organization.locale),
-        organizationLogoUrl: logoAsset?.public_url ?? null,
+        organizationLogoUrl: logoAsset ? getMediaPublicUrl(logoAsset) : null,
         organizationName: organization.name,
         template: {
           ...input,

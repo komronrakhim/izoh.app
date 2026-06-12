@@ -22,6 +22,7 @@ import {
 import type { StaffMemberItem } from "~/shared/staff";
 import { isOrganizationSubscriptionActive } from "~/server/domain/subscriptions";
 import { fromPrismaLocale } from "~/shared/i18n";
+import { getMediaPublicUrl } from "~/server/media/public-url";
 
 const toStaffMemberItem = (
   staffMember: {
@@ -86,8 +87,10 @@ const getAvatarUrlByAssetId = async (avatarMediaAssetIds: Array<null | string>, 
 
   const assets = await db.mediaAsset.findMany({
     select: {
+      bucket: true,
       id: true,
-      public_url: true
+      public_url: true,
+      storage_key: true
     },
     where: {
       id: {
@@ -98,7 +101,7 @@ const getAvatarUrlByAssetId = async (avatarMediaAssetIds: Array<null | string>, 
     }
   });
 
-  return new Map(assets.map((asset) => [asset.id, asset.public_url]));
+  return new Map(assets.map((asset) => [asset.id, getMediaPublicUrl(asset)]));
 };
 
 export const getGuestEntryConfig = async (
@@ -188,7 +191,9 @@ export const getGuestEntryConfig = async (
   const logoAsset = organization.logo_media_asset_id
     ? await db.mediaAsset.findFirst({
         select: {
-          public_url: true
+          bucket: true,
+          public_url: true,
+          storage_key: true
         },
         where: {
           id: organization.logo_media_asset_id,
@@ -236,7 +241,7 @@ export const getGuestEntryConfig = async (
       description: organization.description,
       id: organization.id,
       locale: fromPrismaLocale(organization.locale),
-      logoUrl: logoAsset?.public_url ?? null,
+      logoUrl: logoAsset ? getMediaPublicUrl(logoAsset) : null,
       name: organization.name
     },
     staff: getEffectiveStaff({

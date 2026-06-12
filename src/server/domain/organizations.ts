@@ -5,6 +5,7 @@ import {
   createInitialOrganizationSubscriptionData,
   isOrganizationSubscriptionActive
 } from "~/server/domain/subscriptions";
+import { getMediaPublicUrl } from "~/server/media/public-url";
 import { MAX_ADMIN_ORGANIZATIONS, type AdminOrganization } from "~/shared/admin/organizations";
 import {
   DEFAULT_ORGANIZATION_PRESET_ID,
@@ -95,8 +96,10 @@ export const getAdminOrganizations = async (userId: string, db: DomainDb = getDo
     logoAssetIds.length > 0
       ? await db.mediaAsset.findMany({
           select: {
+            bucket: true,
             id: true,
-            public_url: true
+            public_url: true,
+            storage_key: true
           },
           where: {
             id: {
@@ -107,7 +110,7 @@ export const getAdminOrganizations = async (userId: string, db: DomainDb = getDo
           }
         })
       : [];
-  const logoUrlByAssetId = new Map(logoAssets.map((asset) => [asset.id, asset.public_url]));
+  const logoUrlByAssetId = new Map(logoAssets.map((asset) => [asset.id, getMediaPublicUrl(asset)]));
 
   const items = organizations.map<AdminOrganization>((organization) =>
     toAdminOrganization({
@@ -237,8 +240,10 @@ export const updateAdminOrganizationLogo = async (
 
   const logoAsset = await db.mediaAsset.findFirst({
     select: {
+      bucket: true,
       id: true,
-      public_url: true
+      public_url: true,
+      storage_key: true
     },
     where: {
       id: logoMediaAssetId,
@@ -266,7 +271,7 @@ export const updateAdminOrganizationLogo = async (
   });
   return {
     organization: toAdminOrganization({
-      logoUrl: logoAsset.public_url,
+      logoUrl: getMediaPublicUrl(logoAsset),
       organization: updatedOrganization,
       role: "OWNER"
     })
