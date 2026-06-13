@@ -1,6 +1,7 @@
 import type { SubmissionKind } from "../../../prisma/generated/prisma/client";
 
 import { getDomainDb, type DomainDb } from "~/server/domain/shared";
+import { getMediaPublicUrl } from "~/server/media/public-url";
 import { createTranslator, fromPrismaLocale } from "~/shared/i18n";
 import type { AppLocale } from "~/shared/i18n";
 import { isImportantSubmission } from "~/shared/notifications";
@@ -288,7 +289,7 @@ export const sendTelegramNotificationDelivery = async (
 
   const bot = getTelegramBot();
   const photoUrls = delivery.submission.attachments
-    .map((attachment) => attachment.media_asset.public_url)
+    .map((attachment) => getMediaPublicUrl(attachment.media_asset))
     .slice(0, 4);
   const text = formatSubmissionNotificationText({
     locale,
