@@ -9,7 +9,6 @@ import {
   WizardContactStep,
   WizardDetailsStep,
   WizardDoneStep,
-  WizardFooter,
   WizardMessageStep,
   WizardProgress,
   WizardRatingStep,
@@ -98,7 +97,6 @@ export const CustomerWizardStepPage = () => {
     return null;
   }
 
-  const showNativeFallbackFooter = Boolean(mainButtonState);
   const progressMeta = wizard.progressMetaForStep(step);
 
   return (
@@ -213,16 +211,6 @@ export const CustomerWizardStepPage = () => {
           </motion.section>
         </AnimatePresence>
       </div>
-
-      {showNativeFallbackFooter && mainButtonState ? (
-        <WizardFooter
-          disabled={!mainButtonState.enabled}
-          isSubmitting={Boolean(mainButtonState.loading)}
-          label={mainButtonState.text}
-          onClick={() => wizard.goNext(step)}
-          showSendIcon={step === "summary"}
-        />
-      ) : null}
     </>
   );
 };

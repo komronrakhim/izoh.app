@@ -5,7 +5,6 @@ import {
   Bell,
   CalendarClock,
   Check,
-  CreditCard,
   ImagePlus,
   Inbox,
   Languages,
@@ -17,7 +16,6 @@ import * as React from "react";
 
 import {
   Badge,
-  Button,
   List,
   ListIcon,
   PendingScreen,
@@ -617,20 +615,6 @@ export const AdminSubscriptionPage = () => {
                 items={benefitItems}
                 title={t("admin.subscription.benefits.previewTitle")}
               />
-
-              <section className="tma-fallback-action sticky bottom-0 z-10 grid gap-3 bg-surface/80 pt-2 backdrop-blur-xl">
-                <Button
-                  disabled={!canPay}
-                  state={isPaying ? "loading" : "idle"}
-                  type="button"
-                  wide
-                  onClick={() => invoiceMutation.mutate(selectedPlanCode)}
-                >
-                  <CreditCard aria-hidden="true" size={18} strokeWidth={2.35} />
-                  {payButtonText}
-                  <StarCurrencyIcon className="size-3.5" />
-                </Button>
-              </section>
             </>
           )}
         </div>

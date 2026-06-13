@@ -85,7 +85,7 @@ export const AdminOrganizationProvider = ({ children }: { children: React.ReactN
   );
 
   const organizationsQuery = useQuery({
-    enabled: isReady,
+    enabled: isReady && Boolean(initDataRaw),
     queryFn: () =>
       fetchApiJson<AdminOrganizationsPayload>("/api/admin/organizations", {
         initDataRaw

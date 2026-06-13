@@ -3,7 +3,6 @@ export * from "./wizard-contact-step";
 export * from "./wizard-details-step";
 export * from "./wizard-done-step";
 export * from "./wizard-empty-state";
-export * from "./wizard-footer";
 export * from "./wizard-header";
 export * from "./wizard-message-step";
 export * from "./wizard-progress";

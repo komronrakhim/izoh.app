@@ -422,10 +422,6 @@
     padding-bottom: 28px;
   }
 
-  [data-tma="true"] .tma-fallback-action {
-    display: none;
-  }
-
   .iz-glass {
     isolation: isolate;
     overflow: hidden;

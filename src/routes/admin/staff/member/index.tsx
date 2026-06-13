@@ -1,10 +1,10 @@
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { ImagePlus, Save, Trash2, UserRound } from "lucide-react";
+import { ImagePlus, Trash2, UserRound } from "lucide-react";
 import * as React from "react";
 
 import { Avatar } from "~/common/components";
-import { Button, Input, List, ListIcon, PendingScreen, Toggle } from "~/common/ui";
+import { Input, List, ListIcon, PendingScreen, Toggle } from "~/common/ui";
 import { cn } from "~/common/utils";
 import { useAdminOrganization } from "~/shared/admin";
 import { useI18n } from "~/shared/i18n/react";
@@ -487,19 +487,6 @@ export const AdminStaffMemberPage = () => {
               }
             ]}
           />
-
-          <section className="grid gap-3 px-4">
-            <Button
-              className="tma-fallback-action"
-              disabled={!canSave}
-              state={isSaving ? "loading" : "idle"}
-              type="submit"
-              wide
-            >
-              <Save size={16} />
-              {mainButtonText}
-            </Button>
-          </section>
         </form>
       </main>
     </PageTransition>

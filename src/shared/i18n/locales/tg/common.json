@@ -3,6 +3,11 @@
   "appType": "Mini App",
   "loading": "Бор шуда истодааст...",
   "poweredBy": "Izoh",
+  "tmaOnly": {
+    "title": "Дар Telegram кушоед",
+    "subtitle": "Izoh ҳамчун Mini App кор мекунад, бинобар ин админка ва формаи меҳмон танҳо дар дохили Telegram дастрасанд.",
+    "action": "Кушодани Izoh"
+  },
   "actions": {
     "clear": "Тоза кардан"
   },

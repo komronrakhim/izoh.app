@@ -3,6 +3,11 @@
   "appType": "Mini App",
   "loading": "Завантажуємо...",
   "poweredBy": "Izoh",
+  "tmaOnly": {
+    "title": "Відкрийте в Telegram",
+    "subtitle": "Izoh працює як Mini App, тому адмінка і гостьова форма доступні лише всередині Telegram.",
+    "action": "Відкрити Izoh"
+  },
   "actions": {
     "clear": "Очистити"
   },

@@ -3,6 +3,11 @@
   "appType": "Mini App",
   "loading": "Yuklanmoqda...",
   "poweredBy": "Izoh",
+  "tmaOnly": {
+    "title": "Telegramda oching",
+    "subtitle": "Izoh Mini App sifatida ishlaydi, shuning uchun admin panel va mehmon formasi faqat Telegram ichida ochiladi.",
+    "action": "Izohni ochish"
+  },
   "actions": {
     "clear": "Tozalash"
   },

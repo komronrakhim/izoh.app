@@ -13,7 +13,7 @@ import {
 import * as React from "react";
 
 import { Avatar } from "~/common/components";
-import { Button, Input } from "~/common/ui";
+import { Input } from "~/common/ui";
 import { cn } from "~/common/utils";
 import {
   MAX_ADMIN_ORGANIZATIONS,
@@ -455,12 +455,6 @@ export const AdminOrganizationCreatePage = () => {
               </div>
               <p className="ios-footnote px-4 text-muted">{t("admin.organizations.presetHint")}</p>
             </div>
-          </section>
-
-          <section className="tma-fallback-action sticky bottom-0 z-10 grid gap-3 bg-surface/80 pt-2 backdrop-blur-xl">
-            <Button disabled={!canSave} state={isSaving ? "loading" : "idle"} type="submit" wide>
-              {mainButtonText}
-            </Button>
           </section>
         </form>
       </main>

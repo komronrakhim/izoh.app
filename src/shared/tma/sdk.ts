@@ -131,7 +131,7 @@ const callIfAvailable = <Args extends unknown[]>(
 
     return fn(...args);
   } catch {
-    // Telegram methods are best-effort because the app also runs in browser during development.
+    // Telegram methods are best-effort because client capabilities vary across Telegram surfaces.
     return undefined;
   }
 };

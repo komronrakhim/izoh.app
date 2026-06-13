@@ -3,6 +3,11 @@
   "appType": "Mini App",
   "loading": "Loading...",
   "poweredBy": "Izoh",
+  "tmaOnly": {
+    "title": "Open in Telegram",
+    "subtitle": "Izoh works as a Mini App, so the admin area and guest form are available only inside Telegram.",
+    "action": "Open Izoh"
+  },
   "actions": {
     "clear": "Clear"
   },

@@ -1,10 +1,10 @@
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { ImagePlus, Plus, UserRound } from "lucide-react";
+import { ImagePlus, UserRound } from "lucide-react";
 import * as React from "react";
 
 import { Avatar } from "~/common/components";
-import { Button, Input, PendingScreen } from "~/common/ui";
+import { Input, PendingScreen } from "~/common/ui";
 import { cn } from "~/common/utils";
 import { useAdminOrganization } from "~/shared/admin";
 import { useI18n } from "~/shared/i18n/react";
@@ -357,16 +357,6 @@ export const AdminStaffCreatePage = () => {
               wide
               onChange={(event) => setRoleTitle(event.target.value)}
             />
-            <Button
-              className="tma-fallback-action"
-              disabled={!canSave}
-              state={isSaving ? "loading" : "idle"}
-              type="submit"
-              wide
-            >
-              <Plus size={16} />
-              {mainButtonText}
-            </Button>
           </section>
         </form>
       </main>

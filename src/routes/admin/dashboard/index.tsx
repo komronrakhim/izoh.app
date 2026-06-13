@@ -26,7 +26,7 @@ import {
 import * as React from "react";
 
 import { Avatar } from "~/common/components";
-import { Button, List, ListIcon, LogoWordmark, PendingScreen, Spinner } from "~/common/ui";
+import { List, ListIcon, LogoWordmark, PendingScreen, Spinner } from "~/common/ui";
 import { cn } from "~/common/utils";
 import { fetchApiJson } from "~/shared/api";
 import {
@@ -236,19 +236,6 @@ const AdminEmptyIntro = () => {
               {t(`common.locales.${locale}.label`)}
             </span>
           </button>
-
-          {!tma.isTelegram ? (
-            <Button
-              className="tma-fallback-action"
-              size="lg"
-              variant="primary"
-              wide
-              onClick={goToCreateOrganization}
-            >
-              {t("admin.organizations.introAction")}
-              <ArrowRight aria-hidden="true" size={18} strokeWidth={2.35} />
-            </Button>
-          ) : null}
         </section>
       </main>
     </PageTransition>

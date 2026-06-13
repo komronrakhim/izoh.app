@@ -1,10 +1,9 @@
 import * as React from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Download } from "lucide-react";
 import QRCode from "qrcode";
 
-import { Button, Input, List, PendingScreen, Textarea, Toggle } from "~/common/ui";
+import { Input, List, PendingScreen, Textarea, Toggle } from "~/common/ui";
 import { cn } from "~/common/utils";
 import { fetchApiJson } from "~/shared/api";
 import { useAdminOrganization } from "~/shared/admin";
@@ -22,7 +21,6 @@ import {
   QR_EMOJI_THEME_BY_ID,
   QR_FORMATS,
   QR_FORMAT_BY_ID,
-  createQrPdfFileName,
   getQrAlignmentPatternCenters,
   getQrEmojiForMark,
   getQrEmojiAssetPath,
@@ -980,8 +978,7 @@ export const AdminQrConstructor = () => {
     setIsPdfActionPending(true);
 
     try {
-      const deliveryQuery = tma.isTelegram ? "?delivery=chat" : "";
-      const response = await fetch(`/api/organizations/${organization.id}/qr-pdf${deliveryQuery}`, {
+      const response = await fetch(`/api/organizations/${organization.id}/qr-pdf?delivery=chat`, {
         body: JSON.stringify({
           caption: cleanCaption,
           context: cleanQrContext,
@@ -1004,23 +1001,6 @@ export const AdminQrConstructor = () => {
         throw new Error("QR PDF action failed.");
       }
 
-      if (!tma.isTelegram) {
-        const blob = await response.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-
-        link.href = objectUrl;
-        link.download = createQrPdfFileName({
-          context: cleanQrContext,
-          organizationName: organization.name,
-          organizationSlug: organization.slug
-        });
-        document.body.append(link);
-        link.click();
-        link.remove();
-        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1200);
-      }
-
       tmaHaptics.notification("success");
     } catch {
       tmaHaptics.notification("error");
@@ -1039,7 +1019,6 @@ export const AdminQrConstructor = () => {
     organization,
     showContext,
     activeQrStyle,
-    tma.isTelegram,
     tma.initDataRaw
   ]);
 
@@ -1256,19 +1235,6 @@ export const AdminQrConstructor = () => {
             <p className="ios-footnote px-1 text-muted">{t("qr.constructor.context.hint")}</p>
           </section>
 
-          {!tma.isTelegram ? (
-            <Button
-              disabled={!qrTargetUrl || isPdfActionPending}
-              state={isPdfActionPending ? "loading" : "idle"}
-              type="button"
-              variant="primary"
-              wide
-              onClick={handlePdfAction}
-            >
-              <Download size={17} strokeWidth={2.35} />
-              {t("qr.constructor.downloadPdf")}
-            </Button>
-          ) : null}
         </div>
       </main>
     </PageTransition>
