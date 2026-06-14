@@ -114,6 +114,12 @@ export const QR_EMOJI_OPACITY_DEFAULT = 1.75;
 export const QR_EMOJI_OPACITY_MAX = 3.2;
 export const QR_EMOJI_OPACITY_MIN = 1.15;
 
+const PDF_POINTS_PER_INCH = 72;
+const PDF_POINTS_PER_MM = PDF_POINTS_PER_INCH / 25.4;
+const toPdfPoints = (value: number) => Number(value.toFixed(3));
+const mmToPdfPoints = (value: number) => toPdfPoints(value * PDF_POINTS_PER_MM);
+const inchesToPdfPoints = (value: number) => toPdfPoints(value * PDF_POINTS_PER_INCH);
+
 export const QR_EMOJI_OPACITY_PRESETS = [
   { id: "soft", opacity: 1.15 },
   { id: "visible", opacity: QR_EMOJI_OPACITY_DEFAULT },
@@ -141,15 +147,15 @@ export const QR_FORMATS: QrFormat[] = [
     allowCustomHeadline: true,
     allowEmoji: true,
     id: "table",
-    aspectRatio: "306 / 432",
+    aspectRatio: "105 / 148",
     captionMaxLength: 76,
     compact: false,
     contextMaxLength: 52,
-    heightPt: 420,
+    heightPt: mmToPdfPoints(148),
     headlineMaxLength: 34,
     previewWidthClassName: "max-w-[298px]",
     qrStyles: QR_VISUAL_STYLES,
-    widthPt: 298
+    widthPt: mmToPdfPoints(105)
   },
   {
     allowCaption: true,
@@ -157,15 +163,15 @@ export const QR_FORMATS: QrFormat[] = [
     allowCustomHeadline: true,
     allowEmoji: true,
     id: "stand",
-    aspectRatio: "288 / 432",
+    aspectRatio: "4 / 6",
     captionMaxLength: 84,
     compact: false,
     contextMaxLength: 60,
-    heightPt: 432,
+    heightPt: inchesToPdfPoints(6),
     headlineMaxLength: 36,
     previewWidthClassName: "max-w-[294px]",
     qrStyles: QR_VISUAL_STYLES,
-    widthPt: 288
+    widthPt: inchesToPdfPoints(4)
   },
   {
     allowCaption: true,
@@ -173,15 +179,15 @@ export const QR_FORMATS: QrFormat[] = [
     allowCustomHeadline: true,
     allowEmoji: true,
     id: "poster",
-    aspectRatio: "420 / 595",
+    aspectRatio: "148 / 210",
     captionMaxLength: 112,
     compact: false,
     contextMaxLength: 64,
-    heightPt: 595,
+    heightPt: mmToPdfPoints(210),
     headlineMaxLength: 44,
     previewWidthClassName: "max-w-[315px]",
     qrStyles: QR_VISUAL_STYLES,
-    widthPt: 420
+    widthPt: mmToPdfPoints(148)
   },
   {
     allowCaption: false,
@@ -192,12 +198,12 @@ export const QR_FORMATS: QrFormat[] = [
     captionMaxLength: 0,
     compact: true,
     contextMaxLength: 0,
-    heightPt: 170,
+    heightPt: mmToPdfPoints(60),
     headlineMaxLength: 0,
     id: "sticker",
     previewWidthClassName: "max-w-[286px]",
     qrStyles: QR_VISUAL_STYLES,
-    widthPt: 170
+    widthPt: mmToPdfPoints(60)
   }
 ];
 export const QR_EMOJI_THEMES = [

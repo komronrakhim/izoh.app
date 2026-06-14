@@ -78,6 +78,27 @@ const registerFonts = (doc: PDFKit.PDFDocument) => {
   doc.registerFont("OpenRunde-Bold", fontBoldPath);
 };
 
+const setPagePrintBoxes = (doc: PDFKit.PDFDocument, width: number, height: number) => {
+  const pageDictionary = (
+    doc.page as unknown as {
+      dictionary?: {
+        data?: Record<string, unknown>;
+      };
+    }
+  ).dictionary;
+  const pageData = pageDictionary?.data;
+
+  if (!pageData) {
+    return;
+  }
+
+  for (const boxName of ["MediaBox", "CropBox", "TrimBox", "BleedBox", "ArtBox"] as const) {
+    pageData[boxName] = [0, 0, width, height];
+  }
+
+  pageData.UserUnit = 1;
+};
+
 const normalizeFontText = (value: string) => value.replace(/\s+/g, " ").trim();
 
 const emojiImageCache = new Map<string, Promise<Buffer | null>>();
@@ -500,6 +521,7 @@ export const renderOrganizationQrPdf = async ({
     size: [format.widthPt, format.heightPt]
   });
   const result = collectPdf(doc);
+  setPagePrintBoxes(doc, format.widthPt, format.heightPt);
   registerFonts(doc);
   const pageWidth = doc.page.width;
   const pageHeight = doc.page.height;

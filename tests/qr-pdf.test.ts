@@ -6,11 +6,14 @@ import { renderOrganizationQrPdf } from "~/server/pdf";
 import {
   QR_EMOJI_THEMES,
   QR_FORMATS,
+  QR_FORMAT_BY_ID,
   createQrPdfFileName,
   getQrEmojiAssetPath,
   getQrEmojiScene,
   getQrFormatLayout
 } from "~/shared/qr";
+
+const ptToMm = (value: number) => (value * 25.4) / 72;
 
 describe("organization QR PDF", () => {
   it("maps QR emoji themes to local Fluent assets", () => {
@@ -105,6 +108,27 @@ describe("organization QR PDF", () => {
 
       expect(pdf.subarray(0, 4).toString()).toBe("%PDF");
       expect(pdf.length).toBeGreaterThan(10_000);
+
+      const pdfText = pdf.toString("latin1");
+      const expectedBox = `[0 0 ${format.widthPt} ${format.heightPt}]`;
+
+      for (const boxName of ["MediaBox", "CropBox", "TrimBox", "BleedBox", "ArtBox"]) {
+        expect(pdfText).toContain(`/${boxName} ${expectedBox}`);
+      }
     }
+  });
+
+  it("matches declared print format sizes", () => {
+    expect(ptToMm(QR_FORMAT_BY_ID.table.widthPt)).toBeCloseTo(105, 2);
+    expect(ptToMm(QR_FORMAT_BY_ID.table.heightPt)).toBeCloseTo(148, 2);
+
+    expect(QR_FORMAT_BY_ID.stand.widthPt).toBe(288);
+    expect(QR_FORMAT_BY_ID.stand.heightPt).toBe(432);
+
+    expect(ptToMm(QR_FORMAT_BY_ID.poster.widthPt)).toBeCloseTo(148, 2);
+    expect(ptToMm(QR_FORMAT_BY_ID.poster.heightPt)).toBeCloseTo(210, 2);
+
+    expect(ptToMm(QR_FORMAT_BY_ID.sticker.widthPt)).toBeCloseTo(60, 2);
+    expect(ptToMm(QR_FORMAT_BY_ID.sticker.heightPt)).toBeCloseTo(60, 2);
   });
 });
