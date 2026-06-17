@@ -50,12 +50,23 @@ import {
 import {
   answerSubscriptionPreCheckoutQuery,
   applySuccessfulSubscriptionPayment,
+  cancelOrganizationSubscription,
   createOrganizationSubscriptionInvoice,
   getOrganizationSubscriptionPayload,
   grantOrganizationSubscription,
   toOrganizationSubscriptionPayload
 } from "~/server/domain/subscriptions";
-import { getSystemPulse, recordGuestEntryScan } from "~/server/domain/system";
+import {
+  getSystemOrganizationDetail,
+  getSystemOrganizations,
+  getSystemPulse,
+  getSystemStars,
+  getSystemSubmissions,
+  getSystemUserDetail,
+  getSystemUsers,
+  recordGuestEntryScan,
+  recordSystemAuditLog
+} from "~/server/domain/system";
 import { syncUserContactFromTelegram, syncUserFromTelegram } from "~/server/domain/users";
 import {
   createGuestEntryStartParam,
@@ -79,6 +90,7 @@ import {
 } from "~/server/telegram";
 import { getOptionalEnv, getRequiredEnv } from "~/server/config/env";
 import { isGuestMenuItemId } from "~/shared/guest-menu";
+import type { GuestEntryConfigPayload } from "~/shared/guest-entry";
 import {
   APP_LOCALES,
   fromPrismaLocale,
@@ -171,6 +183,10 @@ const systemSubscriptionGrantSchema = z.object({
   reason: z.string().trim().max(160).optional()
 });
 
+const systemSubscriptionCancelSchema = z.object({
+  reason: z.string().trim().max(160).optional()
+});
+
 const qrHexColorSchema = z.string().regex(/^#[0-9a-f]{6}$/i);
 const qrCaptionMaxLength = Math.max(...QR_FORMATS.map((format) => format.captionMaxLength));
 const qrHeadlineMaxLength = Math.max(...QR_FORMATS.map((format) => format.headlineMaxLength));
@@ -200,6 +216,15 @@ const isNonProduction = () => process.env.NODE_ENV !== "production";
 const databaseRequired = (c: Context) => c.json({ error: "Database is required." }, 503);
 
 const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
+const guestEntryConfigCache = new Map<
+  string,
+  {
+    expiresAt: number;
+    value: Promise<GuestEntryConfigPayload>;
+  }
+>();
+const guestEntryConfigCacheTtlMs = 20_000;
+const guestEntryConfigCacheMaxEntries = 500;
 
 const getClientAddress = (c: Context) => {
   const forwardedFor = c.req.header("x-forwarded-for")?.split(",")[0]?.trim();
@@ -245,6 +270,46 @@ const enforceRateLimit = (
   }
 
   return c.json({ error: "Too many requests. Please try again later." }, 429);
+};
+
+const getCachedGuestEntryConfig = ({
+  db,
+  startParam
+}: {
+  db: NonNullable<ReturnType<typeof getPrisma>>;
+  startParam: string;
+}) => {
+  const now = Date.now();
+  const cached = guestEntryConfigCache.get(startParam);
+
+  if (cached && cached.expiresAt > now) {
+    return cached.value;
+  }
+
+  if (guestEntryConfigCache.size >= guestEntryConfigCacheMaxEntries) {
+    for (const [key, item] of guestEntryConfigCache.entries()) {
+      if (item.expiresAt <= now || guestEntryConfigCache.size >= guestEntryConfigCacheMaxEntries) {
+        guestEntryConfigCache.delete(key);
+      }
+    }
+  }
+
+  const value = getGuestEntryConfig(
+    {
+      startParam
+    },
+    db
+  ).catch((error) => {
+    guestEntryConfigCache.delete(startParam);
+    throw error;
+  });
+
+  guestEntryConfigCache.set(startParam, {
+    expiresAt: now + guestEntryConfigCacheTtlMs,
+    value
+  });
+
+  return value;
 };
 
 const getTelegramInitDataFromRequest = (c: {
@@ -827,6 +892,191 @@ export const createApiApp = () => {
     }
   });
 
+  app.get("/api/system/organizations", async (c) => {
+    const cursor = c.req.query("cursor")?.trim() || undefined;
+    const periodQuery = c.req.query("period")?.trim() || "7D";
+    const search = c.req.query("search")?.trim() || undefined;
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    if (!isSystemPulsePeriod(periodQuery)) {
+      return c.json({ error: "Invalid system pulse period." }, 400);
+    }
+
+    try {
+      await requireSystemAdmin({ c, db });
+
+      return c.json(await getSystemOrganizations({ cursor, period: periodQuery, search }, db));
+    } catch (error) {
+      if (error instanceof Error) {
+        const status = getSystemAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      throw error;
+    }
+  });
+
+  app.get("/api/system/organizations/:organizationId", async (c) => {
+    const cursor = c.req.query("cursor")?.trim() || undefined;
+    const organizationId = c.req.param("organizationId");
+    const periodQuery = c.req.query("period")?.trim() || "7D";
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    if (!isSystemPulsePeriod(periodQuery)) {
+      return c.json({ error: "Invalid system pulse period." }, 400);
+    }
+
+    try {
+      await requireSystemAdmin({ c, db });
+
+      return c.json(
+        await getSystemOrganizationDetail({ cursor, organizationId, period: periodQuery }, db)
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        const status = getSystemAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      if (error instanceof Error && error.message.includes("Organization is not available")) {
+        return c.json({ error: error.message }, 404);
+      }
+
+      throw error;
+    }
+  });
+
+  app.get("/api/system/users", async (c) => {
+    const cursor = c.req.query("cursor")?.trim() || undefined;
+    const periodQuery = c.req.query("period")?.trim() || "7D";
+    const search = c.req.query("search")?.trim() || undefined;
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    if (!isSystemPulsePeriod(periodQuery)) {
+      return c.json({ error: "Invalid system pulse period." }, 400);
+    }
+
+    try {
+      await requireSystemAdmin({ c, db });
+
+      return c.json(await getSystemUsers({ cursor, period: periodQuery, search }, db));
+    } catch (error) {
+      if (error instanceof Error) {
+        const status = getSystemAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      throw error;
+    }
+  });
+
+  app.get("/api/system/users/:userId", async (c) => {
+    const cursor = c.req.query("cursor")?.trim() || undefined;
+    const userId = c.req.param("userId");
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    try {
+      await requireSystemAdmin({ c, db });
+
+      return c.json(await getSystemUserDetail({ cursor, userId }, db));
+    } catch (error) {
+      if (error instanceof Error) {
+        const status = getSystemAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      if (error instanceof Error && error.message.includes("User is not available")) {
+        return c.json({ error: error.message }, 404);
+      }
+
+      throw error;
+    }
+  });
+
+  app.get("/api/system/submissions", async (c) => {
+    const cursor = c.req.query("cursor")?.trim() || undefined;
+    const periodQuery = c.req.query("period")?.trim() || "7D";
+    const search = c.req.query("search")?.trim() || undefined;
+    const kindQuery = c.req.query("kind")?.trim() || undefined;
+    const kind = kindQuery ? submissionKindSchema.parse(kindQuery) : undefined;
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    if (!isSystemPulsePeriod(periodQuery)) {
+      return c.json({ error: "Invalid system pulse period." }, 400);
+    }
+
+    try {
+      await requireSystemAdmin({ c, db });
+
+      return c.json(await getSystemSubmissions({ cursor, kind, period: periodQuery, search }, db));
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return c.json({ error: "Invalid submissions filter." }, 400);
+      }
+
+      if (error instanceof Error) {
+        const status = getSystemAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      throw error;
+    }
+  });
+
+  app.get("/api/system/stars", async (c) => {
+    const cursor = c.req.query("cursor")?.trim() || undefined;
+    const periodQuery = c.req.query("period")?.trim() || "7D";
+    const search = c.req.query("search")?.trim() || undefined;
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    if (!isSystemPulsePeriod(periodQuery)) {
+      return c.json({ error: "Invalid system pulse period." }, 400);
+    }
+
+    try {
+      await requireSystemAdmin({ c, db });
+
+      return c.json(await getSystemStars({ cursor, period: periodQuery, search }, db));
+    } catch (error) {
+      if (error instanceof Error) {
+        const status = getSystemAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      throw error;
+    }
+  });
+
   app.post("/api/system/organizations/:organizationId/subscription/grant", async (c) => {
     const organizationId = c.req.param("organizationId");
     const input = systemSubscriptionGrantSchema.parse(await c.req.json());
@@ -844,6 +1094,69 @@ export const createApiApp = () => {
           organizationId,
           planCode: input.planCode,
           reason: input.reason
+        },
+        db
+      );
+      await recordSystemAuditLog(
+        {
+          action: "SUBSCRIPTION_GRANTED",
+          actorUserId: user.id,
+          metadata: {
+            planCode: input.planCode,
+            reason: input.reason ?? null
+          },
+          targetId: organizationId,
+          targetType: "ORGANIZATION"
+        },
+        db
+      );
+
+      return c.json({
+        subscription: toOrganizationSubscriptionPayload(subscription)
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const status = getSystemAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      if (error instanceof Error && error.message.includes("Organization is not available")) {
+        return c.json({ error: error.message }, 404);
+      }
+
+      throw error;
+    }
+  });
+
+  app.post("/api/system/organizations/:organizationId/subscription/cancel", async (c) => {
+    const organizationId = c.req.param("organizationId");
+    const input = systemSubscriptionCancelSchema.parse(await c.req.json());
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    try {
+      const user = await requireSystemAdmin({ c, db });
+      const subscription = await cancelOrganizationSubscription(
+        {
+          actorUserId: user.id,
+          organizationId,
+          reason: input.reason
+        },
+        db
+      );
+      await recordSystemAuditLog(
+        {
+          action: "SUBSCRIPTION_CANCELED",
+          actorUserId: user.id,
+          metadata: {
+            reason: input.reason ?? null
+          },
+          targetId: organizationId,
+          targetType: "ORGANIZATION"
         },
         db
       );
@@ -1160,12 +1473,10 @@ export const createApiApp = () => {
     }
 
     try {
-      const guestEntryConfig = await getGuestEntryConfig(
-        {
-          startParam
-        },
-        db
-      );
+      const guestEntryConfig = await getCachedGuestEntryConfig({
+        db,
+        startParam
+      });
       let userId: string | undefined;
       let userLocale: string | undefined;
 

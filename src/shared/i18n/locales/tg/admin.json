@@ -147,8 +147,8 @@
   },
   "system": {
     "badge": "Система",
-    "title": "Набзи Izoh",
-    "subtitle": "Рақамҳои зиндаи маҳсулот: сканҳо, муроҷиатҳо, корбарон ва ҷойҳо.",
+    "title": "Набз",
+    "subtitle": "Манзараи кӯтоҳи маҳсулот: чӣ кушода мешавад, чӣ навишта мешавад ва пардохтҳо аз куҷо мегузаранд.",
     "accessTitle": "Дастрасӣ нест",
     "accessHint": "Ин бахш танҳо барои админҳои система аст.",
     "loadErrorTitle": "Набзро кушода нашуд",
@@ -177,12 +177,81 @@
       "activeSubscriptions": "Обунаҳо",
       "newInPeriod": "+{{count}} дар давра",
       "total": "Ҳамагӣ {{count}}",
-      "allTime": "Ҳама вақт"
+      "allTime": "Ҳама вақт",
+      "paidStars": "Stars",
+      "trendUp": "+{{count}} нисбат ба давраи гузашта",
+      "trendDown": "-{{count}} нисбат ба давраи гузашта",
+      "trendFlat": "Мисли давраи гузашта"
     },
     "sections": {
       "recentSubmissions": "Муроҷиатҳои охирин",
       "organizations": "Ҷойҳо",
-      "organizationsHint": "Рақамҳои сатр: сканҳо ва муроҷиатҳо барои давраи интихобшуда."
+      "organizationsHint": "Рақамҳои сатр: сканҳо ва муроҷиатҳо барои давраи интихобшуда.",
+      "hub": "Бахшҳо",
+      "users": "Корбарон",
+      "submissions": "Муроҷиатҳо",
+      "stars": "Stars",
+      "starsPayments": "Пардохтҳои Stars",
+      "auditLog": "Амалҳо",
+      "userInfo": "Профил",
+      "userOrganizations": "Ҷойҳои корбар",
+      "userSubmissions": "Муроҷиатҳои корбар"
+    },
+    "conversionTitle": "Сканҳо ба муроҷиат табдил меёбанд",
+    "conversionHint": "Нишон медиҳад, ки QR ва форма чӣ қадар кор мекунанд.",
+    "subscriptionUntil": "То {{date}} фаъол аст",
+    "userMeta": "ID {{telegramId}} · {{locale}}",
+    "emptyUsers": "Ҳоло корбар нест.",
+    "emptyStars": "Ҳоло пардохти Stars нест.",
+    "pages": {
+      "organizationsHint": "Ҳама ҷойҳо, соҳибон, сканҳо, муроҷиатҳо ва ҳолати обуна.",
+      "organizationsCount": "Ҳамагӣ ҷойҳо: {{count}}.",
+      "usersHint": "Одамоне, ки Mini App кушодаанд, ҷой сохтаанд ё муроҷиат фиристодаанд.",
+      "usersCount": "Ҳамагӣ корбарон: {{count}}.",
+      "submissionsHint": "Ҳама муроҷиатҳо бо ҷустуҷӯ аз рӯи матн, ҷой ва контекст.",
+      "starsHint": "Пардохтҳо, invoice ва шумораи Stars-и воқеан гузашта."
+    },
+    "search": {
+      "organizations": "Ҷой ё соҳибро ёбед",
+      "users": "Корбар, @username ё телефон",
+      "submissions": "Матн, ҷой ё контекст",
+      "stars": "Ҷой, пардохткунанда ё charge id"
+    },
+    "paymentStatus": {
+      "PENDING": "Интизори пардохт",
+      "PAID": "Пардохт шуд",
+      "FAILED": "Нагузашт",
+      "REFUNDED": "Баргардонида шуд",
+      "CANCELED": "Бекор шуд"
+    },
+    "guest": "Меҳмон",
+    "anonymousGuest": "Меҳмони бе профил",
+    "userId": "ID {{value}}",
+    "photos": "Акс: {{count}}",
+    "userTelegram": "Профили Telegram",
+    "userLanguage": "Забони телефон: {{value}}",
+    "audit": {
+      "systemActor": "Система",
+      "SUBSCRIPTION_GRANTED": "Обуна дастӣ дода шуд",
+      "SUBSCRIPTION_CANCELED": "Обуна бекор карда шуд"
+    },
+    "grantPopup": {
+      "title": "Додани обуна",
+      "message": "Муҳлатро интихоб кунед. Обуна фавран фаъол мешавад.",
+      "month": "Барои як моҳ",
+      "year": "Барои як сол"
+    },
+    "manageAction": "Идора",
+    "managePopup": {
+      "title": "Идораи обуна",
+      "message": "Метавонед дастрасиро дароз кунед ё обунаи фаъолро бекор намоед.",
+      "grant": "Дароз / иваз кардан",
+      "cancelSubscription": "Бекор кардани обуна"
+    },
+    "cancelPopup": {
+      "title": "Обуна бекор шавад?",
+      "message": "Дастрасии ин ҷой фавран қатъ мешавад. Баъдан метавонед обунаи нав диҳед.",
+      "confirm": "Бекор кардан"
     }
   },
   "faq": {

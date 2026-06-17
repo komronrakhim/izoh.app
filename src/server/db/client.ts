@@ -7,6 +7,12 @@ declare global {
   var izohPrismaGlobal: PrismaClient | undefined;
 }
 
+const readPositiveIntegerEnv = (key: string, fallback: number) => {
+  const value = Number(process.env[key] ?? "");
+
+  return Number.isInteger(value) && value > 0 ? value : fallback;
+};
+
 const createPrismaClient = () => {
   const databaseUrl = process.env.DATABASE_URL;
 
@@ -17,7 +23,10 @@ const createPrismaClient = () => {
   const pool =
     globalThis.izohPrismaPoolGlobal ??
     (globalThis.izohPrismaPoolGlobal = new Pool({
-      connectionString: databaseUrl
+      connectionString: databaseUrl,
+      connectionTimeoutMillis: readPositiveIntegerEnv("DATABASE_POOL_CONNECT_TIMEOUT_MS", 5_000),
+      idleTimeoutMillis: readPositiveIntegerEnv("DATABASE_POOL_IDLE_TIMEOUT_MS", 30_000),
+      max: readPositiveIntegerEnv("DATABASE_POOL_MAX", 10)
     }));
 
   const client =

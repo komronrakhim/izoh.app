@@ -513,4 +513,45 @@ export const grantOrganizationSubscription = async (
   return updatedSubscription;
 };
 
+export const cancelOrganizationSubscription = async (
+  {
+    actorUserId,
+    organizationId,
+    reason
+  }: {
+    actorUserId?: string;
+    organizationId: string;
+    reason?: string;
+  },
+  db: DomainDb = getDomainDb()
+) => {
+  const subscription = await getOrCreateOrganizationSubscription(organizationId, db);
+  const now = new Date();
+  const updatedSubscription = await db.organizationSubscription.update({
+    data: {
+      cancel_at_period_end: false,
+      current_period_ends_at: now,
+      grant_reason: reason?.trim() || null,
+      status: "CANCELED"
+    },
+    where: {
+      id: subscription.id
+    }
+  });
+
+  await db.organizationSubscriptionEvent.create({
+    data: {
+      actor_user_id: actorUserId,
+      metadata: {
+        reason: reason?.trim() || null
+      } as Prisma.InputJsonObject,
+      organization_id: organizationId,
+      subscription_id: subscription.id,
+      type: "CANCELED"
+    }
+  });
+
+  return updatedSubscription;
+};
+
 export { SUBSCRIPTION_PLANS };

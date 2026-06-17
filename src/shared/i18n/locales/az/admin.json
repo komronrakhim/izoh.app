@@ -147,8 +147,8 @@
   },
   "system": {
     "badge": "Sistem",
-    "title": "Izoh nəbzi",
-    "subtitle": "Məhsulun canlı rəqəmləri: skanlar, müraciətlər, istifadəçilər və məkanlar.",
+    "title": "Nəbz",
+    "subtitle": "Məhsulun qısa mənzərəsi: nə açılır, nə yazılır və ödənişlər haradan keçir.",
     "accessTitle": "Giriş yoxdur",
     "accessHint": "Bu bölmə yalnız sistem adminləri üçündür.",
     "loadErrorTitle": "Nəbzi açmaq olmadı",
@@ -177,12 +177,81 @@
       "activeSubscriptions": "Abunələr",
       "newInPeriod": "+{{count}} bu dövrdə",
       "total": "Cəmi {{count}}",
-      "allTime": "Bütün dövr"
+      "allTime": "Bütün dövr",
+      "paidStars": "Stars",
+      "trendUp": "Əvvəlki dövrlə müqayisədə +{{count}}",
+      "trendDown": "Əvvəlki dövrlə müqayisədə -{{count}}",
+      "trendFlat": "Əvvəlki dövrlə eyni"
     },
     "sections": {
       "recentSubmissions": "Son müraciətlər",
       "organizations": "Məkanlar",
-      "organizationsHint": "Sətirlərdəki rəqəmlər seçilən dövr üçün skanlar və müraciətlərdir."
+      "organizationsHint": "Sətirlərdəki rəqəmlər seçilən dövr üçün skanlar və müraciətlərdir.",
+      "hub": "Bölmələr",
+      "users": "İstifadəçilər",
+      "submissions": "Müraciətlər",
+      "stars": "Stars",
+      "starsPayments": "Stars ödənişləri",
+      "auditLog": "Əməliyyatlar",
+      "userInfo": "Profil",
+      "userOrganizations": "İstifadəçinin məkanları",
+      "userSubmissions": "İstifadəçinin müraciətləri"
+    },
+    "conversionTitle": "Skanlar müraciətə çevrilir",
+    "conversionHint": "QR və formanın işləyib-işləmədiyini göstərir.",
+    "subscriptionUntil": "{{date}} tarixinə qədər aktivdir",
+    "userMeta": "ID {{telegramId}} · {{locale}}",
+    "emptyUsers": "Hələ istifadəçi yoxdur.",
+    "emptyStars": "Hələ Stars ödənişi yoxdur.",
+    "pages": {
+      "organizationsHint": "Bütün məkanlar, sahiblər, skanlar, müraciətlər və abunə vəziyyəti.",
+      "organizationsCount": "Cəmi məkan: {{count}}.",
+      "usersHint": "Mini App açan, məkan yaradan və ya müraciət göndərən insanlar.",
+      "usersCount": "Cəmi istifadəçi: {{count}}.",
+      "submissionsHint": "Mətn, məkan və kontekst üzrə axtarılan bütün müraciətlər.",
+      "starsHint": "Ödənişlər, invoice-lar və real keçən Stars sayı."
+    },
+    "search": {
+      "organizations": "Məkan və ya sahib axtar",
+      "users": "İstifadəçi, @username və ya telefon",
+      "submissions": "Mətn, məkan və ya kontekst",
+      "stars": "Məkan, ödəyən və ya charge id"
+    },
+    "paymentStatus": {
+      "PENDING": "Ödəniş gözlənilir",
+      "PAID": "Ödənilib",
+      "FAILED": "Keçmədi",
+      "REFUNDED": "Geri qaytarılıb",
+      "CANCELED": "Ləğv edilib"
+    },
+    "guest": "Qonaq",
+    "anonymousGuest": "Profilsiz qonaq",
+    "userId": "ID {{value}}",
+    "photos": "Foto: {{count}}",
+    "userTelegram": "Telegram profili",
+    "userLanguage": "Telefon dili: {{value}}",
+    "audit": {
+      "systemActor": "Sistem",
+      "SUBSCRIPTION_GRANTED": "Abunəlik əl ilə verildi",
+      "SUBSCRIPTION_CANCELED": "Abunəlik ləğv edildi"
+    },
+    "grantPopup": {
+      "title": "Abunəlik ver",
+      "message": "Müddəti seçin. Abunəlik dərhal aktiv olacaq.",
+      "month": "Bir ay",
+      "year": "Bir il"
+    },
+    "manageAction": "İdarə et",
+    "managePopup": {
+      "title": "Abunəliyi idarə et",
+      "message": "Girişi uzada və ya aktiv abunəliyi ləğv edə bilərsiniz.",
+      "grant": "Uzat / dəyiş",
+      "cancelSubscription": "Abunəliyi ləğv et"
+    },
+    "cancelPopup": {
+      "title": "Abunəlik ləğv edilsin?",
+      "message": "Bu məkan üçün giriş dərhal dayanacaq. Sonra yenidən abunəlik verə bilərsiniz.",
+      "confirm": "Ləğv et"
     }
   },
   "faq": {

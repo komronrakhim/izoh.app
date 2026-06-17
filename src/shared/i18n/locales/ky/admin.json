@@ -147,8 +147,8 @@
   },
   "system": {
     "badge": "Система",
-    "title": "Izoh пульсу",
-    "subtitle": "Продукттун жандуу сандары: скандар, кайрылуулар, колдонуучулар жана жерлер.",
+    "title": "Пульс",
+    "subtitle": "Продукттун кыска сүрөтү: эмне ачылууда, эмне жазылууда жана төлөмдөр кайда өтүүдө.",
     "accessTitle": "Кирүү жок",
     "accessHint": "Бул бөлүм системалык админдер үчүн гана.",
     "loadErrorTitle": "Пульсту ачуу мүмкүн болгон жок",
@@ -177,12 +177,81 @@
       "activeSubscriptions": "Жазылуулар",
       "newInPeriod": "+{{count}} мезгилде",
       "total": "Жалпы {{count}}",
-      "allTime": "Бардык убакыт"
+      "allTime": "Бардык убакыт",
+      "paidStars": "Stars",
+      "trendUp": "Мурунку мезгилге караганда +{{count}}",
+      "trendDown": "Мурунку мезгилге караганда -{{count}}",
+      "trendFlat": "Мурунку мезгилдей эле"
     },
     "sections": {
       "recentSubmissions": "Акыркы кайрылуулар",
       "organizations": "Жерлер",
-      "organizationsHint": "Катардагы сандар: тандалган мезгилдеги скандар жана кайрылуулар."
+      "organizationsHint": "Катардагы сандар: тандалган мезгилдеги скандар жана кайрылуулар.",
+      "hub": "Бөлүмдөр",
+      "users": "Колдонуучулар",
+      "submissions": "Кайрылуулар",
+      "stars": "Stars",
+      "starsPayments": "Stars төлөмдөрү",
+      "auditLog": "Аракеттер",
+      "userInfo": "Профиль",
+      "userOrganizations": "Колдонуучунун жайлары",
+      "userSubmissions": "Колдонуучунун кайрылуулары"
+    },
+    "conversionTitle": "Скандар кайрылууга айланат",
+    "conversionHint": "QR жана форма канчалык иштеп жатканын көрсөтөт.",
+    "subscriptionUntil": "{{date}} чейин активдүү",
+    "userMeta": "ID {{telegramId}} · {{locale}}",
+    "emptyUsers": "Азырынча колдонуучу жок.",
+    "emptyStars": "Азырынча Stars төлөмү жок.",
+    "pages": {
+      "organizationsHint": "Бардык жерлер, ээлери, скандар, кайрылуулар жана жазылуу абалы.",
+      "organizationsCount": "Жалпы жерлер: {{count}}.",
+      "usersHint": "Mini App ачкан, жер түзгөн же кайрылуу калтырган адамдар.",
+      "usersCount": "Жалпы колдонуучулар: {{count}}.",
+      "submissionsHint": "Текст, жер жана контекст боюнча издеген бардык кайрылуулар.",
+      "starsHint": "Төлөмдөр, invoice жана чыныгы өткөн Stars саны."
+    },
+    "search": {
+      "organizations": "Жерди же ээсин табуу",
+      "users": "Колдонуучу, @username же телефон",
+      "submissions": "Текст, жер же контекст",
+      "stars": "Жер, төлөөчү же charge id"
+    },
+    "paymentStatus": {
+      "PENDING": "Төлөм күтүлүүдө",
+      "PAID": "Төлөндү",
+      "FAILED": "Өткөн жок",
+      "REFUNDED": "Кайтарылды",
+      "CANCELED": "Жокко чыгарылды"
+    },
+    "guest": "Конок",
+    "anonymousGuest": "Профили жок конок",
+    "userId": "ID {{value}}",
+    "photos": "Сүрөт: {{count}}",
+    "userTelegram": "Telegram профили",
+    "userLanguage": "Телефон тили: {{value}}",
+    "audit": {
+      "systemActor": "Система",
+      "SUBSCRIPTION_GRANTED": "Жазылуу кол менен берилди",
+      "SUBSCRIPTION_CANCELED": "Жазылуу жокко чыгарылды"
+    },
+    "grantPopup": {
+      "title": "Жазылуу берүү",
+      "message": "Мөөнөттү тандаңыз. Жазылуу дароо иштей баштайт.",
+      "month": "Бир айга",
+      "year": "Бир жылга"
+    },
+    "manageAction": "Башкаруу",
+    "managePopup": {
+      "title": "Жазылууну башкаруу",
+      "message": "Кирүүнү узарта аласыз же активдүү жазылууну жокко чыгара аласыз.",
+      "grant": "Узартуу / өзгөртүү",
+      "cancelSubscription": "Жазылууну жокко чыгаруу"
+    },
+    "cancelPopup": {
+      "title": "Жазылуу жокко чыгарылсынбы?",
+      "message": "Бул жай үчүн кирүү дароо токтойт. Кийин кайра жазылуу бере аласыз.",
+      "confirm": "Жокко чыгаруу"
     }
   },
   "faq": {

@@ -147,8 +147,8 @@
   },
   "system": {
     "badge": "Система",
-    "title": "Пульс Izoh",
-    "subtitle": "Живі цифри продукту: скани, звернення, користувачі та місця.",
+    "title": "Пульс",
+    "subtitle": "Коротка картина продукту: що відкривають, що пишуть і де проходять оплати.",
     "accessTitle": "Немає доступу",
     "accessHint": "Цей розділ доступний лише системним адміністраторам.",
     "loadErrorTitle": "Не вдалося відкрити Пульс",
@@ -177,12 +177,81 @@
       "activeSubscriptions": "Підписки",
       "newInPeriod": "+{{count}} за період",
       "total": "Усього {{count}}",
-      "allTime": "За весь час"
+      "allTime": "За весь час",
+      "paidStars": "Stars",
+      "trendUp": "+{{count}} до попереднього періоду",
+      "trendDown": "-{{count}} до попереднього періоду",
+      "trendFlat": "Як у попередньому періоді"
     },
     "sections": {
       "recentSubmissions": "Останні звернення",
       "organizations": "Місця",
-      "organizationsHint": "Числа в рядках: скани та звернення за вибраний період."
+      "organizationsHint": "Числа в рядках: скани та звернення за вибраний період.",
+      "hub": "Розділи",
+      "users": "Користувачі",
+      "submissions": "Звернення",
+      "stars": "Stars",
+      "starsPayments": "Платежі Stars",
+      "auditLog": "Дії",
+      "userInfo": "Профіль",
+      "userOrganizations": "Місця користувача",
+      "userSubmissions": "Звернення користувача"
+    },
+    "conversionTitle": "Скани стають зверненнями",
+    "conversionHint": "Показує, чи працюють QR і сама форма.",
+    "subscriptionUntil": "Діє до {{date}}",
+    "userMeta": "ID {{telegramId}} · {{locale}}",
+    "emptyUsers": "Користувачів поки немає.",
+    "emptyStars": "Оплат Stars поки немає.",
+    "pages": {
+      "organizationsHint": "Усі місця продукту, власники, скани, звернення та підписка.",
+      "organizationsCount": "Усього місць: {{count}}.",
+      "usersHint": "Люди, які відкривали Mini App, створювали місця або залишали звернення.",
+      "usersCount": "Усього користувачів: {{count}}.",
+      "submissionsHint": "Усі звернення продукту з пошуком за текстом, місцем і контекстом.",
+      "starsHint": "Оплати, інвойси і скільки Stars реально пройшло."
+    },
+    "search": {
+      "organizations": "Знайти місце або власника",
+      "users": "Знайти користувача, @username або телефон",
+      "submissions": "Знайти текст, місце або контекст",
+      "stars": "Знайти місце, платника або charge id"
+    },
+    "paymentStatus": {
+      "PENDING": "Очікує оплату",
+      "PAID": "Оплачено",
+      "FAILED": "Не пройшло",
+      "REFUNDED": "Повернення",
+      "CANCELED": "Скасовано"
+    },
+    "guest": "Гість",
+    "anonymousGuest": "Гість без профілю",
+    "userId": "ID {{value}}",
+    "photos": "Фото: {{count}}",
+    "userTelegram": "Telegram-профіль",
+    "userLanguage": "Мова телефона: {{value}}",
+    "audit": {
+      "systemActor": "Система",
+      "SUBSCRIPTION_GRANTED": "Підписку видано вручну",
+      "SUBSCRIPTION_CANCELED": "Підписку анульовано"
+    },
+    "grantPopup": {
+      "title": "Видати підписку",
+      "message": "Виберіть строк. Підписка почне діяти одразу.",
+      "month": "На місяць",
+      "year": "На рік"
+    },
+    "manageAction": "Керувати",
+    "managePopup": {
+      "title": "Керування підпискою",
+      "message": "Можна продовжити доступ або анулювати активну підписку.",
+      "grant": "Продовжити / змінити",
+      "cancelSubscription": "Анулювати"
+    },
+    "cancelPopup": {
+      "title": "Анулювати підписку?",
+      "message": "Доступ для місця зупиниться одразу. Потім можна видати нову підписку.",
+      "confirm": "Анулювати"
     }
   },
   "faq": {

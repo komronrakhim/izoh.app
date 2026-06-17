@@ -336,6 +336,7 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
         ...(guestEntryConfig.staff.settings.allowTeamReview
           ? [
               {
+                avatarUrl: guestEntryConfig.organization.logoUrl ?? null,
                 icon: UsersRound,
                 id: TEAM_STAFF_TARGET_ID,
                 targetType: "team" as const,
@@ -363,6 +364,7 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
       guestEntryConfig?.staff.enabled,
       guestEntryConfig?.staff.items,
       guestEntryConfig?.staff.settings,
+      guestEntryConfig?.organization.logoUrl,
       t
     ]
   );

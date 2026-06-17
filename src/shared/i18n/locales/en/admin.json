@@ -147,8 +147,8 @@
   },
   "system": {
     "badge": "System",
-    "title": "Izoh Pulse",
-    "subtitle": "Live product numbers: scans, feedback, users, and places.",
+    "title": "Pulse",
+    "subtitle": "A short product picture: what opens, what guests send, and where payments happen.",
     "accessTitle": "No access",
     "accessHint": "This section is available only to system admins.",
     "loadErrorTitle": "Could not open Pulse",
@@ -177,12 +177,81 @@
       "activeSubscriptions": "Subscriptions",
       "newInPeriod": "+{{count}} for period",
       "total": "Total {{count}}",
-      "allTime": "All time"
+      "allTime": "All time",
+      "paidStars": "Stars",
+      "trendUp": "+{{count}} vs previous period",
+      "trendDown": "-{{count}} vs previous period",
+      "trendFlat": "Same as previous period"
     },
     "sections": {
       "recentSubmissions": "Latest feedback",
       "organizations": "Places",
-      "organizationsHint": "Row numbers show scans and feedback for the selected period."
+      "organizationsHint": "Row numbers show scans and feedback for the selected period.",
+      "hub": "Sections",
+      "users": "Users",
+      "submissions": "Feedback",
+      "stars": "Stars",
+      "starsPayments": "Stars payments",
+      "auditLog": "Actions",
+      "userInfo": "Profile",
+      "userOrganizations": "User places",
+      "userSubmissions": "User messages"
+    },
+    "conversionTitle": "Scans become feedback",
+    "conversionHint": "Shows whether QR and the form are doing their job.",
+    "subscriptionUntil": "Active until {{date}}",
+    "userMeta": "ID {{telegramId}} · {{locale}}",
+    "emptyUsers": "No users yet.",
+    "emptyStars": "No Stars payments yet.",
+    "pages": {
+      "organizationsHint": "All product places, owners, scans, feedback, and subscription state.",
+      "organizationsCount": "Total places: {{count}}.",
+      "usersHint": "People who opened the Mini App, created places, or sent feedback.",
+      "usersCount": "Total users: {{count}}.",
+      "submissionsHint": "All product feedback with search by text, place, and context.",
+      "starsHint": "Payments, invoices, and how many Stars actually went through."
+    },
+    "search": {
+      "organizations": "Find a place or owner",
+      "users": "Find user, @username, or phone",
+      "submissions": "Find text, place, or context",
+      "stars": "Find place, payer, or charge id"
+    },
+    "paymentStatus": {
+      "PENDING": "Waiting for payment",
+      "PAID": "Paid",
+      "FAILED": "Failed",
+      "REFUNDED": "Refunded",
+      "CANCELED": "Canceled"
+    },
+    "guest": "Guest",
+    "anonymousGuest": "Guest without profile",
+    "userId": "ID {{value}}",
+    "photos": "Photos: {{count}}",
+    "userTelegram": "Telegram profile",
+    "userLanguage": "Phone language: {{value}}",
+    "audit": {
+      "systemActor": "System",
+      "SUBSCRIPTION_GRANTED": "Subscription granted manually",
+      "SUBSCRIPTION_CANCELED": "Subscription canceled"
+    },
+    "grantPopup": {
+      "title": "Grant subscription",
+      "message": "Choose the period. The subscription starts right away.",
+      "month": "For a month",
+      "year": "For a year"
+    },
+    "manageAction": "Manage",
+    "managePopup": {
+      "title": "Manage subscription",
+      "message": "You can extend access or cancel the active subscription.",
+      "grant": "Extend / change",
+      "cancelSubscription": "Cancel subscription"
+    },
+    "cancelPopup": {
+      "title": "Cancel subscription?",
+      "message": "Access for this place will stop right away. You can grant a new subscription later.",
+      "confirm": "Cancel subscription"
     }
   },
   "faq": {

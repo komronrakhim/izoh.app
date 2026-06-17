@@ -9,22 +9,134 @@ import {
 } from "@tanstack/react-router";
 
 import { PendingScreen } from "~/common/ui";
-import { AdminAnalyticsPage } from "~/routes/admin/analytics";
-import { AdminOrganizationCreatePage } from "~/routes/admin/create";
-import { AdminDashboard, AdminOrganizationOverviewPage } from "~/routes/admin/dashboard";
-import { AdminFaqPage } from "~/routes/admin/faq";
-import { AdminFeedPage } from "~/routes/admin/feed";
-import { AdminLanguagePage } from "~/routes/admin/language";
-import { AdminQrConstructor } from "~/routes/admin/qr";
-import { AdminSection } from "~/routes/admin/section";
-import { AdminStaffCreatePage } from "~/routes/admin/staff/create";
-import { AdminStaffMemberPage } from "~/routes/admin/staff/member";
-import { AdminSubscriptionPage } from "~/routes/admin/subscription";
-import { AdminSystemPage } from "~/routes/admin/system";
-import { CustomerWizardChoicePage } from "~/routes/guest/start-param/choice";
-import { CustomerWizardRoute } from "~/routes/guest/start-param";
-import { CustomerWizardStepPage } from "~/routes/guest/start-param/step";
 import { useTma } from "~/shared/tma";
+
+const lazyRouteComponent = (
+  load: () => Promise<{
+    default: React.ComponentType;
+  }>
+) => {
+  const LazyComponent = React.lazy(load);
+
+  return function LazyRouteComponent() {
+    return (
+      <React.Suspense fallback={<PendingScreen />}>
+        <LazyComponent />
+      </React.Suspense>
+    );
+  };
+};
+
+const AdminAnalyticsPage = lazyRouteComponent(() =>
+  import("~/routes/admin/analytics").then((module) => ({
+    default: module.AdminAnalyticsPage
+  }))
+);
+const AdminOrganizationCreatePage = lazyRouteComponent(() =>
+  import("~/routes/admin/create").then((module) => ({
+    default: module.AdminOrganizationCreatePage
+  }))
+);
+const AdminDashboard = lazyRouteComponent(() =>
+  import("~/routes/admin/dashboard").then((module) => ({
+    default: module.AdminDashboard
+  }))
+);
+const AdminOrganizationOverviewPage = lazyRouteComponent(() =>
+  import("~/routes/admin/dashboard").then((module) => ({
+    default: module.AdminOrganizationOverviewPage
+  }))
+);
+const AdminFaqPage = lazyRouteComponent(() =>
+  import("~/routes/admin/faq").then((module) => ({
+    default: module.AdminFaqPage
+  }))
+);
+const AdminFeedPage = lazyRouteComponent(() =>
+  import("~/routes/admin/feed").then((module) => ({
+    default: module.AdminFeedPage
+  }))
+);
+const AdminLanguagePage = lazyRouteComponent(() =>
+  import("~/routes/admin/language").then((module) => ({
+    default: module.AdminLanguagePage
+  }))
+);
+const AdminQrConstructor = lazyRouteComponent(() =>
+  import("~/routes/admin/qr").then((module) => ({
+    default: module.AdminQrConstructor
+  }))
+);
+const AdminSection = lazyRouteComponent(() =>
+  import("~/routes/admin/section").then((module) => ({
+    default: module.AdminSection
+  }))
+);
+const AdminStaffCreatePage = lazyRouteComponent(() =>
+  import("~/routes/admin/staff/create").then((module) => ({
+    default: module.AdminStaffCreatePage
+  }))
+);
+const AdminStaffMemberPage = lazyRouteComponent(() =>
+  import("~/routes/admin/staff/member").then((module) => ({
+    default: module.AdminStaffMemberPage
+  }))
+);
+const AdminSubscriptionPage = lazyRouteComponent(() =>
+  import("~/routes/admin/subscription").then((module) => ({
+    default: module.AdminSubscriptionPage
+  }))
+);
+const AdminSystemPage = lazyRouteComponent(() =>
+  import("~/routes/admin/system").then((module) => ({
+    default: module.AdminSystemPage
+  }))
+);
+const AdminSystemOrganizationsPage = lazyRouteComponent(() =>
+  import("~/routes/admin/system").then((module) => ({
+    default: module.AdminSystemOrganizationsPage
+  }))
+);
+const AdminSystemOrganizationPage = lazyRouteComponent(() =>
+  import("~/routes/admin/system").then((module) => ({
+    default: module.AdminSystemOrganizationPage
+  }))
+);
+const AdminSystemUsersPage = lazyRouteComponent(() =>
+  import("~/routes/admin/system").then((module) => ({
+    default: module.AdminSystemUsersPage
+  }))
+);
+const AdminSystemUserPage = lazyRouteComponent(() =>
+  import("~/routes/admin/system").then((module) => ({
+    default: module.AdminSystemUserPage
+  }))
+);
+const AdminSystemSubmissionsPage = lazyRouteComponent(() =>
+  import("~/routes/admin/system").then((module) => ({
+    default: module.AdminSystemSubmissionsPage
+  }))
+);
+const AdminSystemStarsPage = lazyRouteComponent(() =>
+  import("~/routes/admin/system").then((module) => ({
+    default: module.AdminSystemStarsPage
+  }))
+);
+const CustomerWizardRoute = lazyRouteComponent(() =>
+  import("~/routes/guest/start-param").then((module) => ({
+    default: module.CustomerWizardRoute
+  }))
+);
+const CustomerWizardChoicePage = lazyRouteComponent(() =>
+  import("~/routes/guest/start-param/choice").then((module) => ({
+    default: module.CustomerWizardChoicePage
+  }))
+);
+const CustomerWizardStepPage = lazyRouteComponent(() =>
+  import("~/routes/guest/start-param/step").then((module) => ({
+    default: module.CustomerWizardStepPage
+  }))
+);
 
 const RootComponent = () => {
   const location = useLocation();
@@ -96,6 +208,42 @@ const adminSystemRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/admin/system",
   component: AdminSystemPage
+});
+
+const adminSystemOrganizationsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/system/organizations",
+  component: AdminSystemOrganizationsPage
+});
+
+const adminSystemOrganizationRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/system/organizations/$organizationId",
+  component: AdminSystemOrganizationPage
+});
+
+const adminSystemUsersRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/system/users",
+  component: AdminSystemUsersPage
+});
+
+const adminSystemUserRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/system/users/$userId",
+  component: AdminSystemUserPage
+});
+
+const adminSystemSubmissionsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/system/submissions",
+  component: AdminSystemSubmissionsPage
+});
+
+const adminSystemStarsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/system/stars",
+  component: AdminSystemStarsPage
 });
 
 const adminOrganizationRoute = createRoute({
@@ -171,6 +319,12 @@ const routeTree = rootRoute.addChildren([
   adminLanguageRoute,
   adminFaqRoute,
   adminSystemRoute,
+  adminSystemOrganizationsRoute,
+  adminSystemOrganizationRoute,
+  adminSystemUsersRoute,
+  adminSystemUserRoute,
+  adminSystemSubmissionsRoute,
+  adminSystemStarsRoute,
   adminOrganizationRoute,
   adminQrRoute,
   adminFeedRoute,

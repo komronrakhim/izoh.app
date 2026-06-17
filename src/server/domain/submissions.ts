@@ -499,7 +499,7 @@ export const getOrganizationSubmissions = async (
   const countsWhere: Prisma.SubmissionWhereInput = {
     organization_id: organization.id
   };
-
+  const shouldIncludeCounts = !cursor;
   const [items, total, reviewCount, complaintCount, suggestionCount] = await Promise.all([
     db.submission.findMany({
       ...(cursor
@@ -545,27 +545,31 @@ export const getOrganizationSubmissions = async (
       take: take + 1,
       where
     }),
-    db.submission.count({
-      where
-    }),
-    db.submission.count({
-      where: {
-        ...countsWhere,
-        kind: "REVIEW"
-      }
-    }),
-    db.submission.count({
-      where: {
-        ...countsWhere,
-        kind: "COMPLAINT"
-      }
-    }),
-    db.submission.count({
-      where: {
-        ...countsWhere,
-        kind: "SUGGESTION"
-      }
-    })
+    shouldIncludeCounts ? db.submission.count({ where }) : Promise.resolve(0),
+    shouldIncludeCounts
+      ? db.submission.count({
+          where: {
+            ...countsWhere,
+            kind: "REVIEW"
+          }
+        })
+      : Promise.resolve(0),
+    shouldIncludeCounts
+      ? db.submission.count({
+          where: {
+            ...countsWhere,
+            kind: "COMPLAINT"
+          }
+        })
+      : Promise.resolve(0),
+    shouldIncludeCounts
+      ? db.submission.count({
+          where: {
+            ...countsWhere,
+            kind: "SUGGESTION"
+          }
+        })
+      : Promise.resolve(0)
   ]);
   const visibleItems = items.slice(0, take);
   const hasNextPage = items.length > take;

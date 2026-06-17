@@ -147,8 +147,8 @@
   },
   "system": {
     "badge": "Tizim",
-    "title": "Izoh pulsi",
-    "subtitle": "Mahsulotning jonli raqamlari: skanlar, murojaatlar, foydalanuvchilar va joylar.",
+    "title": "Puls",
+    "subtitle": "Mahsulotning qisqa holati: nimalar ochilyapti, nimalar yuborilyapti va to‘lovlar qayerda.",
     "accessTitle": "Kirish yo‘q",
     "accessHint": "Bu bo‘lim faqat tizim adminlari uchun.",
     "loadErrorTitle": "Pulsni ochib bo‘lmadi",
@@ -177,12 +177,81 @@
       "activeSubscriptions": "Obunalar",
       "newInPeriod": "+{{count}} davr ichida",
       "total": "Jami {{count}}",
-      "allTime": "Butun vaqt"
+      "allTime": "Butun vaqt",
+      "paidStars": "Stars",
+      "trendUp": "Oldingi davrga nisbatan +{{count}}",
+      "trendDown": "Oldingi davrga nisbatan -{{count}}",
+      "trendFlat": "Oldingi davr bilan bir xil"
     },
     "sections": {
       "recentSubmissions": "Oxirgi murojaatlar",
       "organizations": "Joylar",
-      "organizationsHint": "Qatorlardagi raqamlar: tanlangan davrdagi skanlar va murojaatlar."
+      "organizationsHint": "Qatorlardagi raqamlar: tanlangan davrdagi skanlar va murojaatlar.",
+      "hub": "Bo‘limlar",
+      "users": "Foydalanuvchilar",
+      "submissions": "Murojaatlar",
+      "stars": "Stars",
+      "starsPayments": "Stars to‘lovlari",
+      "auditLog": "Amallar",
+      "userInfo": "Profil",
+      "userOrganizations": "Foydalanuvchi joylari",
+      "userSubmissions": "Foydalanuvchi murojaatlari"
+    },
+    "conversionTitle": "Skanlar murojaatga aylanadi",
+    "conversionHint": "QR va forma qanchalik ishlayotganini ko‘rsatadi.",
+    "subscriptionUntil": "{{date}} gacha faol",
+    "userMeta": "ID {{telegramId}} · {{locale}}",
+    "emptyUsers": "Hali foydalanuvchilar yo‘q.",
+    "emptyStars": "Hali Stars to‘lovlari yo‘q.",
+    "pages": {
+      "organizationsHint": "Barcha joylar, egalar, skanlar, murojaatlar va obuna holati.",
+      "organizationsCount": "Jami joylar: {{count}}.",
+      "usersHint": "Mini App ochgan, joy yaratgan yoki murojaat qoldirgan odamlar.",
+      "usersCount": "Jami foydalanuvchilar: {{count}}.",
+      "submissionsHint": "Matn, joy va kontekst bo‘yicha qidiriladigan barcha murojaatlar.",
+      "starsHint": "To‘lovlar, invoice’lar va real o‘tgan Stars soni."
+    },
+    "search": {
+      "organizations": "Joy yoki egani topish",
+      "users": "Foydalanuvchi, @username yoki telefon",
+      "submissions": "Matn, joy yoki kontekst",
+      "stars": "Joy, to‘lovchi yoki charge id"
+    },
+    "paymentStatus": {
+      "PENDING": "To‘lov kutilmoqda",
+      "PAID": "To‘langan",
+      "FAILED": "O‘tmadi",
+      "REFUNDED": "Qaytarilgan",
+      "CANCELED": "Bekor qilingan"
+    },
+    "guest": "Mehmon",
+    "anonymousGuest": "Profilsiz mehmon",
+    "userId": "ID {{value}}",
+    "photos": "Rasm: {{count}}",
+    "userTelegram": "Telegram profili",
+    "userLanguage": "Telefon tili: {{value}}",
+    "audit": {
+      "systemActor": "Tizim",
+      "SUBSCRIPTION_GRANTED": "Obuna qo‘lda berildi",
+      "SUBSCRIPTION_CANCELED": "Obuna bekor qilindi"
+    },
+    "grantPopup": {
+      "title": "Obuna berish",
+      "message": "Muddatni tanlang. Obuna darhol ishga tushadi.",
+      "month": "Bir oyga",
+      "year": "Bir yilga"
+    },
+    "manageAction": "Boshqarish",
+    "managePopup": {
+      "title": "Obunani boshqarish",
+      "message": "Kirish muddatini uzaytirish yoki faol obunani bekor qilish mumkin.",
+      "grant": "Uzaytirish / o‘zgartirish",
+      "cancelSubscription": "Obunani bekor qilish"
+    },
+    "cancelPopup": {
+      "title": "Obuna bekor qilinsinmi?",
+      "message": "Bu joy uchun kirish darhol to‘xtaydi. Keyin yana yangi obuna berish mumkin.",
+      "confirm": "Bekor qilish"
     }
   },
   "faq": {

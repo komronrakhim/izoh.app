@@ -20,6 +20,18 @@ export const queryKeys = {
   adminOrganizations: (initDataRaw: string) => ["admin", "organizations", initDataRaw] as const,
   systemPulse: (period: string, initDataRaw: string) =>
     ["system", "pulse", period, initDataRaw] as const,
+  systemOrganizations: (period: string, search: string, initDataRaw: string) =>
+    ["system", "organizations", period, search, initDataRaw] as const,
+  systemOrganizationDetail: (organizationId: string, period: string, initDataRaw: string) =>
+    ["system", "organizations", organizationId, period, initDataRaw] as const,
+  systemSubmissions: (period: string, search: string, kind: string, initDataRaw: string) =>
+    ["system", "submissions", period, search, kind, initDataRaw] as const,
+  systemUsers: (period: string, search: string, initDataRaw: string) =>
+    ["system", "users", period, search, initDataRaw] as const,
+  systemUserDetail: (userId: string, initDataRaw: string) =>
+    ["system", "users", userId, initDataRaw] as const,
+  systemStars: (period: string, search: string, initDataRaw: string) =>
+    ["system", "stars", period, search, initDataRaw] as const,
   guestMenu: (organizationId: string, initDataRaw: string) =>
     ["organization", organizationId, "guest-menu", initDataRaw] as const,
   guestMenuItem: (organizationId: string, itemId: string, initDataRaw: string) =>

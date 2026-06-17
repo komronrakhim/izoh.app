@@ -147,8 +147,8 @@
   },
   "system": {
     "badge": "Sistem",
-    "title": "Izoh Nabzı",
-    "subtitle": "Ürünün canlı sayıları: taramalar, geri bildirimler, kullanıcılar ve mekanlar.",
+    "title": "Nabız",
+    "subtitle": "Ürünün kısa resmi: neler açılıyor, neler gönderiliyor ve ödemeler nerede.",
     "accessTitle": "Erişim yok",
     "accessHint": "Bu bölüm yalnızca sistem yöneticileri içindir.",
     "loadErrorTitle": "Nabız açılamadı",
@@ -177,12 +177,81 @@
       "activeSubscriptions": "Abonelikler",
       "newInPeriod": "+{{count}} bu dönemde",
       "total": "Toplam {{count}}",
-      "allTime": "Tüm zamanlar"
+      "allTime": "Tüm zamanlar",
+      "paidStars": "Stars",
+      "trendUp": "Önceki döneme göre +{{count}}",
+      "trendDown": "Önceki döneme göre -{{count}}",
+      "trendFlat": "Önceki dönemle aynı"
     },
     "sections": {
       "recentSubmissions": "Son geri bildirimler",
       "organizations": "Mekanlar",
-      "organizationsHint": "Satırlardaki sayılar seçilen dönem için tarama ve geri bildirimdir."
+      "organizationsHint": "Satırlardaki sayılar seçilen dönem için tarama ve geri bildirimdir.",
+      "hub": "Bölümler",
+      "users": "Kullanıcılar",
+      "submissions": "Geri bildirimler",
+      "stars": "Stars",
+      "starsPayments": "Stars ödemeleri",
+      "auditLog": "İşlemler",
+      "userInfo": "Profil",
+      "userOrganizations": "Kullanıcının yerleri",
+      "userSubmissions": "Kullanıcının mesajları"
+    },
+    "conversionTitle": "Taramalar geri bildirime dönüşüyor",
+    "conversionHint": "QR ve formun işini yapıp yapmadığını gösterir.",
+    "subscriptionUntil": "{{date}} tarihine kadar aktif",
+    "userMeta": "ID {{telegramId}} · {{locale}}",
+    "emptyUsers": "Henüz kullanıcı yok.",
+    "emptyStars": "Henüz Stars ödemesi yok.",
+    "pages": {
+      "organizationsHint": "Tüm mekanlar, sahipler, taramalar, geri bildirimler ve abonelik durumu.",
+      "organizationsCount": "Toplam mekan: {{count}}.",
+      "usersHint": "Mini App’i açan, mekan oluşturan veya geri bildirim gönderen kişiler.",
+      "usersCount": "Toplam kullanıcı: {{count}}.",
+      "submissionsHint": "Metin, mekan ve bağlama göre aranabilen tüm geri bildirimler.",
+      "starsHint": "Ödemeler, faturalar ve gerçekten geçen Stars miktarı."
+    },
+    "search": {
+      "organizations": "Mekan veya sahip ara",
+      "users": "Kullanıcı, @username veya telefon ara",
+      "submissions": "Metin, mekan veya bağlam ara",
+      "stars": "Mekan, ödeyen veya charge id ara"
+    },
+    "paymentStatus": {
+      "PENDING": "Ödeme bekliyor",
+      "PAID": "Ödendi",
+      "FAILED": "Başarısız",
+      "REFUNDED": "İade edildi",
+      "CANCELED": "İptal edildi"
+    },
+    "guest": "Misafir",
+    "anonymousGuest": "Profilsiz misafir",
+    "userId": "ID {{value}}",
+    "photos": "Fotoğraf: {{count}}",
+    "userTelegram": "Telegram profili",
+    "userLanguage": "Telefon dili: {{value}}",
+    "audit": {
+      "systemActor": "Sistem",
+      "SUBSCRIPTION_GRANTED": "Abonelik manuel verildi",
+      "SUBSCRIPTION_CANCELED": "Abonelik iptal edildi"
+    },
+    "grantPopup": {
+      "title": "Abonelik ver",
+      "message": "Süreyi seçin. Abonelik hemen başlar.",
+      "month": "Bir ay",
+      "year": "Bir yıl"
+    },
+    "manageAction": "Yönet",
+    "managePopup": {
+      "title": "Aboneliği yönet",
+      "message": "Erişimi uzatabilir veya aktif aboneliği iptal edebilirsiniz.",
+      "grant": "Uzat / değiştir",
+      "cancelSubscription": "Aboneliği iptal et"
+    },
+    "cancelPopup": {
+      "title": "Abonelik iptal edilsin mi?",
+      "message": "Bu yerin erişimi hemen durur. Daha sonra yeni abonelik verebilirsiniz.",
+      "confirm": "İptal et"
     }
   },
   "faq": {

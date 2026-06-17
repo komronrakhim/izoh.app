@@ -184,6 +184,7 @@ model User {
   broadcast_recipients              BroadcastRecipient[]
   organization_deletion_jobs        OrganizationDeletionJob[]                   @relation("OrganizationDeletionJobsRequested")
   guest_entry_scans                 GuestEntryScan[]
+  system_audit_logs                 SystemAuditLog[]                            @relation("SystemAuditLogActor")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -435,6 +436,24 @@ model GuestEntryScan {
   @@index([organization_id, created_at])
   @@index([user_id, created_at])
   @@index([start_param, created_at])
+  @@index([created_at])
+}
+
+model SystemAuditLog {
+  id            String  @id @default(cuid())
+  actor_user_id String?
+  action        String
+  target_type   String
+  target_id     String?
+  metadata      Json?
+
+  actor_user User? @relation("SystemAuditLogActor", fields: [actor_user_id], references: [id], onDelete: SetNull)
+
+  created_at DateTime @default(now())
+
+  @@index([actor_user_id, created_at])
+  @@index([target_type, target_id, created_at])
+  @@index([action, created_at])
   @@index([created_at])
 }
 

@@ -147,8 +147,8 @@
   },
   "system": {
     "badge": "Жүйе",
-    "title": "Izoh пульсі",
-    "subtitle": "Өнімнің тірі сандары: скандар, өтініштер, пайдаланушылар және орындар.",
+    "title": "Пульс",
+    "subtitle": "Өнімнің қысқа көрінісі: не ашылады, не жазылады және төлемдер қайда өтеді.",
     "accessTitle": "Қолжетім жоқ",
     "accessHint": "Бұл бөлім тек жүйе әкімшілеріне қолжетімді.",
     "loadErrorTitle": "Пульсті ашу мүмкін болмады",
@@ -177,12 +177,81 @@
       "activeSubscriptions": "Жазылымдар",
       "newInPeriod": "+{{count}} кезеңде",
       "total": "Барлығы {{count}}",
-      "allTime": "Барлық уақыт"
+      "allTime": "Барлық уақыт",
+      "paidStars": "Stars",
+      "trendUp": "Алдыңғы кезеңнен +{{count}}",
+      "trendDown": "Алдыңғы кезеңнен -{{count}}",
+      "trendFlat": "Алдыңғы кезеңмен бірдей"
     },
     "sections": {
       "recentSubmissions": "Соңғы өтініштер",
       "organizations": "Орындар",
-      "organizationsHint": "Жолдардағы сандар: таңдалған кезеңдегі скандар мен өтініштер."
+      "organizationsHint": "Жолдардағы сандар: таңдалған кезеңдегі скандар мен өтініштер.",
+      "hub": "Бөлімдер",
+      "users": "Пайдаланушылар",
+      "submissions": "Өтініштер",
+      "stars": "Stars",
+      "starsPayments": "Stars төлемдері",
+      "auditLog": "Әрекеттер",
+      "userInfo": "Профиль",
+      "userOrganizations": "Пайдаланушы орындары",
+      "userSubmissions": "Пайдаланушы өтініштері"
+    },
+    "conversionTitle": "Скандар өтінішке айналады",
+    "conversionHint": "QR мен форманың қаншалықты жұмыс істейтінін көрсетеді.",
+    "subscriptionUntil": "{{date}} дейін белсенді",
+    "userMeta": "ID {{telegramId}} · {{locale}}",
+    "emptyUsers": "Әзірге пайдаланушылар жоқ.",
+    "emptyStars": "Әзірге Stars төлемдері жоқ.",
+    "pages": {
+      "organizationsHint": "Барлық орындар, иелері, скандар, өтініштер және жазылым күйі.",
+      "organizationsCount": "Барлығы орын: {{count}}.",
+      "usersHint": "Mini App ашқан, орын құрған немесе өтініш жіберген адамдар.",
+      "usersCount": "Барлығы пайдаланушы: {{count}}.",
+      "submissionsHint": "Мәтін, орын және контекст бойынша ізделетін барлық өтініштер.",
+      "starsHint": "Төлемдер, invoice және нақты өткен Stars саны."
+    },
+    "search": {
+      "organizations": "Орын немесе иесін табу",
+      "users": "Пайдаланушы, @username немесе телефон",
+      "submissions": "Мәтін, орын немесе контекст",
+      "stars": "Орын, төлеуші немесе charge id"
+    },
+    "paymentStatus": {
+      "PENDING": "Төлем күтілуде",
+      "PAID": "Төленді",
+      "FAILED": "Өтпеді",
+      "REFUNDED": "Қайтарылды",
+      "CANCELED": "Бас тартылды"
+    },
+    "guest": "Қонақ",
+    "anonymousGuest": "Профильсіз қонақ",
+    "userId": "ID {{value}}",
+    "photos": "Фото: {{count}}",
+    "userTelegram": "Telegram профилі",
+    "userLanguage": "Телефон тілі: {{value}}",
+    "audit": {
+      "systemActor": "Жүйе",
+      "SUBSCRIPTION_GRANTED": "Жазылым қолмен берілді",
+      "SUBSCRIPTION_CANCELED": "Жазылым тоқтатылды"
+    },
+    "grantPopup": {
+      "title": "Жазылым беру",
+      "message": "Мерзімді таңдаңыз. Жазылым бірден іске қосылады.",
+      "month": "Бір айға",
+      "year": "Бір жылға"
+    },
+    "manageAction": "Басқару",
+    "managePopup": {
+      "title": "Жазылымды басқару",
+      "message": "Қолжетімділікті ұзартуға немесе белсенді жазылымды тоқтатуға болады.",
+      "grant": "Ұзарту / өзгерту",
+      "cancelSubscription": "Жазылымды тоқтату"
+    },
+    "cancelPopup": {
+      "title": "Жазылым тоқтатылсын ба?",
+      "message": "Бұл орынға қолжетімділік бірден тоқтайды. Кейін жаңа жазылым беруге болады.",
+      "confirm": "Тоқтату"
     }
   },
   "faq": {
