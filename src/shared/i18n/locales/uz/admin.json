@@ -35,6 +35,10 @@
     "createHeroTitle": "Yangi joy",
     "createHint": "Nom va logotip mehmon qayerga yozayotganini tushunishga yordam beradi.",
     "namePlaceholder": "Joy nomi",
+    "nameErrors": {
+      "required": "Joy nomini kiriting.",
+      "tooShort": "Nom kamida 2 ta belgidan iborat bo‘lsin."
+    },
     "contactPlaceholder": "Telefon yoki @username",
     "contactHint": "Mehmon siz bilan bog‘lanishi kerak bo‘lsa ko‘rsatamiz.",
     "presetTitle": "Format",
@@ -138,7 +142,48 @@
     "subscription": "Obuna",
     "locale": "Til",
     "faq": "Savollar",
-    "support": "Yordam"
+    "support": "Yordam",
+    "system": "Puls"
+  },
+  "system": {
+    "badge": "Tizim",
+    "title": "Izoh pulsi",
+    "subtitle": "Mahsulotning jonli raqamlari: skanlar, murojaatlar, foydalanuvchilar va joylar.",
+    "accessTitle": "Kirish yo‘q",
+    "accessHint": "Bu bo‘lim faqat tizim adminlari uchun.",
+    "loadErrorTitle": "Pulsni ochib bo‘lmadi",
+    "loadErrorHint": "Aloqani tekshirib, yana urinib ko‘ring.",
+    "retry": "Qayta urinish",
+    "conversion": "murojaatga",
+    "context": "Kontekst: {{value}}",
+    "rating": "{{value}}/5",
+    "scanSubmissionPair": "skan / mur.",
+    "grantAction": "Berish",
+    "extendAction": "Uzaytirish",
+    "granting": "Tayyorlanmoqda",
+    "emptySubmissions": "Hali murojaatlar yo‘q.",
+    "emptyOrganizations": "Hali joylar yo‘q.",
+    "periods": {
+      "TODAY": "Bugun",
+      "7D": "7 kun",
+      "30D": "30 kun",
+      "ALL": "Hammasi"
+    },
+    "metrics": {
+      "submissions": "Murojaatlar",
+      "scans": "Skanlar",
+      "users": "Foydalanuvchilar",
+      "organizations": "Joylar",
+      "activeSubscriptions": "Obunalar",
+      "newInPeriod": "+{{count}} davr ichida",
+      "total": "Jami {{count}}",
+      "allTime": "Butun vaqt"
+    },
+    "sections": {
+      "recentSubmissions": "Oxirgi murojaatlar",
+      "organizations": "Joylar",
+      "organizationsHint": "Qatorlardagi raqamlar: tanlangan davrdagi skanlar va murojaatlar."
+    }
   },
   "faq": {
     "title": "Savollar",
@@ -685,37 +730,68 @@
     "showHint": "O‘chirilsa, mehmon bu bo‘limni formada ko‘rmaydi.",
     "analytics": {
       "hint": "Reyting va dinamika.",
-      "rows": ["O‘rtacha reyting", "Kunlar bo‘yicha", "Bo‘limlar bo‘yicha"]
+      "rows": [
+        "O‘rtacha reyting",
+        "Kunlar bo‘yicha",
+        "Bo‘limlar bo‘yicha"
+      ]
     },
     "feed": {
       "hint": "Izohlar, shikoyatlar va takliflar bitta ro‘yxatda.",
-      "rows": ["Izohlar", "Shikoyatlar", "Takliflar"]
+      "rows": [
+        "Izohlar",
+        "Shikoyatlar",
+        "Takliflar"
+      ]
     },
     "review": {
       "hint": "Mehmonlarga nima yoqishini va nimani yaxshilash mumkinligini ko‘rsatadi.",
-      "rows": ["Baho", "Izoh", "Rasm"]
+      "rows": [
+        "Baho",
+        "Izoh",
+        "Rasm"
+      ]
     },
     "complaint": {
       "hint": "Muammoni tez ko‘rish va tafsilotlarni ortiqcha yozishmasiz olishga yordam beradi.",
-      "rows": ["Matn", "Rasm", "Oluvchilar"]
+      "rows": [
+        "Matn",
+        "Rasm",
+        "Oluvchilar"
+      ]
     },
     "suggestion": {
       "hint": "Mehmon g‘oyalarini yig‘ib, servisni taxminlarsiz yaxshilashga yordam beradi.",
-      "rows": ["Matn", "Rasm", "Oluvchilar"]
+      "rows": [
+        "Matn",
+        "Rasm",
+        "Oluvchilar"
+      ]
     },
     "notifications": {
       "hint": "Bot qaysi murojaatlarni darhol yuborishi va qayerga kelishini sozlang.",
-      "rows": ["Shaxsiy xabarlar", "Guruh", "Murojaat turlari"]
+      "rows": [
+        "Shaxsiy xabarlar",
+        "Guruh",
+        "Murojaat turlari"
+      ]
     },
     "qr": {
       "hint": "Mehmon havolasi avtomatik yaratiladi. QR uni stol, stoyka yoki stikerda chiroyli joylashtirish uchun kerak.",
-      "rows": ["Havola", "A4 poster", "Stiker"]
+      "rows": [
+        "Havola",
+        "A4 poster",
+        "Stiker"
+      ]
     },
     "staff": {
       "show": "Xodim tanlovi",
       "showHint": "Yoqilsa, izoh va shikoyatlarda xodim tanlovi chiqadi.",
       "hint": "Mehmon kim haqida yozayotganini bilib, izoh va shikoyatlarni aniqroq ko‘rishga yordam beradi.",
-      "rows": ["Xodimlar", "Formalarda"]
+      "rows": [
+        "Xodimlar",
+        "Formalarda"
+      ]
     }
   },
   "sectionShellHint": "Bo‘lim tayyor bo‘lganda sozlamalar shu yerda chiqadi."

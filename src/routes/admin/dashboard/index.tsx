@@ -17,6 +17,7 @@ import {
   MessageSquareText,
   Plus,
   QrCode,
+  ShieldCheck,
   SquareArrowOutUpRight,
   Star,
   Trash2,
@@ -245,7 +246,8 @@ const AdminEmptyIntro = () => {
 export const AdminDashboard = () => {
   const navigate = useNavigate();
   const { locale, t } = useI18n();
-  const { error, isLoading, organizations, setActiveOrganizationId } = useAdminOrganization();
+  const { error, isLoading, organizations, setActiveOrganizationId, viewer } =
+    useAdminOrganization();
   const isOrganizationLimitReached = organizations.length >= MAX_ADMIN_ORGANIZATIONS;
   const openSupport = React.useCallback(() => {
     openTmaTelegramLink(IZOH_SUPPORT_TELEGRAM_URL);
@@ -344,6 +346,18 @@ export const AdminDashboard = () => {
 
           <List
             items={[
+              ...(viewer.isSystemAdmin
+                ? [
+                    {
+                      addon: {
+                        after: <RowSuffix />,
+                        before: <SettingsIcon icon={ShieldCheck} tone="analytics" />
+                      },
+                      href: "/admin/system",
+                      title: t("admin.rows.system")
+                    }
+                  ]
+                : []),
               {
                 addon: {
                   after: <RowSuffix>{t(`common.locales.${locale}.label`)}</RowSuffix>,

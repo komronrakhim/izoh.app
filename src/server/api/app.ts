@@ -51,8 +51,11 @@ import {
   answerSubscriptionPreCheckoutQuery,
   applySuccessfulSubscriptionPayment,
   createOrganizationSubscriptionInvoice,
-  getOrganizationSubscriptionPayload
+  getOrganizationSubscriptionPayload,
+  grantOrganizationSubscription,
+  toOrganizationSubscriptionPayload
 } from "~/server/domain/subscriptions";
+import { getSystemPulse, recordGuestEntryScan } from "~/server/domain/system";
 import { syncUserContactFromTelegram, syncUserFromTelegram } from "~/server/domain/users";
 import {
   createGuestEntryStartParam,
@@ -89,6 +92,7 @@ import {
 } from "~/shared/organization-presets";
 import { createSubmissionRequestSchema, submissionKindSchema } from "~/shared/submissions";
 import { isAdminAnalyticsPeriod } from "~/shared/analytics";
+import { isSystemPulsePeriod } from "~/shared/system";
 import {
   QR_DEFAULT_CUSTOM_COLORS,
   QR_EMOJI_OPACITY_MAX,
@@ -160,6 +164,11 @@ const staffMemberPatchSchema = z
 
 const subscriptionInvoiceSchema = z.object({
   planCode: z.enum(["MONTHLY", "ANNUAL"])
+});
+
+const systemSubscriptionGrantSchema = z.object({
+  planCode: z.enum(["MONTHLY", "ANNUAL"]).default("ANNUAL"),
+  reason: z.string().trim().max(160).optional()
 });
 
 const qrHexColorSchema = z.string().regex(/^#[0-9a-f]{6}$/i);
@@ -320,6 +329,29 @@ const requireOrganizationOwner = async ({
   return user;
 };
 
+const requireSystemAdmin = async ({
+  c,
+  db
+}: {
+  c: Parameters<typeof getTelegramInitDataFromRequest>[0];
+  db: NonNullable<ReturnType<typeof getPrisma>>;
+}) => {
+  const initData = getTelegramInitDataFromRequest(c);
+
+  if (!initData) {
+    throw new Error("Telegram init data is required.");
+  }
+
+  const validated = getValidatedTelegramUser(initData);
+  const user = await syncUserFromTelegram(validated.user, db);
+
+  if (user.system_role !== "ADMIN") {
+    throw new Error("System admin access is required.");
+  }
+
+  return user;
+};
+
 const getAdminAccessStatus = (error: Error) => {
   if (
     error.message.includes("Telegram init data") ||
@@ -329,6 +361,19 @@ const getAdminAccessStatus = (error: Error) => {
   }
 
   if (error.message.includes("Organization is not available")) return 404;
+
+  return null;
+};
+
+const getSystemAccessStatus = (error: Error) => {
+  if (
+    error.message.includes("Telegram init data") ||
+    error.message.includes("Telegram user is required")
+  ) {
+    return 401;
+  }
+
+  if (error.message.includes("System admin access")) return 403;
 
   return null;
 };
@@ -735,7 +780,13 @@ export const createApiApp = () => {
       const validated = getValidatedTelegramUser(initData);
       const user = await syncUserFromTelegram(validated.user, db);
 
-      return c.json(await getAdminOrganizations(user.id, db));
+      return c.json({
+        ...(await getAdminOrganizations(user.id, db)),
+        viewer: {
+          isSystemAdmin: user.system_role === "ADMIN",
+          systemRole: user.system_role
+        }
+      });
     } catch (error) {
       if (error instanceof Error && error.message.includes("Telegram")) {
         return c.json({ error: error.message }, 401);
@@ -743,6 +794,72 @@ export const createApiApp = () => {
 
       if (error instanceof Error && error.message.includes("Organization limit reached")) {
         return c.json({ error: error.message }, 400);
+      }
+
+      throw error;
+    }
+  });
+
+  app.get("/api/system/pulse", async (c) => {
+    const periodQuery = c.req.query("period")?.trim() || "7D";
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    if (!isSystemPulsePeriod(periodQuery)) {
+      return c.json({ error: "Invalid system pulse period." }, 400);
+    }
+
+    try {
+      await requireSystemAdmin({ c, db });
+
+      return c.json(await getSystemPulse({ period: periodQuery }, db));
+    } catch (error) {
+      if (error instanceof Error) {
+        const status = getSystemAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      throw error;
+    }
+  });
+
+  app.post("/api/system/organizations/:organizationId/subscription/grant", async (c) => {
+    const organizationId = c.req.param("organizationId");
+    const input = systemSubscriptionGrantSchema.parse(await c.req.json());
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    try {
+      const user = await requireSystemAdmin({ c, db });
+      const subscription = await grantOrganizationSubscription(
+        {
+          grantedByUserId: user.id,
+          organizationId,
+          planCode: input.planCode,
+          reason: input.reason
+        },
+        db
+      );
+
+      return c.json({
+        subscription: toOrganizationSubscriptionPayload(subscription)
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        const status = getSystemAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      if (error instanceof Error && error.message.includes("Organization is not available")) {
+        return c.json({ error: error.message }, 404);
       }
 
       throw error;
@@ -1032,6 +1149,7 @@ export const createApiApp = () => {
   const handleGuestEntryConfigRequest = async (c: Context) => {
     const startParam = c.req.param("startParam");
     const db = getPrisma();
+    const initData = getTelegramInitDataFromRequest(c);
 
     if (!startParam) {
       return c.json({ error: "Guest entry payload is required." }, 400);
@@ -1042,14 +1160,45 @@ export const createApiApp = () => {
     }
 
     try {
-      return c.json(
-        await getGuestEntryConfig(
-          {
-            startParam
-          },
-          db
-        )
+      const guestEntryConfig = await getGuestEntryConfig(
+        {
+          startParam
+        },
+        db
       );
+      let userId: string | undefined;
+      let userLocale: string | undefined;
+
+      if (initData) {
+        try {
+          const validated = getValidatedTelegramUser(initData);
+          const user = await syncUserFromTelegram(validated.user, db);
+
+          userId = user.id;
+          userLocale = user.locale;
+        } catch (error) {
+          console.warn("Guest entry user sync failed for scan analytics", {
+            error: error instanceof Error ? error.message : String(error)
+          });
+        }
+      }
+
+      void recordGuestEntryScan(
+        {
+          locale: userLocale,
+          organizationId: guestEntryConfig.organization.id,
+          qrContext: guestEntryConfig.qrContext,
+          startParam,
+          userId
+        },
+        db
+      ).catch((error) => {
+        console.warn("Guest entry scan analytics failed", {
+          error: error instanceof Error ? error.message : String(error)
+        });
+      });
+
+      return c.json(guestEntryConfig);
     } catch (error) {
       if (
         error instanceof Error &&

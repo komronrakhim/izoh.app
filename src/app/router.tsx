@@ -20,6 +20,7 @@ import { AdminSection } from "~/routes/admin/section";
 import { AdminStaffCreatePage } from "~/routes/admin/staff/create";
 import { AdminStaffMemberPage } from "~/routes/admin/staff/member";
 import { AdminSubscriptionPage } from "~/routes/admin/subscription";
+import { AdminSystemPage } from "~/routes/admin/system";
 import { CustomerWizardChoicePage } from "~/routes/guest/start-param/choice";
 import { CustomerWizardRoute } from "~/routes/guest/start-param";
 import { CustomerWizardStepPage } from "~/routes/guest/start-param/step";
@@ -89,6 +90,12 @@ const adminFaqRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/admin/faq",
   component: AdminFaqPage
+});
+
+const adminSystemRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/system",
+  component: AdminSystemPage
 });
 
 const adminOrganizationRoute = createRoute({
@@ -163,6 +170,7 @@ const routeTree = rootRoute.addChildren([
   adminCreateOrganizationRoute,
   adminLanguageRoute,
   adminFaqRoute,
+  adminSystemRoute,
   adminOrganizationRoute,
   adminQrRoute,
   adminFeedRoute,

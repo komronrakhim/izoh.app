@@ -167,8 +167,10 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
   const tma = useTma();
   const guestEntryConfigQuery = useQuery({
     queryFn: () =>
-      fetchApiJson<GuestEntryConfigPayload>(`/api/guest-entry/${encodeURIComponent(startParam)}`),
-    queryKey: queryKeys.guestEntryConfig(startParam)
+      fetchApiJson<GuestEntryConfigPayload>(`/api/guest-entry/${encodeURIComponent(startParam)}`, {
+        initDataRaw: tma.initDataRaw
+      }),
+    queryKey: queryKeys.guestEntryConfig(startParam, tma.initDataRaw)
   });
   const guestEntryConfig = guestEntryConfigQuery.data ?? null;
   const [selectedChoiceId, setSelectedChoiceId] = React.useState<WizardChoiceId | null>(null);

@@ -35,6 +35,10 @@
     "createHeroTitle": "Yeni yer",
     "createHint": "İsim ve logo, misafirin nereye yazdığını anlamasına yardımcı olur.",
     "namePlaceholder": "Yer adı",
+    "nameErrors": {
+      "required": "Mekan adını yazın.",
+      "tooShort": "Ad en az 2 karakter olmalı."
+    },
     "contactPlaceholder": "Telefon veya @username",
     "contactHint": "Konuğa sizinle iletişime geçmesi gerekip gerekmediğini göstereceğiz.",
     "presetTitle": "Biçim",
@@ -138,7 +142,48 @@
     "subscription": "Abonelik",
     "locale": "Dil",
     "faq": "Sorular",
-    "support": "Destek"
+    "support": "Destek",
+    "system": "Nabız"
+  },
+  "system": {
+    "badge": "Sistem",
+    "title": "Izoh Nabzı",
+    "subtitle": "Ürünün canlı sayıları: taramalar, geri bildirimler, kullanıcılar ve mekanlar.",
+    "accessTitle": "Erişim yok",
+    "accessHint": "Bu bölüm yalnızca sistem yöneticileri içindir.",
+    "loadErrorTitle": "Nabız açılamadı",
+    "loadErrorHint": "Bağlantıyı kontrol edip tekrar deneyin.",
+    "retry": "Tekrar dene",
+    "conversion": "geri bildirime",
+    "context": "Bağlam: {{value}}",
+    "rating": "{{value}}/5",
+    "scanSubmissionPair": "tarama / not",
+    "grantAction": "Ver",
+    "extendAction": "Uzat",
+    "granting": "Hazırlanıyor",
+    "emptySubmissions": "Henüz geri bildirim yok.",
+    "emptyOrganizations": "Henüz mekan yok.",
+    "periods": {
+      "TODAY": "Bugün",
+      "7D": "7 gün",
+      "30D": "30 gün",
+      "ALL": "Tümü"
+    },
+    "metrics": {
+      "submissions": "Geri bildirim",
+      "scans": "Taramalar",
+      "users": "Kullanıcılar",
+      "organizations": "Mekanlar",
+      "activeSubscriptions": "Abonelikler",
+      "newInPeriod": "+{{count}} bu dönemde",
+      "total": "Toplam {{count}}",
+      "allTime": "Tüm zamanlar"
+    },
+    "sections": {
+      "recentSubmissions": "Son geri bildirimler",
+      "organizations": "Mekanlar",
+      "organizationsHint": "Satırlardaki sayılar seçilen dönem için tarama ve geri bildirimdir."
+    }
   },
   "faq": {
     "title": "Sorular",
@@ -685,37 +730,68 @@
     "showHint": "Devre dışı bırakılırsa misafir bu bölümü formda görmez.",
     "analytics": {
       "hint": "Derecelendirme ve dinamikler.",
-      "rows": ["Ortalama derecelendirme", "Güne göre", "Nokta nokta"]
+      "rows": [
+        "Ortalama derecelendirme",
+        "Güne göre",
+        "Nokta nokta"
+      ]
     },
     "feed": {
       "hint": "İncelemeler, şikayetler ve öneriler tek listede.",
-      "rows": ["Yorumlar", "Şikayetler", "Öneriler"]
+      "rows": [
+        "Yorumlar",
+        "Şikayetler",
+        "Öneriler"
+      ]
     },
     "review": {
       "hint": "Konukları neyin mutlu ettiğini ve nereleri geliştirebileceğinizi anlamanıza yardımcı olurlar.",
-      "rows": ["Değerlendirme", "Yorum", "Fotoğraf"]
+      "rows": [
+        "Değerlendirme",
+        "Yorum",
+        "Fotoğraf"
+      ]
     },
     "complaint": {
       "hint": "Sorunu hızlı bir şekilde görmenize ve uzun yazışmalara gerek kalmadan ayrıntıları almanıza yardımcı olurlar.",
-      "rows": ["Metin", "Fotoğraf", "Alıcılar"]
+      "rows": [
+        "Metin",
+        "Fotoğraf",
+        "Alıcılar"
+      ]
     },
     "suggestion": {
       "hint": "Tahmine gerek kalmadan konukların fikirlerini toplamaya ve hizmeti iyileştirmeye yardımcı olur.",
-      "rows": ["Metin", "Fotoğraf", "Alıcılar"]
+      "rows": [
+        "Metin",
+        "Fotoğraf",
+        "Alıcılar"
+      ]
     },
     "notifications": {
       "hint": "Botun hangi istekleri anında göndereceğini ve bunların nereye gideceğini yapılandırın.",
-      "rows": ["Kişisel mesajlar", "Grup", "İstek türleri"]
+      "rows": [
+        "Kişisel mesajlar",
+        "Grup",
+        "İstek türleri"
+      ]
     },
     "qr": {
       "hint": "Misafir bağlantısı otomatik oluşturulur. QR, onu masaya, tezgaha veya çıkartmaya düzenli yerleştirmenize yardımcı olur.",
-      "rows": ["Bağlantı", "Poster A4", "Etiket"]
+      "rows": [
+        "Bağlantı",
+        "Poster A4",
+        "Etiket"
+      ]
     },
     "staff": {
       "show": "Personel seçimi",
       "showHint": "Etkinleştirilirse, çalışan seçimi incelemelerde ve şikayetlerde görünecektir.",
       "hint": "Konuğun kimin hakkında yazdığını anlamanıza ve değerlendirmeleri ve şikayetleri daha doğru bir şekilde analiz etmenize yardımcı olur.",
-      "rows": ["Çalışanlar", "formlarda"]
+      "rows": [
+        "Çalışanlar",
+        "formlarda"
+      ]
     }
   },
   "sectionShellHint": "Bölüm hazır olduğunda ayarlar burada görünecektir."

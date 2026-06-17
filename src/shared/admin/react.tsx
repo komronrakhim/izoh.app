@@ -4,7 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ACTIVE_ADMIN_ORGANIZATION_STORAGE_KEY,
   type AdminOrganization,
-  type AdminOrganizationLocale
+  type AdminOrganizationLocale,
+  type AdminViewer
 } from "./organizations";
 import { fetchApiJson } from "~/shared/api";
 import type { OrganizationPresetId } from "~/shared/organization-presets";
@@ -22,6 +23,7 @@ type CreateAdminOrganizationInput = {
 type AdminOrganizationsPayload = {
   activeOrganizationId?: null | string;
   organizations?: AdminOrganization[];
+  viewer?: AdminViewer;
 };
 
 type CreateAdminOrganizationPayload = AdminOrganizationsPayload & {
@@ -37,9 +39,15 @@ type AdminOrganizationContextValue = {
   organizations: AdminOrganization[];
   refreshOrganizations: () => Promise<void>;
   setActiveOrganizationId: (id: string) => void;
+  viewer: AdminViewer;
 };
 
 const AdminOrganizationContext = React.createContext<AdminOrganizationContextValue | null>(null);
+
+const defaultAdminViewer: AdminViewer = {
+  isSystemAdmin: false,
+  systemRole: "USER"
+};
 
 const getStoredActiveOrganizationId = () => {
   if (typeof window === "undefined") {
@@ -214,7 +222,8 @@ export const AdminOrganizationProvider = ({ children }: { children: React.ReactN
       isLoading: !isReady || organizationsQuery.isLoading,
       organizations,
       refreshOrganizations,
-      setActiveOrganizationId
+      setActiveOrganizationId,
+      viewer: organizationsQuery.data?.viewer ?? defaultAdminViewer
     }),
     [
       activeOrganization,
@@ -222,6 +231,7 @@ export const AdminOrganizationProvider = ({ children }: { children: React.ReactN
       createOrganizationMutation.error,
       isReady,
       organizations,
+      organizationsQuery.data?.viewer,
       organizationsQuery.error,
       organizationsQuery.isLoading,
       refreshOrganizations,

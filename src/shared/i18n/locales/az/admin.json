@@ -35,6 +35,10 @@
     "createHeroTitle": "Yeni yer",
     "createHint": "Ad və loqo qonağa hansı məkana yazdığını anlamağa kömək edir.",
     "namePlaceholder": "Yer adı",
+    "nameErrors": {
+      "required": "Məkan adını yazın.",
+      "tooShort": "Ad ən azı 2 simvol olmalıdır."
+    },
     "contactPlaceholder": "Telefon və ya @username",
     "contactHint": "Qonağa sizinlə əlaqə saxlaması lazım olduğunu göstərəcəyik.",
     "presetTitle": "Format",
@@ -138,7 +142,48 @@
     "subscription": "Abunəlik",
     "locale": "Dil",
     "faq": "Suallar",
-    "support": "Dəstək"
+    "support": "Dəstək",
+    "system": "Nəbz"
+  },
+  "system": {
+    "badge": "Sistem",
+    "title": "Izoh nəbzi",
+    "subtitle": "Məhsulun canlı rəqəmləri: skanlar, müraciətlər, istifadəçilər və məkanlar.",
+    "accessTitle": "Giriş yoxdur",
+    "accessHint": "Bu bölmə yalnız sistem adminləri üçündür.",
+    "loadErrorTitle": "Nəbzi açmaq olmadı",
+    "loadErrorHint": "Bağlantını yoxlayın və yenidən cəhd edin.",
+    "retry": "Yenidən cəhd et",
+    "conversion": "müraciətə",
+    "context": "Kontekst: {{value}}",
+    "rating": "{{value}}/5",
+    "scanSubmissionPair": "skan / mür.",
+    "grantAction": "Ver",
+    "extendAction": "Uzat",
+    "granting": "Hazırlanır",
+    "emptySubmissions": "Hələ müraciət yoxdur.",
+    "emptyOrganizations": "Hələ məkan yoxdur.",
+    "periods": {
+      "TODAY": "Bu gün",
+      "7D": "7 gün",
+      "30D": "30 gün",
+      "ALL": "Hamısı"
+    },
+    "metrics": {
+      "submissions": "Müraciətlər",
+      "scans": "Skanlar",
+      "users": "İstifadəçilər",
+      "organizations": "Məkanlar",
+      "activeSubscriptions": "Abunələr",
+      "newInPeriod": "+{{count}} bu dövrdə",
+      "total": "Cəmi {{count}}",
+      "allTime": "Bütün dövr"
+    },
+    "sections": {
+      "recentSubmissions": "Son müraciətlər",
+      "organizations": "Məkanlar",
+      "organizationsHint": "Sətirlərdəki rəqəmlər seçilən dövr üçün skanlar və müraciətlərdir."
+    }
   },
   "faq": {
     "title": "Suallar",
@@ -685,37 +730,68 @@
     "showHint": "Deaktiv edilərsə, qonaq formada bu bölməni görməyəcək.",
     "analytics": {
       "hint": "Reytinq və dinamika.",
-      "rows": ["Orta reytinq", "Gündüz", "Nöqtə-nöqtə"]
+      "rows": [
+        "Orta reytinq",
+        "Gündüz",
+        "Nöqtə-nöqtə"
+      ]
     },
     "feed": {
       "hint": "Rəylər, şikayətlər və təkliflər bir siyahıda.",
-      "rows": ["Rəylər", "Şikayətlər", "Təkliflər"]
+      "rows": [
+        "Rəylər",
+        "Şikayətlər",
+        "Təkliflər"
+      ]
     },
     "review": {
       "hint": "Onlar qonaqları nəyin sevindirdiyini və harada inkişaf etdirə biləcəyinizi anlamağa kömək edir.",
-      "rows": ["Qiymətləndirmə", "Şərh", "Foto"]
+      "rows": [
+        "Qiymətləndirmə",
+        "Şərh",
+        "Foto"
+      ]
     },
     "complaint": {
       "hint": "Onlar problemi tez görməyə və uzun yazışmalar olmadan təfərrüatları əldə etməyə kömək edir.",
-      "rows": ["Mətn", "Foto", "Qəbul edənlər"]
+      "rows": [
+        "Mətn",
+        "Foto",
+        "Qəbul edənlər"
+      ]
     },
     "suggestion": {
       "hint": "Qonaq fikirlərini toplamağa və təxmin etmədən xidməti yaxşılaşdırmağa kömək edir.",
-      "rows": ["Mətn", "Foto", "Qəbul edənlər"]
+      "rows": [
+        "Mətn",
+        "Foto",
+        "Qəbul edənlər"
+      ]
     },
     "notifications": {
       "hint": "Botun hansı sorğuları dərhal göndərəcəyini və hara getdiyini konfiqurasiya edin.",
-      "rows": ["Şəxsi mesajlar", "Qrup", "Müraciət növləri"]
+      "rows": [
+        "Şəxsi mesajlar",
+        "Qrup",
+        "Müraciət növləri"
+      ]
     },
     "qr": {
       "hint": "Qonaq linki avtomatik yaradılır. QR onu masaya, piştaxtaya və ya stikerə səliqəli yerləşdirməyə kömək edir.",
-      "rows": ["Link", "Poster A4", "Stiker"]
+      "rows": [
+        "Link",
+        "Poster A4",
+        "Stiker"
+      ]
     },
     "staff": {
       "show": "Kadr seçimi",
       "showHint": "Aktiv edilərsə, işçi seçimi rəylərdə və şikayətlərdə görünəcək.",
       "hint": "Qonağın kim haqqında yazdığını anlamağa və rəy və şikayətləri daha dəqiq təhlil etməyə kömək edir.",
-      "rows": ["İşçilər", "Formalarda"]
+      "rows": [
+        "İşçilər",
+        "Formalarda"
+      ]
     }
   },
   "sectionShellHint": "Bölmə hazır olduqda parametrlər burada görünəcək."

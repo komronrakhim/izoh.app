@@ -39,7 +39,18 @@ interface TextareaProps
 
 export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   (
-    { className, variant, size = "md", autoresize = false, value, defaultValue, error, ...props },
+    {
+      className,
+      variant,
+      size = "md",
+      autoresize = false,
+      value,
+      defaultValue,
+      error,
+      "aria-describedby": ariaDescribedBy,
+      "aria-invalid": ariaInvalid,
+      ...props
+    },
     ref
   ) => {
     const maxHeight =
@@ -50,6 +61,10 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     const textareaRef = React.useRef<HTMLTextAreaElement>(null);
     const measureRef = React.useRef<HTMLTextAreaElement>(null);
+    const errorId = React.useId();
+    const errorDescriptionId = error ? errorId : undefined;
+    const describedBy =
+      [ariaDescribedBy, errorDescriptionId].filter(Boolean).join(" ") || undefined;
 
     const setRefs = React.useCallback(
       (node: HTMLTextAreaElement | null) => {
@@ -133,6 +148,8 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             <textarea
               {...props}
               ref={setRefs}
+              aria-describedby={describedBy}
+              aria-invalid={ariaInvalid ?? (error ? true : undefined)}
               value={value}
               defaultValue={defaultValue}
               onChange={handleChange}
@@ -154,6 +171,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 
         {error ? (
           <p
+            id={errorDescriptionId}
             className={cn(
               "ios-footnote px-1 pb-0.5 font-normal text-danger",
               autoresize ? "pt-3" : "pt-2"

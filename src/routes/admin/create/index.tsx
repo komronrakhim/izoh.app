@@ -50,6 +50,10 @@ const presetIconMeta: Record<OrganizationPresetId, { icon: LucideIcon; tone: str
   }
 };
 
+const ORGANIZATION_NAME_MIN_LENGTH = 2;
+const ORGANIZATION_NAME_MAX_LENGTH = 80;
+const ORGANIZATION_CONTACT_MAX_LENGTH = 120;
+
 const createHeaders = (initDataRaw?: string, headers?: HeadersInit) => {
   const nextHeaders = new Headers(headers);
 
@@ -79,11 +83,26 @@ export const AdminOrganizationCreatePage = () => {
   );
   const [isSaving, setIsSaving] = React.useState(false);
   const [isPickingContact, setIsPickingContact] = React.useState(false);
+  const [didAttemptSubmit, setDidAttemptSubmit] = React.useState(false);
+  const [didTouchName, setDidTouchName] = React.useState(false);
   const logoInputId = React.useId();
   const logoInputRef = React.useRef<HTMLInputElement>(null);
 
   const cleanName = name.trim();
   const cleanContactText = contactText.trim();
+  const nameValidationError = React.useMemo(() => {
+    if (!cleanName) {
+      return t("admin.organizations.nameErrors.required");
+    }
+
+    if (cleanName.length < ORGANIZATION_NAME_MIN_LENGTH) {
+      return t("admin.organizations.nameErrors.tooShort");
+    }
+
+    return "";
+  }, [cleanName, t]);
+  const displayedNameError =
+    didAttemptSubmit || didTouchName ? nameValidationError || undefined : undefined;
   const isOrganizationLimitReached =
     !createdOrganization && organizations.length >= MAX_ADMIN_ORGANIZATIONS;
 
@@ -219,7 +238,13 @@ export const AdminOrganizationCreatePage = () => {
   );
 
   const saveOrganization = React.useCallback(async () => {
-    if (!cleanName || isSaving || isOrganizationLimitReached) {
+    setDidAttemptSubmit(true);
+
+    if (nameValidationError || isSaving || isOrganizationLimitReached) {
+      if (nameValidationError) {
+        tma.haptics.notification("error");
+      }
+
       return;
     }
 
@@ -271,13 +296,14 @@ export const AdminOrganizationCreatePage = () => {
     isSaving,
     locale,
     navigate,
+    nameValidationError,
     refreshOrganizations,
     setActiveOrganizationId,
     t,
     tma.haptics
   ]);
 
-  const canSave = Boolean(name.trim()) && !isSaving;
+  const canSave = !isSaving && !createdOrganization && !isOrganizationLimitReached;
   const mainButtonText = createdOrganization
     ? t("admin.organizations.savingLogo")
     : t("admin.organizations.createAction");
@@ -285,10 +311,10 @@ export const AdminOrganizationCreatePage = () => {
     () => ({
       enabled: canSave,
       loading: isSaving,
-      shine: canSave,
+      shine: canSave && !nameValidationError,
       text: mainButtonText
     }),
-    [canSave, isSaving, mainButtonText]
+    [canSave, isSaving, mainButtonText, nameValidationError]
   );
 
   useTmaMainButton(mainButtonState, saveOrganization);
@@ -374,10 +400,13 @@ export const AdminOrganizationCreatePage = () => {
                 clearLabel={t("common.actions.clear")}
                 disabled={Boolean(createdOrganization)}
                 enterKeyHint="next"
+                error={displayedNameError}
+                maxLength={ORGANIZATION_NAME_MAX_LENGTH}
                 placeholder={t("admin.organizations.namePlaceholder")}
                 size="lg"
                 value={name}
                 wide
+                onBlur={() => setDidTouchName(true)}
                 onChange={(event) => setName(event.target.value)}
               />
               <Input
@@ -401,6 +430,7 @@ export const AdminOrganizationCreatePage = () => {
                 disabled={Boolean(createdOrganization)}
                 enterKeyHint="done"
                 hint={t("admin.organizations.contactHint")}
+                maxLength={ORGANIZATION_CONTACT_MAX_LENGTH}
                 placeholder={t("admin.organizations.contactPlaceholder")}
                 size="lg"
                 value={contactText}

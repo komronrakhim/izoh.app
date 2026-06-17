@@ -183,6 +183,7 @@ model User {
   created_broadcasts                Broadcast[]                                 @relation("CreatedBroadcasts")
   broadcast_recipients              BroadcastRecipient[]
   organization_deletion_jobs        OrganizationDeletionJob[]                   @relation("OrganizationDeletionJobsRequested")
+  guest_entry_scans                 GuestEntryScan[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -213,6 +214,7 @@ model Organization {
   subscription_payments             OrganizationSubscriptionPayment[]
   subscription_events               OrganizationSubscriptionEvent[]
   guest_contexts                    OrganizationGuestContext[]
+  guest_entry_scans                 GuestEntryScan[]
   staff_members                     StaffMember[]
   submissions                       Submission[]
   deletion_jobs                     OrganizationDeletionJob[]
@@ -414,6 +416,26 @@ model OrganizationGuestContext {
   @@unique([organization_id, code])
   @@unique([organization_id, label])
   @@index([organization_id, created_at])
+}
+
+model GuestEntryScan {
+  id              String  @id @default(cuid())
+  organization_id String
+  user_id         String?
+  start_param     String
+  qr_context      String?
+  locale          String?
+  platform        String?
+
+  organization Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  created_at DateTime @default(now())
+
+  @@index([organization_id, created_at])
+  @@index([user_id, created_at])
+  @@index([start_param, created_at])
+  @@index([created_at])
 }
 
 model StaffMember {

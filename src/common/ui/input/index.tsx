@@ -96,6 +96,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       value,
       defaultValue,
       onChange,
+      "aria-describedby": ariaDescribedBy,
+      "aria-invalid": ariaInvalid,
       ...props
     },
     ref
@@ -111,10 +113,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const spinnerSize = spinnerSizeMap[size ?? "md"];
 
     const inputRef = React.useRef<HTMLInputElement>(null);
+    const feedbackId = React.useId();
     const [hasValue, setHasValue] = React.useState(() => hasInputValue(value ?? defaultValue));
     const feedbackMessage = error || hint || null;
     const isError = Boolean(error);
     const isDisabled = disabled || loading;
+    const feedbackDescriptionId = feedbackMessage ? feedbackId : undefined;
+    const describedBy =
+      [ariaDescribedBy, feedbackDescriptionId].filter(Boolean).join(" ") || undefined;
     const canReserveClearButton = clearable && canClearInputType(type) && !readOnly;
     const showClearButton = canReserveClearButton && !isDisabled && hasValue;
     const shouldRenderTrailingSlot = loading || canReserveClearButton || Boolean(addon?.after);
@@ -179,6 +185,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <div className="relative z-10 flex min-w-0 flex-1 items-center">
             <input
               ref={setRefs}
+              aria-describedby={describedBy}
+              aria-invalid={ariaInvalid ?? (isError ? true : undefined)}
               disabled={isDisabled}
               readOnly={readOnly}
               type={type}
@@ -227,6 +235,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
         {feedbackMessage ? (
           <p
+            id={feedbackDescriptionId}
             className={cn(
               "ios-footnote px-1 pt-3 pb-0.5 font-normal",
               isError ? "text-danger" : "text-muted"

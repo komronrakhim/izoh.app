@@ -15,5 +15,10 @@ export type AdminOrganization = {
   subscriptionActive: boolean;
 };
 
+export type AdminViewer = {
+  isSystemAdmin: boolean;
+  systemRole: "ADMIN" | "USER";
+};
+
 export const ACTIVE_ADMIN_ORGANIZATION_STORAGE_KEY = "izoh.admin.activeOrganizationId";
 export const MAX_ADMIN_ORGANIZATIONS = 3;

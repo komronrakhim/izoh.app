@@ -18,6 +18,8 @@ export const AppQueryProvider = ({ children }: { children: React.ReactNode }) =>
 
 export const queryKeys = {
   adminOrganizations: (initDataRaw: string) => ["admin", "organizations", initDataRaw] as const,
+  systemPulse: (period: string, initDataRaw: string) =>
+    ["system", "pulse", period, initDataRaw] as const,
   guestMenu: (organizationId: string, initDataRaw: string) =>
     ["organization", organizationId, "guest-menu", initDataRaw] as const,
   guestMenuItem: (organizationId: string, itemId: string, initDataRaw: string) =>
@@ -32,7 +34,8 @@ export const queryKeys = {
     ["organization", organizationId, "analytics", period, initDataRaw] as const,
   organizationQrLink: (organizationId: string, context: string, initDataRaw: string) =>
     ["organization", organizationId, "qr-link", context, initDataRaw] as const,
-  guestEntryConfig: (startParam: string) => ["guest-entry", startParam] as const,
+  guestEntryConfig: (startParam: string, initDataRaw = "") =>
+    ["guest-entry", startParam, initDataRaw] as const,
   staffMembers: (organizationId: string, initDataRaw: string) =>
     ["organization", organizationId, "staff-members", initDataRaw] as const,
   submissions: (organizationId: string, filter: string, initDataRaw: string) =>
