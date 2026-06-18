@@ -122,7 +122,10 @@ describe("Telegram submission notifications", () => {
         },
         qr_context: null,
         rating: 5,
-        target_staff_member: null
+        target_staff_member: {
+          display_name: "Хадича",
+          role_title: "Бариста"
+        }
       }
     });
 

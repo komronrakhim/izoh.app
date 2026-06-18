@@ -135,19 +135,19 @@ export const formatSubmissionNotificationText = ({
     metadata: submission.metadata
   });
   const staffLabel = (() => {
-    if (submission.target_staff_member) {
+    if (parsedMetadata.staffTargetSnapshot) {
       return [
-        submission.target_staff_member.display_name,
-        submission.target_staff_member.role_title || null
+        parsedMetadata.staffTargetSnapshot.displayName,
+        parsedMetadata.staffTargetSnapshot.roleTitle || null
       ]
         .filter(Boolean)
         .join(" · ");
     }
 
-    if (parsedMetadata.staffTargetSnapshot) {
+    if (submission.target_staff_member) {
       return [
-        parsedMetadata.staffTargetSnapshot.displayName,
-        parsedMetadata.staffTargetSnapshot.roleTitle || null
+        submission.target_staff_member.display_name,
+        submission.target_staff_member.role_title || null
       ]
         .filter(Boolean)
         .join(" · ");

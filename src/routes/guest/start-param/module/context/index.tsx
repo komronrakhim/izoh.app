@@ -413,7 +413,7 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
     }
 
     if (!staffTargets.some((target) => target.id === staffTargetId)) {
-      setStaffTargetId(staffTargets[0]?.id ?? "");
+      setStaffTargetId("");
     }
   }, [showStaffTarget, staffTargetId, staffTargets]);
 
@@ -466,7 +466,7 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
     hasMessageText ||
     effectiveTopicIds.length > 0 ||
     readyPhotoIds.length > 0;
-  const detailsStepIsValid = !showStaffTarget || Boolean(staffTargetId);
+  const detailsStepIsValid = !showStaffTarget || Boolean(selectedStaffTarget);
   const messageStepIsValid =
     activeChannel?.id === "complaint"
       ? (!commentRequired || hasMessageText) && complaintHasAnyDetail
@@ -1042,6 +1042,7 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
             customerContactPhone: normalizedContact || undefined,
             attachmentMediaAssetIds: readyPhotoIds,
             attachmentOwnerId,
+            guestEntryScanId: guestEntryConfig.scanId ?? undefined,
             kind: activeChannel.module,
             locale: toPrismaLocale(locale),
             metadata,

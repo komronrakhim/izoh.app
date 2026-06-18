@@ -44,7 +44,11 @@ const createAnalyticsDb = ({ staffEnabled = true }: { staffEnabled?: boolean } =
           },
           qr_context: "Стол 4",
           rating: 5,
-          target_staff_member: null
+          target_staff_member: {
+            display_name: "Хадича",
+            id: "staff_1",
+            role_title: "Бариста"
+          }
         },
         {
           attachments: [],

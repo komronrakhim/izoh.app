@@ -45,6 +45,7 @@ export type GuestEntryConfigPayload = {
     settings: StaffModuleSettings;
   };
   qrContext?: string;
+  scanId?: null | string;
   startParam: string;
 };
 

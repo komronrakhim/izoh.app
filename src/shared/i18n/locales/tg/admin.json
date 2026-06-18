@@ -163,6 +163,11 @@
     "granting": "Омода мекунем",
     "emptySubmissions": "Ҳоло муроҷиат нест.",
     "emptyOrganizations": "Ҳоло ҷой нест.",
+    "scanConversion": {
+      "title": "Сканҳои бо муроҷиат",
+      "hint": "{{converted}} аз {{scans}} скан то муроҷиат расид.",
+      "empty": "Дар ин давра ҳоло скан нест."
+    },
     "periods": {
       "TODAY": "Имрӯз",
       "7D": "7 рӯз",
@@ -179,6 +184,7 @@
       "total": "Ҳамагӣ {{count}}",
       "allTime": "Ҳама вақт",
       "paidStars": "Stars",
+      "paidPayments": "Пардохтҳо",
       "trendUp": "+{{count}} нисбат ба давраи гузашта",
       "trendDown": "-{{count}} нисбат ба давраи гузашта",
       "trendFlat": "Мисли давраи гузашта"
@@ -197,8 +203,6 @@
       "userOrganizations": "Ҷойҳои корбар",
       "userSubmissions": "Муроҷиатҳои корбар"
     },
-    "conversionTitle": "Сканҳо ба муроҷиат табдил меёбанд",
-    "conversionHint": "Нишон медиҳад, ки QR ва форма чӣ қадар кор мекунанд.",
     "subscriptionUntil": "То {{date}} фаъол аст",
     "userMeta": "ID {{telegramId}} · {{locale}}",
     "emptyUsers": "Ҳоло корбар нест.",

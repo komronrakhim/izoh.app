@@ -3,6 +3,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tansta
 import {
   BadgeCheck,
   Building2,
+  ChevronLeft,
   ChevronRight,
   CircleDollarSign,
   Gift,
@@ -17,6 +18,7 @@ import {
   ShieldCheck,
   Star,
   UsersRound,
+  X,
   type LucideIcon
 } from "lucide-react";
 import * as React from "react";
@@ -52,6 +54,7 @@ type SystemMetricId =
   | "activeSubscriptions"
   | "organizations"
   | "paidStars"
+  | "paidPayments"
   | "scans"
   | "submissions"
   | "users";
@@ -77,6 +80,10 @@ const metricMeta: Record<SystemMetricId, SystemMetricMeta> = {
   },
   paidStars: {
     icon: Star,
+    tone: "bg-[#FFB000] text-white"
+  },
+  paidPayments: {
+    icon: CircleDollarSign,
     tone: "bg-[#FFB000] text-white"
   },
   scans: {
@@ -296,6 +303,50 @@ const MetricTile = ({
   );
 };
 
+const ScanConversionTile = ({
+  convertedScans,
+  period,
+  rate,
+  scans
+}: {
+  convertedScans: SystemPulseMetric;
+  period: SystemPulsePeriod;
+  rate: null | number;
+  scans: SystemPulseMetric;
+}) => {
+  const { locale, t } = useI18n();
+  const number = React.useMemo(() => new Intl.NumberFormat(getIntlLocale(locale)), [locale]);
+  const scansValue = period === "ALL" ? scans.total : scans.value;
+  const convertedValue = period === "ALL" ? convertedScans.total : convertedScans.value;
+  const rateText = rate === null ? "—" : `${number.format(rate)}%`;
+
+  return (
+    <div className="iz-liquid-list rounded-[24px] border px-4 py-3.5">
+      <div className="flex items-start justify-between gap-3">
+        <span className="min-w-0">
+          <span className="ios-title-2 block font-semibold tracking-normal text-foreground">
+            {rateText}
+          </span>
+          <span className="ios-caption-1 mt-0.5 block font-semibold uppercase text-muted">
+            {t("admin.system.scanConversion.title")}
+          </span>
+        </span>
+        <span className="grid size-9 shrink-0 place-items-center rounded-[13px] bg-[#34C759] text-white">
+          <ScanLine size={18} strokeWidth={2.35} />
+        </span>
+      </div>
+      <p className="ios-footnote mt-2 text-muted">
+        {rate === null
+          ? t("admin.system.scanConversion.empty")
+          : t("admin.system.scanConversion.hint", {
+              converted: number.format(convertedValue),
+              scans: number.format(scansValue)
+            })}
+      </p>
+    </div>
+  );
+};
+
 const EmptySection = ({ text }: { text: string }) => (
   <div className="ios-footnote rounded-[24px] border border-dashed border-border/80 px-4 py-5 text-center text-muted">
     {text}
@@ -393,7 +444,7 @@ const useLoadMoreRef = ({
   return loadMoreRef;
 };
 
-const useSystemGate = (fallbackBackTo?: () => void) => {
+const useSystemGate = (fallbackBackTo?: () => void, beforeBack?: () => boolean) => {
   const canGoBack = useCanGoBack();
   const navigate = useNavigate();
   const router = useRouter();
@@ -405,13 +456,17 @@ const useSystemGate = (fallbackBackTo?: () => void) => {
   }, [navigate]);
 
   const goBack = React.useCallback(() => {
+    if (beforeBack?.()) {
+      return;
+    }
+
     if (canGoBack) {
       router.history.back();
       return;
     }
 
     (fallbackBackTo ?? defaultBackTo)();
-  }, [canGoBack, defaultBackTo, fallbackBackTo, router.history]);
+  }, [beforeBack, canGoBack, defaultBackTo, fallbackBackTo, router.history]);
 
   useTmaBackButton(true, goBack);
 
@@ -452,6 +507,48 @@ const useSystemGate = (fallbackBackTo?: () => void) => {
   return {
     content: null,
     isAllowed: true
+  };
+};
+
+const useSystemSubmissionGallery = () => {
+  const [gallery, setGallery] = React.useState<null | SystemSubmissionGalleryState>(null);
+
+  const closeGallery = React.useCallback(() => {
+    setGallery(null);
+  }, []);
+
+  const openGallery = React.useCallback((submission: SystemSubmissionItem, index: number) => {
+    if (submission.attachments.length === 0) {
+      return;
+    }
+
+    tmaHaptics.impact("light");
+    setGallery({
+      attachments: submission.attachments,
+      index
+    });
+  }, []);
+
+  const selectGalleryIndex = React.useCallback((index: number) => {
+    setGallery((current) => (current ? { ...current, index } : current));
+  }, []);
+
+  const closeGalleryOnBack = React.useCallback(() => {
+    if (!gallery) {
+      return false;
+    }
+
+    closeGallery();
+
+    return true;
+  }, [closeGallery, gallery]);
+
+  return {
+    closeGallery,
+    closeGalleryOnBack,
+    gallery,
+    openGallery,
+    selectGalleryIndex
   };
 };
 
@@ -666,27 +763,214 @@ const SystemFeedPill = ({
   </span>
 );
 
-const SystemSubmissionMediaStrip = ({ submission }: { submission: SystemSubmissionItem }) => {
-  if (submission.attachments.length === 0) {
+type SystemSubmissionGalleryState = {
+  attachments: SystemSubmissionItem["attachments"];
+  index: number;
+};
+
+const SystemSubmissionMediaGrid = ({
+  attachments,
+  onOpen,
+  t
+}: {
+  attachments: SystemSubmissionItem["attachments"];
+  onOpen: (index: number) => void;
+  t: (key: string, options?: Record<string, unknown>) => string;
+}) => {
+  const count = attachments.length;
+
+  if (count === 0) {
     return null;
   }
 
-  return (
-    <div className="scrollbar-hide -mx-0.5 flex gap-1 overflow-x-auto">
-      {submission.attachments.map((attachment) => (
+  if (count === 1) {
+    const attachment = attachments[0];
+
+    if (!attachment) {
+      return null;
+    }
+
+    return (
+      <button
+        type="button"
+        className="-mx-0.5 block aspect-[4/3] overflow-hidden rounded-[20px] bg-foreground/[0.06] active:opacity-85 dark:bg-white/[0.08]"
+        onClick={() => onOpen(0)}
+      >
         <img
-          key={attachment.id}
           src={attachment.publicUrl}
-          alt=""
-          className="size-20 shrink-0 rounded-[16px] object-cover"
+          alt={t("admin.feed.photoAlt", {
+            index: 1
+          })}
+          className="size-full object-cover"
           loading="lazy"
         />
+      </button>
+    );
+  }
+
+  if (count === 3) {
+    return (
+      <div className="-mx-0.5 grid aspect-[4/3] grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden rounded-[20px] bg-foreground/[0.06] dark:bg-white/[0.08]">
+        {attachments.map((attachment, index) => (
+          <button
+            key={attachment.id}
+            type="button"
+            className={cn("overflow-hidden active:opacity-85", index === 0 && "row-span-2")}
+            onClick={() => onOpen(index)}
+          >
+            <img
+              src={attachment.publicUrl}
+              alt={t("admin.feed.photoAlt", {
+                index: index + 1
+              })}
+              className="size-full object-cover"
+              loading="lazy"
+            />
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "-mx-0.5 grid grid-cols-2 gap-0.5 overflow-hidden rounded-[20px] bg-foreground/[0.06] dark:bg-white/[0.08]",
+        count === 2 ? "aspect-[4/3]" : ""
+      )}
+    >
+      {attachments.map((attachment, index) => (
+        <button
+          key={attachment.id}
+          type="button"
+          className={cn("overflow-hidden active:opacity-85", count !== 2 && "aspect-square")}
+          onClick={() => onOpen(index)}
+        >
+          <img
+            src={attachment.publicUrl}
+            alt={t("admin.feed.photoAlt", {
+              index: index + 1
+            })}
+            className="size-full object-cover"
+            loading="lazy"
+          />
+        </button>
       ))}
     </div>
   );
 };
 
-const SystemSubmissionBubble = ({ submission }: { submission: SystemSubmissionItem }) => {
+const SystemSubmissionGallery = ({
+  gallery,
+  onClose,
+  onSelect,
+  t
+}: {
+  gallery: null | SystemSubmissionGalleryState;
+  onClose: () => void;
+  onSelect: (index: number) => void;
+  t: (key: string, options?: Record<string, unknown>) => string;
+}) => {
+  if (!gallery) {
+    return null;
+  }
+
+  const attachment = gallery.attachments[gallery.index];
+  const hasMultiple = gallery.attachments.length > 1;
+
+  if (!attachment) {
+    return null;
+  }
+
+  const selectNext = () => {
+    tmaHaptics.selection();
+    onSelect((gallery.index + 1) % gallery.attachments.length);
+  };
+  const selectPrevious = () => {
+    tmaHaptics.selection();
+    onSelect((gallery.index - 1 + gallery.attachments.length) % gallery.attachments.length);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 grid bg-black/94 text-white">
+      <button
+        type="button"
+        aria-label={t("admin.feed.gallery.close")}
+        className="absolute right-4 top-[max(16px,var(--iz-safe-top))] z-10 grid size-11 place-items-center rounded-full bg-white/12 text-white backdrop-blur-xl active:bg-white/18"
+        onClick={onClose}
+      >
+        <X size={22} strokeWidth={2.45} />
+      </button>
+
+      {hasMultiple ? (
+        <>
+          <button
+            type="button"
+            aria-label={t("admin.feed.gallery.previous")}
+            className="absolute left-3 top-1/2 z-10 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white backdrop-blur-xl active:bg-white/18"
+            onClick={selectPrevious}
+          >
+            <ChevronLeft size={24} strokeWidth={2.45} />
+          </button>
+          <button
+            type="button"
+            aria-label={t("admin.feed.gallery.next")}
+            className="absolute right-3 top-1/2 z-10 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white backdrop-blur-xl active:bg-white/18"
+            onClick={selectNext}
+          >
+            <ChevronRight size={24} strokeWidth={2.45} />
+          </button>
+        </>
+      ) : null}
+
+      <div className="grid min-h-0 place-items-center px-3 py-[max(74px,var(--iz-safe-top))]">
+        <img
+          src={attachment.publicUrl}
+          alt={t("admin.feed.photoAlt", {
+            index: gallery.index + 1
+          })}
+          className="max-h-full max-w-full rounded-[18px] object-contain"
+        />
+      </div>
+
+      {hasMultiple ? (
+        <div className="scrollbar-hide fixed inset-x-0 bottom-[max(16px,var(--iz-safe-bottom))] flex justify-center gap-2 overflow-x-auto px-4">
+          {gallery.attachments.map((item, index) => {
+            const active = index === gallery.index;
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                aria-label={t("admin.feed.photoAlt", {
+                  index: index + 1
+                })}
+                className={cn(
+                  "size-14 shrink-0 overflow-hidden rounded-[13px] transition-opacity",
+                  active ? "ring-2 ring-white" : "opacity-54 active:opacity-80"
+                )}
+                onClick={() => {
+                  tmaHaptics.selection();
+                  onSelect(index);
+                }}
+              >
+                <img src={item.publicUrl} alt="" className="size-full object-cover" />
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
+const SystemSubmissionBubble = ({
+  onOpenAttachment,
+  submission
+}: {
+  onOpenAttachment?: (submission: SystemSubmissionItem, index: number) => void;
+  submission: SystemSubmissionItem;
+}) => {
   const { locale, t } = useI18n();
   const meta = kindMeta[submission.kind];
   const Icon = meta.icon;
@@ -742,6 +1026,12 @@ const SystemSubmissionBubble = ({ submission }: { submission: SystemSubmissionIt
 
       <div className={bubbleClassName}>
         <div className="grid gap-1.5">
+          <SystemSubmissionMediaGrid
+            attachments={submission.attachments}
+            onOpen={(index) => onOpenAttachment?.(submission, index)}
+            t={t}
+          />
+
           <header className="flex min-w-0 items-start justify-between gap-3 px-1">
             <span className="grid min-w-0 gap-0.5">
               {author ? (
@@ -767,8 +1057,6 @@ const SystemSubmissionBubble = ({ submission }: { submission: SystemSubmissionIt
               {t(`admin.feed.kind.${submission.kind}`)}
             </span>
           </header>
-
-          <SystemSubmissionMediaStrip submission={submission} />
 
           <p
             className={cn(
@@ -830,10 +1118,12 @@ const SystemSubmissionBubble = ({ submission }: { submission: SystemSubmissionIt
 const SystemSubmissionFeed = ({
   emptyText,
   loadMoreRef,
+  onOpenAttachment,
   submissions
 }: {
   emptyText: string;
   loadMoreRef?: React.RefObject<HTMLDivElement | null>;
+  onOpenAttachment?: (submission: SystemSubmissionItem, index: number) => void;
   submissions: SystemSubmissionItem[];
 }) => {
   const { locale, t } = useI18n();
@@ -862,7 +1152,10 @@ const SystemSubmissionFeed = ({
               {dateLabel}
             </div>
           ) : null}
-          <SystemSubmissionBubble submission={submission} />
+          <SystemSubmissionBubble
+            onOpenAttachment={onOpenAttachment}
+            submission={submission}
+          />
         </React.Fragment>
       ))}
       {loadMoreRef ? <div ref={loadMoreRef} aria-hidden="true" className="h-1" /> : null}
@@ -885,10 +1178,6 @@ export const AdminSystemPage = () => {
     queryKey: queryKeys.systemPulse(period, tma.initDataRaw)
   });
   const pulse = pulseQuery.data ?? null;
-  const conversion =
-    pulse && pulse.totals.scans.value > 0
-      ? Math.round((pulse.totals.submissions.value / pulse.totals.scans.value) * 100)
-      : null;
 
   if (!gate.isAllowed) {
     return gate.content;
@@ -923,27 +1212,13 @@ export const AdminSystemPage = () => {
                 ).map((id) => (
                   <MetricTile key={id} id={id} metric={pulse.totals[id]} period={period} />
                 ))}
+                <ScanConversionTile
+                  convertedScans={pulse.scanConversion.convertedScans}
+                  period={period}
+                  rate={pulse.scanConversion.rate}
+                  scans={pulse.totals.scans}
+                />
               </section>
-
-              {conversion !== null ? (
-                <section className="px-1">
-                  <div className="iz-liquid-list rounded-[24px] border px-4 py-3">
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="min-w-0">
-                        <span className="ios-body block font-medium">
-                          {t("admin.system.conversionTitle")}
-                        </span>
-                        <span className="ios-footnote text-muted">
-                          {t("admin.system.conversionHint")}
-                        </span>
-                      </span>
-                      <span className="ios-title-2 shrink-0 font-semibold tracking-normal">
-                        {conversion}%
-                      </span>
-                    </div>
-                  </div>
-                </section>
-              ) : null}
 
               <List
                 title={t("admin.system.sections.hub")}
@@ -1019,7 +1294,6 @@ export const AdminSystemOrganizationsPage = () => {
   const gate = useSystemGate(backToSystem);
   const tma = useTma();
   const { locale, t } = useI18n();
-  const [period, setPeriod] = React.useState<SystemPulsePeriod>("7D");
   const [search, setSearch] = React.useState("");
   const deferredSearch = React.useDeferredValue(search.trim());
   const number = React.useMemo(() => new Intl.NumberFormat(getIntlLocale(locale)), [locale]);
@@ -1030,7 +1304,7 @@ export const AdminSystemOrganizationsPage = () => {
     queryFn: ({ pageParam }) => {
       const params = new URLSearchParams({
         limit: String(SYSTEM_PAGE_SIZE),
-        period,
+        period: "ALL",
         search: deferredSearch
       });
 
@@ -1045,7 +1319,7 @@ export const AdminSystemOrganizationsPage = () => {
         }
       );
     },
-    queryKey: queryKeys.systemOrganizations(period, deferredSearch, tma.initDataRaw)
+    queryKey: queryKeys.systemOrganizations("ALL", deferredSearch, tma.initDataRaw)
   });
   const firstPage = organizationsQuery.data?.pages[0] ?? null;
   const organizations = organizationsQuery.data?.pages.flatMap((page) => page.items) ?? [];
@@ -1073,7 +1347,6 @@ export const AdminSystemOrganizationsPage = () => {
               search={search}
               setSearch={setSearch}
             />
-            <PeriodTabs period={period} setPeriod={setPeriod} />
           </section>
 
           {organizationsQuery.isPending && !firstPage ? (
@@ -1131,7 +1404,8 @@ export const AdminSystemOrganizationPage = () => {
   const backToOrganizations = React.useCallback(() => {
     void navigate({ to: "/admin/system/organizations" });
   }, [navigate]);
-  const gate = useSystemGate(backToOrganizations);
+  const submissionGallery = useSystemSubmissionGallery();
+  const gate = useSystemGate(backToOrganizations, submissionGallery.closeGalleryOnBack);
   const tma = useTma();
   const { locale, t } = useI18n();
   const [period, setPeriod] = React.useState<SystemPulsePeriod>("7D");
@@ -1265,6 +1539,7 @@ export const AdminSystemOrganizationPage = () => {
                 <SystemSubmissionFeed
                   emptyText={t("admin.system.emptySubmissions")}
                   loadMoreRef={detailQuery.hasNextPage ? loadMoreRef : undefined}
+                  onOpenAttachment={submissionGallery.openGallery}
                   submissions={submissions}
                 />
               </section>
@@ -1289,6 +1564,15 @@ export const AdminSystemOrganizationPage = () => {
             </>
           )}
         </div>
+        <SystemSubmissionGallery
+          gallery={submissionGallery.gallery}
+          onClose={() => {
+            tmaHaptics.impact("light");
+            submissionGallery.closeGallery();
+          }}
+          onSelect={submissionGallery.selectGalleryIndex}
+          t={t}
+        />
       </main>
     </PageTransition>
   );
@@ -1302,7 +1586,6 @@ export const AdminSystemUsersPage = () => {
   const gate = useSystemGate(backToSystem);
   const tma = useTma();
   const { locale, t } = useI18n();
-  const [period, setPeriod] = React.useState<SystemPulsePeriod>("7D");
   const [search, setSearch] = React.useState("");
   const deferredSearch = React.useDeferredValue(search.trim());
   const number = React.useMemo(() => new Intl.NumberFormat(getIntlLocale(locale)), [locale]);
@@ -1313,7 +1596,7 @@ export const AdminSystemUsersPage = () => {
     queryFn: ({ pageParam }) => {
       const queryParams = new URLSearchParams({
         limit: String(SYSTEM_PAGE_SIZE),
-        period,
+        period: "ALL",
         search: deferredSearch
       });
 
@@ -1325,7 +1608,7 @@ export const AdminSystemUsersPage = () => {
         initDataRaw: tma.initDataRaw
       });
     },
-    queryKey: queryKeys.systemUsers(period, deferredSearch, tma.initDataRaw)
+    queryKey: queryKeys.systemUsers("ALL", deferredSearch, tma.initDataRaw)
   });
   const firstPage = usersQuery.data?.pages[0] ?? null;
   const users = usersQuery.data?.pages.flatMap((page) => page.items) ?? [];
@@ -1353,7 +1636,6 @@ export const AdminSystemUsersPage = () => {
               search={search}
               setSearch={setSearch}
             />
-            <PeriodTabs period={period} setPeriod={setPeriod} />
           </section>
 
           {usersQuery.isPending && !firstPage ? (
@@ -1418,7 +1700,8 @@ export const AdminSystemUserPage = () => {
   const backToUsers = React.useCallback(() => {
     void navigate({ to: "/admin/system/users" });
   }, [navigate]);
-  const gate = useSystemGate(backToUsers);
+  const submissionGallery = useSystemSubmissionGallery();
+  const gate = useSystemGate(backToUsers, submissionGallery.closeGalleryOnBack);
   const tma = useTma();
   const { locale, t } = useI18n();
   const number = React.useMemo(() => new Intl.NumberFormat(getIntlLocale(locale)), [locale]);
@@ -1579,6 +1862,7 @@ export const AdminSystemUserPage = () => {
                 <SystemSubmissionFeed
                   emptyText={t("admin.system.emptySubmissions")}
                   loadMoreRef={userQuery.hasNextPage ? loadMoreRef : undefined}
+                  onOpenAttachment={submissionGallery.openGallery}
                   submissions={submissions}
                 />
               </section>
@@ -1629,6 +1913,15 @@ export const AdminSystemUserPage = () => {
             </>
           )}
         </div>
+        <SystemSubmissionGallery
+          gallery={submissionGallery.gallery}
+          onClose={() => {
+            tmaHaptics.impact("light");
+            submissionGallery.closeGallery();
+          }}
+          onSelect={submissionGallery.selectGalleryIndex}
+          t={t}
+        />
       </main>
     </PageTransition>
   );
@@ -1639,7 +1932,8 @@ export const AdminSystemSubmissionsPage = () => {
   const backToSystem = React.useCallback(() => {
     void navigate({ to: "/admin/system" });
   }, [navigate]);
-  const gate = useSystemGate(backToSystem);
+  const submissionGallery = useSystemSubmissionGallery();
+  const gate = useSystemGate(backToSystem, submissionGallery.closeGalleryOnBack);
   const tma = useTma();
   const { t } = useI18n();
   const [period, setPeriod] = React.useState<SystemPulsePeriod>("7D");
@@ -1717,10 +2011,20 @@ export const AdminSystemSubmissionsPage = () => {
             <SystemSubmissionFeed
               emptyText={t("admin.system.emptySubmissions")}
               loadMoreRef={submissionsQuery.hasNextPage ? loadMoreRef : undefined}
+              onOpenAttachment={submissionGallery.openGallery}
               submissions={submissions}
             />
           )}
         </div>
+        <SystemSubmissionGallery
+          gallery={submissionGallery.gallery}
+          onClose={() => {
+            tmaHaptics.impact("light");
+            submissionGallery.closeGallery();
+          }}
+          onSelect={submissionGallery.selectGalleryIndex}
+          t={t}
+        />
       </main>
     </PageTransition>
   );
@@ -1801,7 +2105,7 @@ export const AdminSystemStarsPage = () => {
                   period={period}
                 />
                 <MetricTile
-                  id="activeSubscriptions"
+                  id="paidPayments"
                   metric={{ total: stars.totals.paidPayments, value: stars.totals.paidPayments }}
                   period={period}
                 />

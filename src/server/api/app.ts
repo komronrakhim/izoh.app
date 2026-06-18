@@ -780,6 +780,50 @@ const resolveSubmissionGuestContext = async ({
   }
 };
 
+const resolveSubmissionGuestEntryScanId = async ({
+  customerUserId,
+  db,
+  organizationId,
+  scanId,
+  startParam
+}: {
+  customerUserId?: string;
+  db: NonNullable<ReturnType<typeof getPrisma>>;
+  organizationId: string;
+  scanId?: string;
+  startParam?: string;
+}) => {
+  if (!scanId) {
+    return undefined;
+  }
+
+  if (!startParam) {
+    throw new Error("Guest entry scan is not available.");
+  }
+
+  const scan = await db.guestEntryScan.findFirst({
+    select: {
+      id: true,
+      user_id: true
+    },
+    where: {
+      id: scanId,
+      organization_id: organizationId,
+      start_param: startParam
+    }
+  });
+
+  if (!scan) {
+    throw new Error("Guest entry scan is not available.");
+  }
+
+  if (customerUserId && scan.user_id && scan.user_id !== customerUserId) {
+    throw new Error("Guest entry scan does not match this guest.");
+  }
+
+  return scan.id;
+};
+
 export const createApiApp = () => {
   const app = new Hono();
 
@@ -1477,6 +1521,7 @@ export const createApiApp = () => {
         db,
         startParam
       });
+      let scanId: null | string = null;
       let userId: string | undefined;
       let userLocale: string | undefined;
 
@@ -1494,22 +1539,29 @@ export const createApiApp = () => {
         }
       }
 
-      void recordGuestEntryScan(
-        {
-          locale: userLocale,
-          organizationId: guestEntryConfig.organization.id,
-          qrContext: guestEntryConfig.qrContext,
-          startParam,
-          userId
-        },
-        db
-      ).catch((error) => {
+      try {
+        const scan = await recordGuestEntryScan(
+          {
+            locale: userLocale,
+            organizationId: guestEntryConfig.organization.id,
+            qrContext: guestEntryConfig.qrContext,
+            startParam,
+            userId
+          },
+          db
+        );
+
+        scanId = scan.id;
+      } catch (error) {
         console.warn("Guest entry scan analytics failed", {
           error: error instanceof Error ? error.message : String(error)
         });
-      });
+      }
 
-      return c.json(guestEntryConfig);
+      return c.json({
+        ...guestEntryConfig,
+        scanId
+      });
     } catch (error) {
       if (
         error instanceof Error &&
@@ -2465,6 +2517,7 @@ export const createApiApp = () => {
     });
     const db = getPrisma();
     const initData = getTelegramInitDataFromRequest(c);
+    let guestEntryScanId: string | undefined;
     let qrContext: string | undefined;
     let customerUserId: string | undefined;
 
@@ -2508,10 +2561,27 @@ export const createApiApp = () => {
     }
 
     try {
+      guestEntryScanId = await resolveSubmissionGuestEntryScanId({
+        customerUserId,
+        db,
+        organizationId: input.organizationId,
+        scanId: input.guestEntryScanId,
+        startParam: input.startParam
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        return c.json({ error: error.message }, 400);
+      }
+
+      throw error;
+    }
+
+    try {
       const submission = await createSubmission(
         {
           ...input,
           customerUserId,
+          guestEntryScanId,
           qrContext
         },
         db

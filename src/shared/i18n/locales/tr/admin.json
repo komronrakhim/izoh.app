@@ -163,6 +163,11 @@
     "granting": "Hazırlanıyor",
     "emptySubmissions": "Henüz geri bildirim yok.",
     "emptyOrganizations": "Henüz mekan yok.",
+    "scanConversion": {
+      "title": "Geri bildirime dönen taramalar",
+      "hint": "{{scans}} taramadan {{converted}} tanesi geri bildirime dönüştü.",
+      "empty": "Bu dönemde henüz tarama yok."
+    },
     "periods": {
       "TODAY": "Bugün",
       "7D": "7 gün",
@@ -179,6 +184,7 @@
       "total": "Toplam {{count}}",
       "allTime": "Tüm zamanlar",
       "paidStars": "Stars",
+      "paidPayments": "Ödemeler",
       "trendUp": "Önceki döneme göre +{{count}}",
       "trendDown": "Önceki döneme göre -{{count}}",
       "trendFlat": "Önceki dönemle aynı"
@@ -197,8 +203,6 @@
       "userOrganizations": "Kullanıcının yerleri",
       "userSubmissions": "Kullanıcının mesajları"
     },
-    "conversionTitle": "Taramalar geri bildirime dönüşüyor",
-    "conversionHint": "QR ve formun işini yapıp yapmadığını gösterir.",
     "subscriptionUntil": "{{date}} tarihine kadar aktif",
     "userMeta": "ID {{telegramId}} · {{locale}}",
     "emptyUsers": "Henüz kullanıcı yok.",

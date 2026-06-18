@@ -18,6 +18,7 @@ const createContourDb = () => {
     customer_allows_reply: boolean;
     customer_contact_phone: null | string;
     customer_display_name: null | string;
+    guest_entry_scan_id: null | string;
     id: string;
     kind: "COMPLAINT" | "REVIEW" | "SUGGESTION";
     locale: "ru" | "uz";
@@ -66,6 +67,7 @@ const createContourDb = () => {
           customer_allows_reply: data.customer_allows_reply,
           customer_contact_phone: data.customer_contact_phone ?? null,
           customer_display_name: data.customer_display_name ?? null,
+          guest_entry_scan_id: data.guest_entry_scan_id ?? null,
           id: "submission_1",
           kind: data.kind,
           locale: data.locale,
@@ -124,6 +126,7 @@ describe("submission product contour", () => {
         },
         organizationId: "org_1",
         qrContext: "Стол 4",
+        guestEntryScanId: "scan_1",
         rating: 5
       },
       db
@@ -142,6 +145,7 @@ describe("submission product contour", () => {
       organizationId: "org_1",
       total: 1
     });
+    expect(created.guest_entry_scan_id).toBe("scan_1");
     expect(feed.items[0]).toMatchObject({
       bodyText: "Все понравилось",
       kind: "REVIEW",

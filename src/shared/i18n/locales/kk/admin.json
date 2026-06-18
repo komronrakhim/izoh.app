@@ -163,6 +163,11 @@
     "granting": "Дайындап жатырмыз",
     "emptySubmissions": "Әзірге өтініш жоқ.",
     "emptyOrganizations": "Әзірге орын жоқ.",
+    "scanConversion": {
+      "title": "Өтінішке айналған скандар",
+      "hint": "{{scans}} сканның {{converted}}-і өтінішке айналды.",
+      "empty": "Бұл кезеңде әзірге скан жоқ."
+    },
     "periods": {
       "TODAY": "Бүгін",
       "7D": "7 күн",
@@ -179,6 +184,7 @@
       "total": "Барлығы {{count}}",
       "allTime": "Барлық уақыт",
       "paidStars": "Stars",
+      "paidPayments": "Төлемдер",
       "trendUp": "Алдыңғы кезеңнен +{{count}}",
       "trendDown": "Алдыңғы кезеңнен -{{count}}",
       "trendFlat": "Алдыңғы кезеңмен бірдей"
@@ -197,8 +203,6 @@
       "userOrganizations": "Пайдаланушы орындары",
       "userSubmissions": "Пайдаланушы өтініштері"
     },
-    "conversionTitle": "Скандар өтінішке айналады",
-    "conversionHint": "QR мен форманың қаншалықты жұмыс істейтінін көрсетеді.",
     "subscriptionUntil": "{{date}} дейін белсенді",
     "userMeta": "ID {{telegramId}} · {{locale}}",
     "emptyUsers": "Әзірге пайдаланушылар жоқ.",

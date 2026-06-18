@@ -122,6 +122,10 @@ export type SystemPulsePayload = {
     to: string;
   };
   recentSubmissions: SystemPulseSubmissionItem[];
+  scanConversion: {
+    convertedScans: SystemPulseMetric;
+    rate: null | number;
+  };
   totals: {
     activeSubscriptions: SystemPulseMetric;
     organizations: SystemPulseMetric;

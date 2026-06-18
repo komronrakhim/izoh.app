@@ -34,6 +34,7 @@ type CreateSubmissionInput = {
   customerContactPhone?: string;
   customerDisplayName?: string;
   customerUserId?: string;
+  guestEntryScanId?: string;
   kind: SubmissionKind;
   locale?: AppLocale;
   metadata?: SubmissionMetadata;
@@ -449,17 +450,17 @@ export const toAdminSubmissionItem = (submission: {
     metadata,
     qrContext: submission.qr_context,
     rating: submission.rating,
-    targetStaffMember: submission.target_staff_member
+    targetStaffMember: snapshot
       ? {
-          displayName: submission.target_staff_member.display_name,
-          id: submission.target_staff_member.id,
-          roleTitle: submission.target_staff_member.role_title
+          displayName: snapshot.displayName,
+          id: snapshot.id,
+          roleTitle: snapshot.roleTitle ?? ""
         }
-      : snapshot
+      : submission.target_staff_member
         ? {
-            displayName: snapshot.displayName,
-            id: snapshot.id,
-            roleTitle: snapshot.roleTitle ?? ""
+            displayName: submission.target_staff_member.display_name,
+            id: submission.target_staff_member.id,
+            roleTitle: submission.target_staff_member.role_title
           }
         : null
   };
@@ -684,6 +685,7 @@ export const createSubmission = async (
       customer_contact_phone: contactPhone,
       customer_display_name: customerDisplayName,
       customer_user_id: input.customerUserId,
+      guest_entry_scan_id: input.guestEntryScanId,
       kind: input.kind,
       locale: input.locale ?? DEFAULT_LOCALE,
       metadata: metadataWithSnapshot as Prisma.InputJsonObject,

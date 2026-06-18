@@ -180,20 +180,20 @@ const normalizeRatingKey = (rating: number) =>
 const getStaffTarget = (submission: AnalyticsSubmission) => {
   const metadata = safeParseSubmissionMetadata(submission.metadata);
 
-  if (submission.target_staff_member) {
-    return {
-      displayName: submission.target_staff_member.display_name,
-      id: submission.target_staff_member.id,
-      roleTitle: submission.target_staff_member.role_title,
-      type: "employee" as const
-    };
-  }
-
   if (metadata.staffTargetSnapshot) {
     return {
       displayName: metadata.staffTargetSnapshot.displayName,
       id: metadata.staffTargetSnapshot.id,
       roleTitle: metadata.staffTargetSnapshot.roleTitle ?? "",
+      type: "employee" as const
+    };
+  }
+
+  if (submission.target_staff_member) {
+    return {
+      displayName: submission.target_staff_member.display_name,
+      id: submission.target_staff_member.id,
+      roleTitle: submission.target_staff_member.role_title,
       type: "employee" as const
     };
   }

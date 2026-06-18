@@ -44,6 +44,7 @@ export const createSubmissionRequestSchema = z
     kind: submissionKindSchema,
     locale: prismaLocaleSchema.optional(),
     metadata: submissionMetadataSchema.optional(),
+    guestEntryScanId: z.string().trim().min(1).max(120).optional(),
     organizationId: z.string().min(1),
     rating: z.number().int().min(1).max(5).optional(),
     startParam: z.string().optional(),

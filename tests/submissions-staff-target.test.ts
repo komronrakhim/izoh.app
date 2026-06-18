@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { enqueueSubmissionNotifications } from "~/server/domain/notification-deliveries";
-import { createSubmission } from "~/server/domain/submissions";
+import { createSubmission, toAdminSubmissionItem } from "~/server/domain/submissions";
 import type { SubmissionMetadata } from "~/shared/submissions";
 
 vi.mock("~/server/domain/notification-deliveries", () => ({
@@ -232,6 +232,42 @@ describe("submission staff targeting", () => {
         })
       })
     );
+  });
+
+  it("shows the stored staff snapshot even if the staff row was renamed later", () => {
+    const item = toAdminSubmissionItem({
+      attachments: [],
+      body_text: "Муомала йок",
+      created_at: new Date("2026-06-17T12:34:21.962Z"),
+      customer_allows_reply: false,
+      customer_contact_phone: null,
+      customer_display_name: null,
+      id: "submission_1",
+      kind: "COMPLAINT",
+      locale: "ru",
+      metadata: {
+        complaintCategoryIds: ["service"],
+        staffTargetSnapshot: {
+          displayName: "Сардор",
+          id: "staff_1",
+          roleTitle: "Официант"
+        },
+        staffTargetType: "employee"
+      },
+      qr_context: "Стол 5",
+      rating: null,
+      target_staff_member: {
+        display_name: "Хадича",
+        id: "staff_1",
+        role_title: "Бариста"
+      }
+    });
+
+    expect(item.targetStaffMember).toEqual({
+      displayName: "Сардор",
+      id: "staff_1",
+      roleTitle: "Официант"
+    });
   });
 
   it("requires text for low rating reviews when the organization asks for it", async () => {

@@ -163,6 +163,11 @@
     "granting": "Tayyorlanmoqda",
     "emptySubmissions": "Hali murojaatlar yo‘q.",
     "emptyOrganizations": "Hali joylar yo‘q.",
+    "scanConversion": {
+      "title": "Murojaatga aylangan skanlar",
+      "hint": "{{scans}} ta skandan {{converted}} tasi murojaatga aylandi.",
+      "empty": "Bu davrda hali skanlar yo‘q."
+    },
     "periods": {
       "TODAY": "Bugun",
       "7D": "7 kun",
@@ -179,6 +184,7 @@
       "total": "Jami {{count}}",
       "allTime": "Butun vaqt",
       "paidStars": "Stars",
+      "paidPayments": "To‘lovlar",
       "trendUp": "Oldingi davrga nisbatan +{{count}}",
       "trendDown": "Oldingi davrga nisbatan -{{count}}",
       "trendFlat": "Oldingi davr bilan bir xil"
@@ -197,8 +203,6 @@
       "userOrganizations": "Foydalanuvchi joylari",
       "userSubmissions": "Foydalanuvchi murojaatlari"
     },
-    "conversionTitle": "Skanlar murojaatga aylanadi",
-    "conversionHint": "QR va forma qanchalik ishlayotganini ko‘rsatadi.",
     "subscriptionUntil": "{{date}} gacha faol",
     "userMeta": "ID {{telegramId}} · {{locale}}",
     "emptyUsers": "Hali foydalanuvchilar yo‘q.",

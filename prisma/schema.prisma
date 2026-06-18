@@ -428,6 +428,7 @@ model GuestEntryScan {
 
   organization Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
   user         User?        @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  submissions  Submission[]
 
   created_at DateTime @default(now())
 
@@ -477,6 +478,7 @@ model Submission {
   id                     String         @id @default(cuid())
   organization_id        String
   customer_user_id       String?
+  guest_entry_scan_id    String?
   target_staff_member_id String?
   kind                   SubmissionKind
   rating                 Int?
@@ -490,6 +492,7 @@ model Submission {
 
   organization            Organization                   @relation(fields: [organization_id], references: [id], onDelete: Cascade)
   customer_user           User?                          @relation("CustomerSubmissions", fields: [customer_user_id], references: [id], onDelete: SetNull)
+  guest_entry_scan        GuestEntryScan?                @relation(fields: [guest_entry_scan_id], references: [id], onDelete: SetNull)
   target_staff_member     StaffMember?                   @relation(fields: [target_staff_member_id], references: [id], onDelete: SetNull)
   attachments             SubmissionAttachment[]
   notification_deliveries TelegramNotificationDelivery[]
@@ -500,6 +503,7 @@ model Submission {
   @@index([organization_id, created_at])
   @@index([organization_id, kind, created_at])
   @@index([kind, created_at])
+  @@index([guest_entry_scan_id])
   @@index([target_staff_member_id, created_at])
   @@index([customer_user_id, created_at])
 }

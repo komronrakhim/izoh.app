@@ -163,6 +163,11 @@
     "granting": "Даярдап жатабыз",
     "emptySubmissions": "Азырынча кайрылуу жок.",
     "emptyOrganizations": "Азырынча жер жок.",
+    "scanConversion": {
+      "title": "Кайрылууга айланган скандар",
+      "hint": "{{scans}} скандын {{converted}}и кайрылууга айланды.",
+      "empty": "Бул мезгилде азырынча скан жок."
+    },
     "periods": {
       "TODAY": "Бүгүн",
       "7D": "7 күн",
@@ -179,6 +184,7 @@
       "total": "Жалпы {{count}}",
       "allTime": "Бардык убакыт",
       "paidStars": "Stars",
+      "paidPayments": "Төлөмдөр",
       "trendUp": "Мурунку мезгилге караганда +{{count}}",
       "trendDown": "Мурунку мезгилге караганда -{{count}}",
       "trendFlat": "Мурунку мезгилдей эле"
@@ -197,8 +203,6 @@
       "userOrganizations": "Колдонуучунун жайлары",
       "userSubmissions": "Колдонуучунун кайрылуулары"
     },
-    "conversionTitle": "Скандар кайрылууга айланат",
-    "conversionHint": "QR жана форма канчалык иштеп жатканын көрсөтөт.",
     "subscriptionUntil": "{{date}} чейин активдүү",
     "userMeta": "ID {{telegramId}} · {{locale}}",
     "emptyUsers": "Азырынча колдонуучу жок.",

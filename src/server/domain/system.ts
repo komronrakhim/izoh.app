@@ -1,4 +1,5 @@
 import type {
+  OrganizationSubscriptionSource,
   OrganizationSubscriptionStatus,
   Prisma,
   SubmissionKind
@@ -30,10 +31,10 @@ const defaultSystemListLimit = 40;
 const defaultSystemPageSize = 24;
 const hubListLimit = 6;
 const recentSubmissionsLimit = 6;
-const activeSubscriptionStatuses: OrganizationSubscriptionStatus[] = [
-  "TRIALING",
-  "ACTIVE",
-  "GRANTED"
+const paidOrGrantedSubscriptionStatuses: OrganizationSubscriptionStatus[] = ["ACTIVE", "GRANTED"];
+const paidOrGrantedSubscriptionSources: OrganizationSubscriptionSource[] = [
+  "TELEGRAM_STARS",
+  "ADMIN_GRANT"
 ];
 
 const toIso = (date: Date | null | undefined) => date?.toISOString() ?? null;
@@ -603,8 +604,11 @@ export const getSystemPulse = async (
         }
       }
     ],
+    source: {
+      in: paidOrGrantedSubscriptionSources
+    },
     status: {
-      in: activeSubscriptionStatuses
+      in: paidOrGrantedSubscriptionStatuses
     }
   };
   const activeOrganizationWhere = {
@@ -619,6 +623,8 @@ export const getSystemPulse = async (
     submissionsValue,
     scansTotal,
     scansValue,
+    convertedScansTotal,
+    convertedScansValue,
     activeSubscriptionsTotal,
     activeSubscriptionsValue,
     paidStarsTotal,
@@ -627,6 +633,7 @@ export const getSystemPulse = async (
     organizationsPrevious,
     submissionsPrevious,
     scansPrevious,
+    convertedScansPrevious,
     activeSubscriptionsPrevious,
     paidStarsPrevious,
     recentSubmissions,
@@ -652,6 +659,21 @@ export const getSystemPulse = async (
     db.guestEntryScan.count(),
     db.guestEntryScan.count({
       where: sinceWhere
+    }),
+    db.guestEntryScan.count({
+      where: {
+        submissions: {
+          some: {}
+        }
+      }
+    }),
+    db.guestEntryScan.count({
+      where: {
+        ...sinceWhere,
+        submissions: {
+          some: {}
+        }
+      }
     }),
     db.organizationSubscription.count({
       where: activeSubscriptionWhere
@@ -700,6 +722,16 @@ export const getSystemPulse = async (
     previousWhere
       ? db.guestEntryScan.count({
           where: previousWhere
+        })
+      : 0,
+    previousWhere
+      ? db.guestEntryScan.count({
+          where: {
+            ...previousWhere,
+            submissions: {
+              some: {}
+            }
+          }
         })
       : 0,
     previousWhere
@@ -791,6 +823,14 @@ export const getSystemPulse = async (
       to: now.toISOString()
     },
     recentSubmissions: submissionItems,
+    scanConversion: {
+      convertedScans: toTrendMetric({
+        previous: convertedScansPrevious,
+        total: convertedScansTotal,
+        value: convertedScansValue
+      }),
+      rate: scansValue > 0 ? Math.round((convertedScansValue / scansValue) * 100) : null
+    },
     totals: {
       activeSubscriptions: toTrendMetric({
         previous: activeSubscriptionsPrevious,

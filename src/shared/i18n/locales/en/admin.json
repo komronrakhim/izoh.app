@@ -163,6 +163,11 @@
     "granting": "Granting",
     "emptySubmissions": "No feedback yet.",
     "emptyOrganizations": "No places yet.",
+    "scanConversion": {
+      "title": "Scans with feedback",
+      "hint": "{{converted}} of {{scans}} scans turned into feedback.",
+      "empty": "No scans in this period yet."
+    },
     "periods": {
       "TODAY": "Today",
       "7D": "7 days",
@@ -179,6 +184,7 @@
       "total": "Total {{count}}",
       "allTime": "All time",
       "paidStars": "Stars",
+      "paidPayments": "Payments",
       "trendUp": "+{{count}} vs previous period",
       "trendDown": "-{{count}} vs previous period",
       "trendFlat": "Same as previous period"
@@ -197,8 +203,6 @@
       "userOrganizations": "User places",
       "userSubmissions": "User messages"
     },
-    "conversionTitle": "Scans become feedback",
-    "conversionHint": "Shows whether QR and the form are doing their job.",
     "subscriptionUntil": "Active until {{date}}",
     "userMeta": "ID {{telegramId}} · {{locale}}",
     "emptyUsers": "No users yet.",

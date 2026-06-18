@@ -163,6 +163,11 @@
     "granting": "Готовим",
     "emptySubmissions": "Обращений пока нет.",
     "emptyOrganizations": "Мест пока нет.",
+    "scanConversion": {
+      "title": "Сканы с обращением",
+      "hint": "{{converted}} из {{scans}} сканов дошли до обращения.",
+      "empty": "Сканов за период пока нет."
+    },
     "periods": {
       "TODAY": "Сегодня",
       "7D": "7 дней",
@@ -179,6 +184,7 @@
       "total": "Всего {{count}}",
       "allTime": "За все время",
       "paidStars": "Stars",
+      "paidPayments": "Оплаты",
       "trendUp": "+{{count}} к прошлому периоду",
       "trendDown": "-{{count}} к прошлому периоду",
       "trendFlat": "Как в прошлом периоде"
@@ -197,8 +203,6 @@
       "userOrganizations": "Места пользователя",
       "userSubmissions": "Обращения пользователя"
     },
-    "conversionTitle": "Сканы превращаются в обращения",
-    "conversionHint": "Помогает понять, работает ли QR и сама форма.",
     "subscriptionUntil": "Действует до {{date}}",
     "userMeta": "ID {{telegramId}} · {{locale}}",
     "emptyUsers": "Пользователей пока нет.",

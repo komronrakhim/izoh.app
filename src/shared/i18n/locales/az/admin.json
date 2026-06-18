@@ -163,6 +163,11 @@
     "granting": "Hazırlanır",
     "emptySubmissions": "Hələ müraciət yoxdur.",
     "emptyOrganizations": "Hələ məkan yoxdur.",
+    "scanConversion": {
+      "title": "Müraciətə çevrilən skanlar",
+      "hint": "{{scans}} skandan {{converted}}-i müraciətə çevrildi.",
+      "empty": "Bu dövrdə hələ skan yoxdur."
+    },
     "periods": {
       "TODAY": "Bu gün",
       "7D": "7 gün",
@@ -179,6 +184,7 @@
       "total": "Cəmi {{count}}",
       "allTime": "Bütün dövr",
       "paidStars": "Stars",
+      "paidPayments": "Ödənişlər",
       "trendUp": "Əvvəlki dövrlə müqayisədə +{{count}}",
       "trendDown": "Əvvəlki dövrlə müqayisədə -{{count}}",
       "trendFlat": "Əvvəlki dövrlə eyni"
@@ -197,8 +203,6 @@
       "userOrganizations": "İstifadəçinin məkanları",
       "userSubmissions": "İstifadəçinin müraciətləri"
     },
-    "conversionTitle": "Skanlar müraciətə çevrilir",
-    "conversionHint": "QR və formanın işləyib-işləmədiyini göstərir.",
     "subscriptionUntil": "{{date}} tarixinə qədər aktivdir",
     "userMeta": "ID {{telegramId}} · {{locale}}",
     "emptyUsers": "Hələ istifadəçi yoxdur.",
