@@ -11,7 +11,6 @@ export type OrganizationSubscriptionStatus =
   | "GRANTED";
 export type OrganizationSubscriptionSource = "TRIAL" | "TELEGRAM_STARS" | "ADMIN_GRANT";
 export type OrganizationSubscriptionPaymentStatus =
-  | "PENDING"
   | "PAID"
   | "FAILED"
   | "REFUNDED"
@@ -53,8 +52,8 @@ export type OrganizationSubscriptionPayload = {
 };
 
 export type SubscriptionInvoicePayload = {
+  invoiceId: string;
   invoiceLink: string;
-  paymentId: string;
   plan: SubscriptionPlan;
   subscription: OrganizationSubscriptionPayload;
 };

@@ -212,13 +212,12 @@
       "starsHint": "Ödemeler, faturalar ve gerçekten geçen Stars miktarı."
     },
     "search": {
-      "organizations": "Mekan veya sahip ara",
-      "users": "Kullanıcı, @username veya telefon ara",
-      "submissions": "Metin, mekan veya bağlam ara",
-      "stars": "Mekan, ödeyen veya charge id ara"
+      "organizations": "Mekan ara",
+      "users": "Kullanıcı ara",
+      "submissions": "Geri bildirim ara",
+      "stars": "Ödeme ara"
     },
     "paymentStatus": {
-      "PENDING": "Ödeme bekliyor",
       "PAID": "Ödendi",
       "FAILED": "Başarısız",
       "REFUNDED": "İade edildi",

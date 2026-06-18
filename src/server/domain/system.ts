@@ -502,7 +502,7 @@ const toSystemStarsPaymentItem = (payment: {
     username: string | null;
   };
   plan_code: "ANNUAL" | "MONTHLY";
-  status: "CANCELED" | "FAILED" | "PAID" | "PENDING" | "REFUNDED";
+  status: "CANCELED" | "FAILED" | "PAID" | "REFUNDED";
   telegram_payment_charge_id: string | null;
 }): SystemStarsPaymentItem => ({
   amountStars: payment.amount_stars,
@@ -1351,7 +1351,7 @@ export const getSystemStars = async (
       : {})
   };
   const shouldIncludeTotals = !cursor;
-  const [paidStars, paidPayments, pendingPayments, refundedPayments, payments] = await Promise.all([
+  const [paidStars, paidPayments, refundedPayments, payments] = await Promise.all([
     shouldIncludeTotals
       ? db.organizationSubscriptionPayment.aggregate({
           _sum: {
@@ -1372,14 +1372,6 @@ export const getSystemStars = async (
           where: {
             ...where,
             status: "PAID"
-          }
-        })
-      : Promise.resolve(0),
-    shouldIncludeTotals
-      ? db.organizationSubscriptionPayment.count({
-          where: {
-            ...where,
-            status: "PENDING"
           }
         })
       : Promise.resolve(0),
@@ -1439,7 +1431,6 @@ export const getSystemStars = async (
     totals: {
       paidPayments,
       paidStars: paidStars._sum.amount_stars ?? 0,
-      pendingPayments,
       refundedPayments
     }
   };

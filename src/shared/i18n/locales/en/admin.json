@@ -212,13 +212,12 @@
       "starsHint": "Payments, invoices, and how many Stars actually went through."
     },
     "search": {
-      "organizations": "Find a place or owner",
-      "users": "Find user, @username, or phone",
-      "submissions": "Find text, place, or context",
-      "stars": "Find place, payer, or charge id"
+      "organizations": "Find a place",
+      "users": "Find a user",
+      "submissions": "Find feedback",
+      "stars": "Find a payment"
     },
     "paymentStatus": {
-      "PENDING": "Waiting for payment",
       "PAID": "Paid",
       "FAILED": "Failed",
       "REFUNDED": "Refunded",

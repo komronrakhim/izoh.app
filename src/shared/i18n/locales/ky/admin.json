@@ -212,13 +212,12 @@
       "starsHint": "Төлөмдөр, invoice жана чыныгы өткөн Stars саны."
     },
     "search": {
-      "organizations": "Жерди же ээсин табуу",
-      "users": "Колдонуучу, @username же телефон",
-      "submissions": "Текст, жер же контекст",
-      "stars": "Жер, төлөөчү же charge id"
+      "organizations": "Жер табуу",
+      "users": "Колдонуучу табуу",
+      "submissions": "Кайрылуу табуу",
+      "stars": "Төлөм табуу"
     },
     "paymentStatus": {
-      "PENDING": "Төлөм күтүлүүдө",
       "PAID": "Төлөндү",
       "FAILED": "Өткөн жок",
       "REFUNDED": "Кайтарылды",

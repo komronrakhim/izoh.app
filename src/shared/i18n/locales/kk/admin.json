@@ -212,13 +212,12 @@
       "starsHint": "Төлемдер, invoice және нақты өткен Stars саны."
     },
     "search": {
-      "organizations": "Орын немесе иесін табу",
-      "users": "Пайдаланушы, @username немесе телефон",
-      "submissions": "Мәтін, орын немесе контекст",
-      "stars": "Орын, төлеуші немесе charge id"
+      "organizations": "Орын табу",
+      "users": "Пайдаланушы табу",
+      "submissions": "Өтініш табу",
+      "stars": "Төлем табу"
     },
     "paymentStatus": {
-      "PENDING": "Төлем күтілуде",
       "PAID": "Төленді",
       "FAILED": "Өтпеді",
       "REFUNDED": "Қайтарылды",

@@ -1,4 +1,3 @@
-import { randomBytes } from "node:crypto";
 import type {
   OrganizationSubscription,
   OrganizationSubscriptionPayment,
@@ -22,6 +21,7 @@ import { createTranslator, type AppLocale } from "~/shared/i18n";
 
 const STARS_CURRENCY = "XTR";
 const INVOICE_PAYLOAD_PREFIX = "izoh_sub";
+const INVOICE_PAYLOAD_VERSION = "1";
 
 type SubscriptionLike = Pick<
   OrganizationSubscription,
@@ -171,7 +171,58 @@ export const getOrganizationSubscriptionPayload = async (
 ) =>
   toOrganizationSubscriptionPayload(await getOrCreateOrganizationSubscription(organizationId, db));
 
-const createInvoicePayload = () => `${INVOICE_PAYLOAD_PREFIX}_${randomBytes(10).toString("hex")}`;
+const invoicePayloadPlanCode = {
+  ANNUAL: "a",
+  MONTHLY: "m"
+} as const satisfies Record<SubscriptionPlanCode, string>;
+
+const invoicePayloadPlanCodeByValue: Record<string, SubscriptionPlanCode> = {
+  a: "ANNUAL",
+  m: "MONTHLY"
+};
+
+const createInvoicePayload = ({
+  organizationId,
+  payerUserId,
+  planCode
+}: {
+  organizationId: string;
+  payerUserId?: string;
+  planCode: SubscriptionPlanCode;
+}) =>
+  [
+    INVOICE_PAYLOAD_PREFIX,
+    INVOICE_PAYLOAD_VERSION,
+    invoicePayloadPlanCode[planCode],
+    organizationId,
+    payerUserId || "-"
+  ].join(":");
+
+const parseInvoicePayload = (invoicePayload: string) => {
+  const [prefix, version, planCodeValue, organizationId, payerUserId, ...rest] =
+    invoicePayload.split(":");
+
+  if (
+    rest.length > 0 ||
+    prefix !== INVOICE_PAYLOAD_PREFIX ||
+    version !== INVOICE_PAYLOAD_VERSION ||
+    !organizationId
+  ) {
+    return null;
+  }
+
+  const planCode = invoicePayloadPlanCodeByValue[planCodeValue ?? ""];
+
+  if (!planCode) {
+    return null;
+  }
+
+  return {
+    organizationId,
+    payerUserId: payerUserId && payerUserId !== "-" ? payerUserId : undefined,
+    planCode
+  };
+};
 
 const getPaymentPeriodEnd = ({
   now,
@@ -222,34 +273,10 @@ export const createOrganizationSubscriptionInvoice = async (
 ): Promise<SubscriptionInvoicePayload> => {
   const subscription = await getOrCreateOrganizationSubscription(organizationId, db);
   const plan = getSubscriptionPlan(planCode);
-  const invoicePayload = createInvoicePayload();
-
-  const payment = await db.organizationSubscriptionPayment.create({
-    data: {
-      amount_stars: plan.amountStars,
-      currency: STARS_CURRENCY,
-      is_recurring: plan.recurring,
-      organization_id: organizationId,
-      payer_user_id: payerUserId,
-      plan_code: planCode,
-      status: "PENDING",
-      subscription_id: subscription.id,
-      telegram_invoice_payload: invoicePayload
-    }
-  });
-
-  await db.organizationSubscriptionEvent.create({
-    data: {
-      actor_user_id: payerUserId,
-      metadata: {
-        amountStars: plan.amountStars,
-        planCode
-      } as Prisma.InputJsonObject,
-      organization_id: organizationId,
-      payment_id: payment.id,
-      subscription_id: subscription.id,
-      type: "INVOICE_CREATED"
-    }
+  const invoicePayload = createInvoicePayload({
+    organizationId,
+    payerUserId,
+    planCode
   });
 
   const text = getInvoiceText(planCode, locale);
@@ -273,8 +300,8 @@ export const createOrganizationSubscriptionInvoice = async (
   );
 
   return {
+    invoiceId: invoicePayload,
     invoiceLink,
-    paymentId: payment.id,
     plan,
     subscription: toOrganizationSubscriptionPayload(subscription)
   };
@@ -294,25 +321,25 @@ export const answerSubscriptionPreCheckoutQuery = async (
   },
   db: DomainDb = getDomainDb()
 ) => {
-  const payment = await db.organizationSubscriptionPayment.findFirst({
-    orderBy: {
-      created_at: "desc"
-    },
-    select: {
-      amount_stars: true,
-      currency: true,
-      status: true
-    },
-    where: {
-      status: "PENDING",
-      telegram_invoice_payload: invoicePayload
-    }
-  });
+  const payload = parseInvoicePayload(invoicePayload);
+  const plan = payload ? getSubscriptionPlan(payload.planCode) : null;
+  const organization = payload
+    ? await db.organization.findFirst({
+        select: {
+          id: true
+        },
+        where: {
+          id: payload.organizationId,
+          status: "ACTIVE"
+        }
+      })
+    : null;
   const ok =
-    Boolean(payment) &&
-    payment?.status === "PENDING" &&
-    payment.currency === currency &&
-    payment.amount_stars === totalAmount;
+    Boolean(payload) &&
+    Boolean(plan) &&
+    Boolean(organization) &&
+    currency === STARS_CURRENCY &&
+    plan?.amountStars === totalAmount;
 
   await getTelegramBot().api.answerPreCheckoutQuery(
     id,
@@ -357,105 +384,73 @@ export const applySuccessfulSubscriptionPayment = async (
     return existingPayment;
   }
 
-  const payment = await db.organizationSubscriptionPayment.findFirst({
-    include: {
-      subscription: true
-    },
-    orderBy: {
-      created_at: "desc"
-    },
-    where: {
-      telegram_invoice_payload: invoicePayload
-    }
-  });
+  const payload = parseInvoicePayload(invoicePayload);
 
-  if (!payment) {
+  if (!payload) {
     throw new Error("Subscription payment is not available.");
   }
 
-  const paymentToApply =
-    payment.status === "PAID"
-      ? await db.organizationSubscriptionPayment.create({
-          data: {
-            amount_stars: payment.amount_stars,
-            currency: payment.currency,
-            is_recurring: Boolean(isRecurring),
-            organization_id: payment.organization_id,
-            payer_user_id: payment.payer_user_id,
-            plan_code: payment.plan_code,
-            status: "PENDING",
-            subscription_id: payment.subscription_id,
-            telegram_invoice_payload: invoicePayload
-          },
-          include: {
-            subscription: true
-          }
-        })
-      : payment;
+  const plan = getSubscriptionPlan(payload.planCode);
 
-  if (paymentToApply.amount_stars !== totalAmount) {
-    await db.organizationSubscriptionPayment.update({
-      data: {
-        status: "FAILED"
-      },
-      where: {
-        id: paymentToApply.id
-      }
-    });
-
+  if (plan.amountStars !== totalAmount) {
     throw new Error("Subscription payment amount does not match.");
   }
 
+  const subscription = await getOrCreateOrganizationSubscription(payload.organizationId, db);
   const now = new Date();
-  const paidPayment = await db.organizationSubscriptionPayment.update({
+  const paidPayment = await db.organizationSubscriptionPayment.create({
     data: {
+      amount_stars: plan.amountStars,
+      currency: STARS_CURRENCY,
       is_first_recurring: Boolean(isFirstRecurring),
       is_recurring: Boolean(isRecurring),
+      organization_id: payload.organizationId,
+      payer_user_id: payload.payerUserId,
       paid_at: now,
+      plan_code: payload.planCode,
       provider_payment_charge_id: providerPaymentChargeId,
       raw_payload: rawPayload as Prisma.InputJsonValue,
       status: "PAID",
+      subscription_id: subscription.id,
       subscription_expiration_date: subscriptionExpirationDate,
+      telegram_invoice_payload: invoicePayload,
       telegram_payment_charge_id: telegramPaymentChargeId
-    },
-    where: {
-      id: paymentToApply.id
     }
   });
   const periodEndsAt = getPaymentPeriodEnd({
     now,
     payment: {
       ...paidPayment,
-      plan_code: paymentToApply.plan_code
+      plan_code: payload.planCode
     },
-    subscription: paymentToApply.subscription
+    subscription
   });
 
   await db.organizationSubscription.update({
     data: {
       current_period_ends_at: periodEndsAt,
       current_period_started_at: now,
-      plan_code: paymentToApply.plan_code,
+      plan_code: payload.planCode,
       source: "TELEGRAM_STARS",
       status: "ACTIVE",
       telegram_payment_charge_id: telegramPaymentChargeId
     },
     where: {
-      id: paymentToApply.subscription_id
+      id: subscription.id
     }
   });
 
   await db.organizationSubscriptionEvent.create({
     data: {
       metadata: {
-        amountStars: paymentToApply.amount_stars,
+        amountStars: paidPayment.amount_stars,
         isRecurring: Boolean(isRecurring),
-        planCode: paymentToApply.plan_code
+        planCode: payload.planCode
       } as Prisma.InputJsonObject,
-      organization_id: paymentToApply.organization_id,
-      payment_id: paymentToApply.id,
-      subscription_id: paymentToApply.subscription_id,
-      type: paymentToApply.is_recurring ? "RENEWED" : "PAYMENT_PAID"
+      organization_id: payload.organizationId,
+      payment_id: paidPayment.id,
+      subscription_id: subscription.id,
+      type: Boolean(isRecurring) && !isFirstRecurring ? "RENEWED" : "PAYMENT_PAID"
     }
   });
 

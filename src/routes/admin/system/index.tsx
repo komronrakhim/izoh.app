@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { Link, useCanGoBack, useNavigate, useParams, useRouter } from "@tanstack/react-router";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BadgeCheck,
@@ -46,7 +46,7 @@ import {
   type SystemUserItem,
   type SystemUsersPayload
 } from "~/shared/system";
-import { showTmaPopup, useTma, useTmaBackButton } from "~/shared/tma";
+import { showTmaPopup, tmaHaptics, useTma, useTmaBackButton } from "~/shared/tma";
 
 type SystemMetricId =
   | "activeSubscriptions"
@@ -393,14 +393,25 @@ const useLoadMoreRef = ({
   return loadMoreRef;
 };
 
-const useSystemGate = () => {
+const useSystemGate = (fallbackBackTo?: () => void) => {
+  const canGoBack = useCanGoBack();
   const navigate = useNavigate();
+  const router = useRouter();
   const { t } = useI18n();
   const { isLoading, viewer } = useAdminOrganization();
 
-  const goBack = React.useCallback(() => {
+  const defaultBackTo = React.useCallback(() => {
     void navigate({ to: "/admin" });
   }, [navigate]);
+
+  const goBack = React.useCallback(() => {
+    if (canGoBack) {
+      router.history.back();
+      return;
+    }
+
+    (fallbackBackTo ?? defaultBackTo)();
+  }, [canGoBack, defaultBackTo, fallbackBackTo, router.history]);
 
   useTmaBackButton(true, goBack);
 
@@ -706,10 +717,13 @@ const SystemSubmissionBubble = ({ submission }: { submission: SystemSubmissionIt
   return (
     <article className="flex w-full items-end gap-2 px-1">
       {author ? (
-        <a
+        <Link
           className="shrink-0 active:opacity-70"
-          href={`/admin/system/users/${author.id}`}
+          to={`/admin/system/users/${author.id}` as never}
           aria-label={authorName}
+          onClick={() => {
+            tmaHaptics.impact("light");
+          }}
         >
           <Avatar
             alt={authorName}
@@ -719,7 +733,7 @@ const SystemSubmissionBubble = ({ submission }: { submission: SystemSubmissionIt
             seed={author.id}
             src={author.photoUrl}
           />
-        </a>
+        </Link>
       ) : (
         <span className={cn("grid size-10 shrink-0 place-items-center rounded-full", meta.tone)}>
           <Icon size={18} strokeWidth={2.35} />
@@ -731,12 +745,15 @@ const SystemSubmissionBubble = ({ submission }: { submission: SystemSubmissionIt
           <header className="flex min-w-0 items-start justify-between gap-3 px-1">
             <span className="grid min-w-0 gap-0.5">
               {author ? (
-                <a
+                <Link
                   className="ios-footnote min-w-0 truncate font-semibold text-foreground active:opacity-70"
-                  href={`/admin/system/users/${author.id}`}
+                  to={`/admin/system/users/${author.id}` as never}
+                  onClick={() => {
+                    tmaHaptics.impact("light");
+                  }}
                 >
                   {authorName}
-                </a>
+                </Link>
               ) : (
                 <span className="ios-footnote min-w-0 truncate font-semibold text-foreground">
                   {authorName}
@@ -763,13 +780,16 @@ const SystemSubmissionBubble = ({ submission }: { submission: SystemSubmissionIt
           </p>
 
           <div className="flex min-w-0 flex-wrap gap-1.5 px-1 pt-0.5">
-            <a
+            <Link
               className="ios-caption-1 inline-flex min-h-6 max-w-full items-center gap-1.5 rounded-[10px] border border-primary/12 bg-primary/[0.07] px-2 font-medium text-primary active:opacity-70 dark:border-primary/16 dark:bg-primary/[0.14]"
-              href={`/admin/system/organizations/${submission.organization.id}`}
+              to={`/admin/system/organizations/${submission.organization.id}` as never}
+              onClick={() => {
+                tmaHaptics.impact("light");
+              }}
             >
               <Building2 className="shrink-0" size={13} strokeWidth={2.35} />
               <span className="min-w-0 truncate">{submission.organization.name}</span>
-            </a>
+            </Link>
             {submission.qrContext ? (
               <SystemFeedPill icon={MapPin}>{submission.qrContext}</SystemFeedPill>
             ) : null}
@@ -890,7 +910,7 @@ export const AdminSystemPage = () => {
             <SystemLoadError refetch={() => void pulseQuery.refetch()} />
           ) : pulse ? (
             <>
-              <section className="grid grid-cols-2 gap-2 px-1">
+              <section className="grid gap-2 px-1">
                 {(
                   [
                     "submissions",
@@ -992,7 +1012,11 @@ export const AdminSystemPage = () => {
 };
 
 export const AdminSystemOrganizationsPage = () => {
-  const gate = useSystemGate();
+  const navigate = useNavigate();
+  const backToSystem = React.useCallback(() => {
+    void navigate({ to: "/admin/system" });
+  }, [navigate]);
+  const gate = useSystemGate(backToSystem);
   const tma = useTma();
   const { locale, t } = useI18n();
   const [period, setPeriod] = React.useState<SystemPulsePeriod>("7D");
@@ -1103,7 +1127,11 @@ export const AdminSystemOrganizationsPage = () => {
 
 export const AdminSystemOrganizationPage = () => {
   const params = useParams({ from: "/admin/system/organizations/$organizationId" });
-  const gate = useSystemGate();
+  const navigate = useNavigate();
+  const backToOrganizations = React.useCallback(() => {
+    void navigate({ to: "/admin/system/organizations" });
+  }, [navigate]);
+  const gate = useSystemGate(backToOrganizations);
   const tma = useTma();
   const { locale, t } = useI18n();
   const [period, setPeriod] = React.useState<SystemPulsePeriod>("7D");
@@ -1178,7 +1206,7 @@ export const AdminSystemOrganizationPage = () => {
                 <PeriodTabs period={period} setPeriod={setPeriod} />
               </section>
 
-              <section className="grid grid-cols-2 gap-2 px-1">
+              <section className="grid gap-2 px-1">
                 <MetricTile
                   id="scans"
                   metric={{ total: organization.scanCount, value: organization.scanCount }}
@@ -1267,7 +1295,11 @@ export const AdminSystemOrganizationPage = () => {
 };
 
 export const AdminSystemUsersPage = () => {
-  const gate = useSystemGate();
+  const navigate = useNavigate();
+  const backToSystem = React.useCallback(() => {
+    void navigate({ to: "/admin/system" });
+  }, [navigate]);
+  const gate = useSystemGate(backToSystem);
   const tma = useTma();
   const { locale, t } = useI18n();
   const [period, setPeriod] = React.useState<SystemPulsePeriod>("7D");
@@ -1382,7 +1414,11 @@ export const AdminSystemUsersPage = () => {
 
 export const AdminSystemUserPage = () => {
   const params = useParams({ from: "/admin/system/users/$userId" });
-  const gate = useSystemGate();
+  const navigate = useNavigate();
+  const backToUsers = React.useCallback(() => {
+    void navigate({ to: "/admin/system/users" });
+  }, [navigate]);
+  const gate = useSystemGate(backToUsers);
   const tma = useTma();
   const { locale, t } = useI18n();
   const number = React.useMemo(() => new Intl.NumberFormat(getIntlLocale(locale)), [locale]);
@@ -1456,7 +1492,7 @@ export const AdminSystemUserPage = () => {
                 </div>
               </section>
 
-              <section className="grid grid-cols-2 gap-2 px-1">
+              <section className="grid gap-2 px-1">
                 <MetricTile
                   id="submissions"
                   metric={{ total: user.submissionCount, value: user.submissionCount }}
@@ -1599,7 +1635,11 @@ export const AdminSystemUserPage = () => {
 };
 
 export const AdminSystemSubmissionsPage = () => {
-  const gate = useSystemGate();
+  const navigate = useNavigate();
+  const backToSystem = React.useCallback(() => {
+    void navigate({ to: "/admin/system" });
+  }, [navigate]);
+  const gate = useSystemGate(backToSystem);
   const tma = useTma();
   const { t } = useI18n();
   const [period, setPeriod] = React.useState<SystemPulsePeriod>("7D");
@@ -1687,7 +1727,11 @@ export const AdminSystemSubmissionsPage = () => {
 };
 
 export const AdminSystemStarsPage = () => {
-  const gate = useSystemGate();
+  const navigate = useNavigate();
+  const backToSystem = React.useCallback(() => {
+    void navigate({ to: "/admin/system" });
+  }, [navigate]);
+  const gate = useSystemGate(backToSystem);
   const tma = useTma();
   const { locale, t } = useI18n();
   const [period, setPeriod] = React.useState<SystemPulsePeriod>("7D");
@@ -1750,7 +1794,7 @@ export const AdminSystemStarsPage = () => {
             <SystemLoadError refetch={() => void starsQuery.refetch()} />
           ) : (
             <>
-              <section className="grid grid-cols-2 gap-2 px-1">
+              <section className="grid gap-2 px-1">
                 <MetricTile
                   id="paidStars"
                   metric={{ total: stars.totals.paidStars, value: stars.totals.paidStars }}

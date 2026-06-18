@@ -254,12 +254,12 @@ export const AdminSubscriptionPage = () => {
   const adminOrganizationsQueryKey = queryKeys.adminOrganizations(tma.initDataRaw);
 
   const notifyPaymentSuccess = React.useCallback(
-    (paymentId: string) => {
-      if (successfulPaymentIdRef.current === paymentId) {
+    (invoiceId: string) => {
+      if (successfulPaymentIdRef.current === invoiceId) {
         return;
       }
 
-      successfulPaymentIdRef.current = paymentId;
+      successfulPaymentIdRef.current = invoiceId;
       tma.haptics.notification("success");
     },
     [tma.haptics]
@@ -305,7 +305,7 @@ export const AdminSubscriptionPage = () => {
               previousSubscription
             })
           ) {
-            notifyPaymentSuccess(payment.paymentId);
+            notifyPaymentSuccess(payment.invoiceId);
             await queryClient.invalidateQueries({
               queryKey: adminOrganizationsQueryKey
             });
@@ -366,7 +366,7 @@ export const AdminSubscriptionPage = () => {
 
       void openTmaInvoice(payment.invoiceLink).then((status) => {
         if (isPaidInvoiceStatus(status)) {
-          notifyPaymentSuccess(payment.paymentId);
+          notifyPaymentSuccess(payment.invoiceId);
           startSync(0);
         }
       });

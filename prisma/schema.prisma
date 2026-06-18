@@ -118,7 +118,6 @@ enum OrganizationSubscriptionSource {
 }
 
 enum OrganizationSubscriptionPaymentStatus {
-  PENDING
   PAID
   FAILED
   REFUNDED
@@ -127,7 +126,6 @@ enum OrganizationSubscriptionPaymentStatus {
 
 enum OrganizationSubscriptionEventType {
   TRIAL_STARTED
-  INVOICE_CREATED
   PAYMENT_PAID
   PAYMENT_FAILED
   REFUNDED
@@ -339,7 +337,7 @@ model OrganizationSubscriptionPayment {
   plan_code                    SubscriptionPlanCode
   amount_stars                 Int
   currency                     String                                @default("XTR")
-  status                       OrganizationSubscriptionPaymentStatus @default(PENDING)
+  status                       OrganizationSubscriptionPaymentStatus
   telegram_invoice_payload     String
   telegram_payment_charge_id   String?                               @unique
   provider_payment_charge_id   String?

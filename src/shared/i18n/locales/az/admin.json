@@ -212,13 +212,12 @@
       "starsHint": "Ödənişlər, invoice-lar və real keçən Stars sayı."
     },
     "search": {
-      "organizations": "Məkan və ya sahib axtar",
-      "users": "İstifadəçi, @username və ya telefon",
-      "submissions": "Mətn, məkan və ya kontekst",
-      "stars": "Məkan, ödəyən və ya charge id"
+      "organizations": "Məkan tap",
+      "users": "İstifadəçi tap",
+      "submissions": "Müraciət tap",
+      "stars": "Ödəniş tap"
     },
     "paymentStatus": {
-      "PENDING": "Ödəniş gözlənilir",
       "PAID": "Ödənilib",
       "FAILED": "Keçmədi",
       "REFUNDED": "Geri qaytarılıb",

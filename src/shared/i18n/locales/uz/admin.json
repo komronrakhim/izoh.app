@@ -212,13 +212,12 @@
       "starsHint": "To‘lovlar, invoice’lar va real o‘tgan Stars soni."
     },
     "search": {
-      "organizations": "Joy yoki egani topish",
-      "users": "Foydalanuvchi, @username yoki telefon",
-      "submissions": "Matn, joy yoki kontekst",
-      "stars": "Joy, to‘lovchi yoki charge id"
+      "organizations": "Joyni topish",
+      "users": "Foydalanuvchini topish",
+      "submissions": "Murojaatni topish",
+      "stars": "To‘lovni topish"
     },
     "paymentStatus": {
-      "PENDING": "To‘lov kutilmoqda",
       "PAID": "To‘langan",
       "FAILED": "O‘tmadi",
       "REFUNDED": "Qaytarilgan",

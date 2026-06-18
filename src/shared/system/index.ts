@@ -180,7 +180,6 @@ export type SystemStarsPayload = {
   totals: {
     paidPayments: number;
     paidStars: number;
-    pendingPayments: number;
     refundedPayments: number;
   };
 };

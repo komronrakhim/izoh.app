@@ -212,13 +212,12 @@
       "starsHint": "Пардохтҳо, invoice ва шумораи Stars-и воқеан гузашта."
     },
     "search": {
-      "organizations": "Ҷой ё соҳибро ёбед",
-      "users": "Корбар, @username ё телефон",
-      "submissions": "Матн, ҷой ё контекст",
-      "stars": "Ҷой, пардохткунанда ё charge id"
+      "organizations": "Ҷой ёбед",
+      "users": "Корбар ёбед",
+      "submissions": "Муроҷиат ёбед",
+      "stars": "Пардохт ёбед"
     },
     "paymentStatus": {
-      "PENDING": "Интизори пардохт",
       "PAID": "Пардохт шуд",
       "FAILED": "Нагузашт",
       "REFUNDED": "Баргардонида шуд",
