@@ -160,6 +160,7 @@ const adminOrganizationLogoSchema = z.object({
 
 const staffMemberSchema = z.object({
   avatarMediaAssetId: z.string().min(1).nullable().optional(),
+  clientRequestId: z.string().trim().min(8).max(120),
   displayName: z.string().trim().min(2).max(80),
   roleTitle: z.string().trim().max(80).optional()
 });
@@ -1738,6 +1739,7 @@ export const createApiApp = () => {
       return c.json(
         await createOrganizationStaffMember(
           {
+            clientRequestId: input.clientRequestId,
             displayName: input.displayName,
             organizationId,
             roleTitle: input.roleTitle

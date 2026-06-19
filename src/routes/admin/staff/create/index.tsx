@@ -20,6 +20,14 @@ import { useTma, useTmaBackButton, useTmaMainButton } from "~/shared/tma";
 
 const STAFF_AVATAR_MAX_BYTES = getMediaImageSizeLimit("STAFF_AVATAR");
 
+const createClientRequestId = () => {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `staff-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+};
+
 const createHeaders = (initDataRaw?: string, headers?: HeadersInit) => {
   const nextHeaders = new Headers(headers);
 
@@ -55,6 +63,8 @@ export const AdminStaffCreatePage = () => {
   const [isSaving, setIsSaving] = React.useState(false);
   const avatarInputId = React.useId();
   const avatarInputRef = React.useRef<HTMLInputElement>(null);
+  const isSubmittingRef = React.useRef(false);
+  const clientRequestIdRef = React.useRef(createClientRequestId());
 
   const backToStaff = React.useCallback(() => {
     void navigate({
@@ -146,7 +156,7 @@ export const AdminStaffCreatePage = () => {
   };
 
   const saveStaffMember = React.useCallback(async () => {
-    if (!organization || isSaving) {
+    if (!organization || isSaving || isSubmittingRef.current) {
       return;
     }
 
@@ -157,14 +167,17 @@ export const AdminStaffCreatePage = () => {
       return;
     }
 
+    isSubmittingRef.current = true;
     setIsSaving(true);
     setAvatarError(null);
 
     try {
+      const clientRequestId = clientRequestIdRef.current;
       const staffMember =
         createdStaffMember ??
         (await fetch(`/api/organizations/${organization.id}/staff-members`, {
           body: JSON.stringify({
+            clientRequestId,
             displayName: cleanDisplayName,
             roleTitle: cleanRoleTitle
           }),
@@ -206,6 +219,7 @@ export const AdminStaffCreatePage = () => {
       setAvatarError(t("admin.moduleSettings.staff.createPage.error"));
       tma.haptics.notification("error");
     } finally {
+      isSubmittingRef.current = false;
       setIsSaving(false);
     }
   }, [

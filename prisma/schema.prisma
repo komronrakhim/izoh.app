@@ -458,13 +458,14 @@ model SystemAuditLog {
 }
 
 model StaffMember {
-  id                    String  @id @default(cuid())
-  organization_id       String
-  display_name          String
-  role_title            String  @default("")
-  avatar_media_asset_id String?
-  is_active             Boolean @default(true)
-  sort_order            Int     @default(0)
+  id                         String  @id @default(cuid())
+  organization_id            String
+  creation_client_request_id String? @unique
+  display_name               String
+  role_title                 String  @default("")
+  avatar_media_asset_id      String?
+  is_active                  Boolean @default(true)
+  sort_order                 Int     @default(0)
 
   organization Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
   submissions  Submission[]

@@ -1,9 +1,12 @@
+import { Prisma } from "../../../prisma/generated/prisma/client";
+
 import { getDomainDb, type DomainDb } from "~/server/domain/shared";
 import { getMediaPublicUrl } from "~/server/media/public-url";
 import type { StaffMemberItem, StaffMembersPayload } from "~/shared/staff";
 
 type StaffMemberInput = {
   avatarMediaAssetId?: null | string;
+  clientRequestId?: string;
   displayName: string;
   roleTitle?: string;
 };
@@ -50,6 +53,20 @@ const assertActiveOrganization = async (organizationId: string, db: DomainDb) =>
   }
 
   return organization;
+};
+
+const isUniqueConstraintError = (error: unknown, fieldName: string) => {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+    return false;
+  }
+
+  const target = error.meta?.target;
+
+  if (Array.isArray(target)) {
+    return target.includes(fieldName);
+  }
+
+  return typeof target === "string" && target.includes(fieldName);
 };
 
 const getAvatarUrlByAssetId = async (avatarMediaAssetIds: Array<null | string>, db: DomainDb) => {
@@ -107,6 +124,42 @@ const assertStaffAvatarAsset = async ({
   if (!asset) {
     throw new Error("Staff avatar is not available.");
   }
+};
+
+const getExistingCreatedStaffMember = async (
+  {
+    clientRequestId,
+    organizationId
+  }: {
+    clientRequestId: null | string;
+    organizationId: string;
+  },
+  db: DomainDb
+): Promise<null | StaffMembersPayload> => {
+  if (!clientRequestId) {
+    return null;
+  }
+
+  const staffMember = await db.staffMember.findFirst({
+    select: {
+      id: true
+    },
+    where: {
+      creation_client_request_id: clientRequestId,
+      organization_id: organizationId
+    }
+  });
+
+  if (!staffMember) {
+    return null;
+  }
+
+  const payload = await getOrganizationStaffMembers(organizationId, db);
+
+  return {
+    ...payload,
+    item: payload.items.find((item) => item.id === staffMember.id) ?? null
+  };
 };
 
 export const getOrganizationStaffMembers = async (
@@ -180,6 +233,7 @@ export const createOrganizationStaffMember = async (
   {
     displayName,
     avatarMediaAssetId = null,
+    clientRequestId,
     organizationId,
     roleTitle = ""
   }: StaffMemberInput & {
@@ -189,21 +243,62 @@ export const createOrganizationStaffMember = async (
 ): Promise<StaffMembersPayload> => {
   await assertActiveOrganization(organizationId, db);
 
+  const cleanClientRequestId = clientRequestId?.trim() || null;
+  const existingStaffMember = await getExistingCreatedStaffMember(
+    {
+      clientRequestId: cleanClientRequestId,
+      organizationId
+    },
+    db
+  );
+
+  if (existingStaffMember) {
+    return existingStaffMember;
+  }
+
   const staffCount = await db.staffMember.count({
     where: {
       organization_id: organizationId
     }
   });
 
-  const staffMember = await db.staffMember.create({
-    data: {
-      avatar_media_asset_id: avatarMediaAssetId,
-      display_name: displayName,
-      organization_id: organizationId,
-      role_title: roleTitle,
-      sort_order: staffCount
+  const createStaffMemberRecord = () =>
+    db.staffMember.create({
+      data: {
+        avatar_media_asset_id: avatarMediaAssetId,
+        creation_client_request_id: cleanClientRequestId,
+        display_name: displayName,
+        organization_id: organizationId,
+        role_title: roleTitle,
+        sort_order: staffCount
+      }
+    });
+  let staffMember: Awaited<ReturnType<typeof createStaffMemberRecord>>;
+
+  try {
+    staffMember = await createStaffMemberRecord();
+  } catch (error) {
+    if (
+      !cleanClientRequestId ||
+      !isUniqueConstraintError(error, "creation_client_request_id")
+    ) {
+      throw error;
     }
-  });
+
+    const existingCreatedStaffMember = await getExistingCreatedStaffMember(
+      {
+        clientRequestId: cleanClientRequestId,
+        organizationId
+      },
+      db
+    );
+
+    if (existingCreatedStaffMember) {
+      return existingCreatedStaffMember;
+    }
+
+    throw error;
+  }
 
   await assertStaffAvatarAsset({
     avatarMediaAssetId,

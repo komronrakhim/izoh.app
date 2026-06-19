@@ -1,6 +1,8 @@
 node_modules
 dist
 coverage
+output
+tmp
 prisma/generated
 .env
 .DS_Store

@@ -51,6 +51,8 @@ type FinalizeMediaUploadSessionInput = {
 };
 
 const getSizeLimitBytes = () => MEDIA_IMAGE_MAX_BYTES;
+const waitForFinalizeRetryMs = 250;
+const waitForFinalizeAttempts = 20;
 
 const assertUploadKindIsImage = (kind: MediaAssetKind) => {
   if (kind !== "ORGANIZATION_LOGO" && kind !== "STAFF_AVATAR" && kind !== "SUBMISSION_PHOTO") {
@@ -94,6 +96,52 @@ const createAssetRecordInput = ({
   upload_session_id: sessionId,
   width: asset.width
 });
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getFinalizedMediaAssets = (sessionId: string, db: DomainDb) =>
+  db.mediaAsset.findMany({
+    orderBy: {
+      created_at: "asc"
+    },
+    where: {
+      upload_session_id: sessionId
+    }
+  });
+
+const waitForFinalizedMediaAssets = async (sessionId: string, db: DomainDb) => {
+  for (let attempt = 0; attempt < waitForFinalizeAttempts; attempt += 1) {
+    const session = await db.mediaUploadSession.findUnique({
+      select: {
+        last_error: true,
+        status: true
+      },
+      where: {
+        id: sessionId
+      }
+    });
+
+    if (!session) {
+      throw new Error("Upload session was not found or has expired.");
+    }
+
+    if (session.status === "READY") {
+      return getFinalizedMediaAssets(sessionId, db);
+    }
+
+    if (session.status === "FAILED") {
+      throw new Error(session.last_error || "Upload finalization failed.");
+    }
+
+    if (session.status !== "PROCESSING") {
+      throw new Error("Upload session is not ready to be finalized.");
+    }
+
+    await sleep(waitForFinalizeRetryMs);
+  }
+
+  throw new Error("Upload session is still being finalized.");
+};
 
 export const createMediaUploadSession = async (
   input: CreateMediaUploadSessionInput,
@@ -163,8 +211,37 @@ export const finalizeMediaUploadSession = async (
     throw new Error("Upload session was not found or has expired.");
   }
 
-  if (session.status !== "PENDING" && session.status !== "UPLOADED") {
+  if (session.status === "READY") {
+    return getFinalizedMediaAssets(session.id, db);
+  }
+
+  if (session.status === "FAILED") {
+    throw new Error(session.last_error || "Upload finalization failed.");
+  }
+
+  if (
+    session.status !== "PENDING" &&
+    session.status !== "UPLOADED" &&
+    session.status !== "PROCESSING"
+  ) {
     throw new Error("Upload session is not ready to be finalized.");
+  }
+
+  const claimed = await db.mediaUploadSession.updateMany({
+    data: {
+      status: "PROCESSING",
+      uploaded_at: new Date()
+    },
+    where: {
+      id: session.id,
+      status: {
+        in: ["PENDING", "UPLOADED"]
+      }
+    }
+  });
+
+  if (claimed.count === 0) {
+    return waitForFinalizedMediaAssets(session.id, db);
   }
 
   try {
@@ -181,16 +258,6 @@ export const finalizeMediaUploadSession = async (
     if (head.ContentType && head.ContentType !== session.content_type) {
       throw new Error("Uploaded file content type does not match the upload session.");
     }
-
-    await db.mediaUploadSession.update({
-      data: {
-        status: "PROCESSING",
-        uploaded_at: new Date()
-      },
-      where: {
-        id: session.id
-      }
-    });
 
     const body = useLocalStorage
       ? await getLocalMediaObjectBuffer(session.temp_storage_key)
