@@ -480,6 +480,7 @@ model Submission {
   organization_id        String
   customer_user_id       String?
   guest_entry_scan_id    String?
+  client_request_id      String?        @unique
   target_staff_member_id String?
   kind                   SubmissionKind
   rating                 Int?

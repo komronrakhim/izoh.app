@@ -1,7 +1,7 @@
-import type {
-  MediaAssetKind,
+import {
   Prisma,
-  SubmissionKind
+  type MediaAssetKind,
+  type SubmissionKind
 } from "../../../prisma/generated/prisma/client";
 
 import { enqueueSubmissionNotifications } from "~/server/domain/notification-deliveries";
@@ -30,6 +30,7 @@ type CreateSubmissionInput = {
   attachmentMediaAssetIds?: string[];
   attachmentOwnerId?: string;
   bodyText?: string;
+  clientRequestId?: string;
   customerAllowsReply?: boolean;
   customerContactPhone?: string;
   customerDisplayName?: string;
@@ -64,6 +65,45 @@ const normalizeOptionalString = (value: string | undefined) => {
   const normalized = value?.replace(/\s+/g, " ").trim();
 
   return normalized || undefined;
+};
+
+const isUniqueConstraintError = (error: unknown, fieldName: string) => {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+    return false;
+  }
+
+  const target = error.meta?.target;
+
+  if (Array.isArray(target)) {
+    return target.includes(fieldName);
+  }
+
+  return typeof target === "string" && target.includes(fieldName);
+};
+
+const getExistingCreatedSubmission = async (
+  {
+    clientRequestId,
+    customerUserId,
+    organizationId
+  }: {
+    clientRequestId: string | undefined;
+    customerUserId?: string;
+    organizationId: string;
+  },
+  db: DomainDb
+) => {
+  if (!clientRequestId) {
+    return null;
+  }
+
+  return db.submission.findFirst({
+    where: {
+      client_request_id: clientRequestId,
+      ...(customerUserId ? { customer_user_id: customerUserId } : {}),
+      organization_id: organizationId
+    }
+  });
 };
 
 const assertRating = (kind: SubmissionKind, rating?: number) => {
@@ -635,8 +675,21 @@ export const createSubmission = async (
   input: CreateSubmissionInput,
   db: DomainDb = getDomainDb()
 ) => {
+  const cleanClientRequestId = normalizeOptionalString(input.clientRequestId);
   assertRating(input.kind, input.rating);
   const metadata = parseSubmissionMetadata(input.metadata);
+  const existingSubmission = await getExistingCreatedSubmission(
+    {
+      clientRequestId: cleanClientRequestId,
+      customerUserId: input.customerUserId,
+      organizationId: input.organizationId
+    },
+    db
+  );
+
+  if (existingSubmission) {
+    return existingSubmission;
+  }
 
   const { organization, settings, staffTargetSnapshot } = await assertSubmissionAvailability({
     db,
@@ -672,29 +725,55 @@ export const createSubmission = async (
       }
     : metadata;
 
-  const submission = await db.submission.create({
-    data: {
-      attachments: {
-        create: attachmentIds.map((mediaAssetId, index) => ({
-          media_asset_id: mediaAssetId,
-          sort_order: index
-        }))
-      },
-      body_text: bodyText,
-      customer_allows_reply: Boolean(input.customerAllowsReply && contactPhone),
-      customer_contact_phone: contactPhone,
-      customer_display_name: customerDisplayName,
-      customer_user_id: input.customerUserId,
-      guest_entry_scan_id: input.guestEntryScanId,
-      kind: input.kind,
-      locale: input.locale ?? DEFAULT_LOCALE,
-      metadata: metadataWithSnapshot as Prisma.InputJsonObject,
-      organization_id: organization.id,
-      qr_context: input.qrContext,
-      rating: input.rating,
-      target_staff_member_id: input.targetStaffMemberId
+  const createSubmissionRecord = () =>
+    db.submission.create({
+      data: {
+        attachments: {
+          create: attachmentIds.map((mediaAssetId, index) => ({
+            media_asset_id: mediaAssetId,
+            sort_order: index
+          }))
+        },
+        body_text: bodyText,
+        client_request_id: cleanClientRequestId,
+        customer_allows_reply: Boolean(input.customerAllowsReply && contactPhone),
+        customer_contact_phone: contactPhone,
+        customer_display_name: customerDisplayName,
+        customer_user_id: input.customerUserId,
+        guest_entry_scan_id: input.guestEntryScanId,
+        kind: input.kind,
+        locale: input.locale ?? DEFAULT_LOCALE,
+        metadata: metadataWithSnapshot as Prisma.InputJsonObject,
+        organization_id: organization.id,
+        qr_context: input.qrContext,
+        rating: input.rating,
+        target_staff_member_id: input.targetStaffMemberId
+      }
+    });
+  let submission: Awaited<ReturnType<typeof createSubmissionRecord>>;
+
+  try {
+    submission = await createSubmissionRecord();
+  } catch (error) {
+    if (!cleanClientRequestId || !isUniqueConstraintError(error, "client_request_id")) {
+      throw error;
     }
-  });
+
+    const existingCreatedSubmission = await getExistingCreatedSubmission(
+      {
+        clientRequestId: cleanClientRequestId,
+        customerUserId: input.customerUserId,
+        organizationId: input.organizationId
+      },
+      db
+    );
+
+    if (existingCreatedSubmission) {
+      return existingCreatedSubmission;
+    }
+
+    throw error;
+  }
 
   const uploadSessionIds = attachmentAssets
     .map((asset) => asset.upload_session_id)

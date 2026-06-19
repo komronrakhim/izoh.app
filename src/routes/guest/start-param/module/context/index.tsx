@@ -135,6 +135,14 @@ const getShowTopics = ({
   topicCount: number;
 }) => (channel?.id === "complaint" ? topicCount > 0 : topicCount > 1);
 
+const createSubmissionClientRequestId = () => {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+
+  return `submission-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+};
+
 const getWizardRouteSteps = ({
   channel,
   contactEnabled,
@@ -188,6 +196,8 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
   );
   const photoInputRef = React.useRef<HTMLInputElement>(null);
   const photosRef = React.useRef<SubmissionPhotoDraft[]>([]);
+  const isSubmittingRef = React.useRef(false);
+  const clientRequestIdRef = React.useRef(createSubmissionClientRequestId());
 
   React.useEffect(() => {
     photosRef.current = photos;
@@ -202,6 +212,8 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
     setStaffTargetId("");
     setPhotos([]);
     setAttachmentOwnerId(createUploadOwnerId());
+    isSubmittingRef.current = false;
+    clientRequestIdRef.current = createSubmissionClientRequestId();
   }, []);
 
   React.useEffect(
@@ -997,6 +1009,7 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
     if (
       !guestEntryConfig ||
       !activeChannel ||
+      isSubmittingRef.current ||
       isSubmitting ||
       isUploadingPhotos ||
       !detailsStepIsValid ||
@@ -1006,6 +1019,8 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
       tma.haptics.notification("error");
       return;
     }
+
+    isSubmittingRef.current = true;
 
     const staffMetadata =
       staffTargetType === "none"
@@ -1038,6 +1053,7 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
         const response = await fetch("/api/submissions", {
           body: JSON.stringify({
             bodyText: bodyText.trim(),
+            clientRequestId: clientRequestIdRef.current,
             customerAllowsReply: Boolean(normalizedContact),
             customerContactPhone: normalizedContact || undefined,
             attachmentMediaAssetIds: readyPhotoIds,
@@ -1069,6 +1085,7 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
         });
         tma.haptics.notification("success");
       } catch {
+        isSubmittingRef.current = false;
         setIsSubmitting(false);
         tma.haptics.notification("error");
       }

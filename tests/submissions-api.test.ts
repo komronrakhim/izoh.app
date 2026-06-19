@@ -22,6 +22,7 @@ describe("submissions API", () => {
     const response = await createApiApp().request("/api/submissions", {
       body: JSON.stringify({
         bodyText: "Все хорошо",
+        clientRequestId: "submission-request-1",
         kind: "REVIEW",
         locale: "ru",
         organizationId: "org_1",

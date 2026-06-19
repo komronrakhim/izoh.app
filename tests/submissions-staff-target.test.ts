@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Prisma } from "../prisma/generated/prisma/client";
 
 import { enqueueSubmissionNotifications } from "~/server/domain/notification-deliveries";
 import { createSubmission, toAdminSubmissionItem } from "~/server/domain/submissions";
@@ -66,7 +67,8 @@ const createMockDb = ({
       create: vi.fn(async ({ data }) => ({
         id: "submission_1",
         ...data
-      }))
+      })),
+      findFirst: vi.fn(async () => null)
     },
     telegramNotificationDelivery: {
       create: vi.fn(async ({ data }) => ({
@@ -79,6 +81,7 @@ const createMockDb = ({
 
 describe("submission staff targeting", () => {
   beforeEach(() => {
+    enqueueSubmissionNotificationsMock.mockReset();
     enqueueSubmissionNotificationsMock.mockResolvedValue(0);
   });
 
@@ -185,6 +188,79 @@ describe("submission staff targeting", () => {
         })
       })
     );
+  });
+
+  it("returns the existing submission for a repeated client request", async () => {
+    const db = createMockDb({}) as {
+      mediaAsset: {
+        updateMany: ReturnType<typeof vi.fn>;
+      };
+      submission: {
+        create: ReturnType<typeof vi.fn>;
+        findFirst: ReturnType<typeof vi.fn>;
+      };
+    };
+
+    db.submission.findFirst.mockResolvedValueOnce({
+      id: "submission_existing"
+    });
+
+    await expect(
+      createSubmission(
+        {
+          clientRequestId: "submission-request-1",
+          kind: "REVIEW",
+          organizationId: "org_1",
+          rating: 5
+        },
+        db as never
+      )
+    ).resolves.toMatchObject({
+      id: "submission_existing"
+    });
+
+    expect(db.submission.create).not.toHaveBeenCalled();
+    expect(db.mediaAsset.updateMany).not.toHaveBeenCalled();
+    expect(enqueueSubmissionNotificationsMock).not.toHaveBeenCalled();
+  });
+
+  it("returns the existing submission when the client request races", async () => {
+    const db = createMockDb({}) as {
+      submission: {
+        create: ReturnType<typeof vi.fn>;
+        findFirst: ReturnType<typeof vi.fn>;
+      };
+    };
+    const uniqueError = new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+      clientVersion: "test",
+      code: "P2002",
+      meta: {
+        target: ["client_request_id"]
+      }
+    });
+
+    db.submission.findFirst
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        id: "submission_existing"
+      });
+    db.submission.create.mockRejectedValueOnce(uniqueError);
+
+    await expect(
+      createSubmission(
+        {
+          clientRequestId: "submission-request-1",
+          kind: "REVIEW",
+          organizationId: "org_1",
+          rating: 5
+        },
+        db as never
+      )
+    ).resolves.toMatchObject({
+      id: "submission_existing"
+    });
+
+    expect(enqueueSubmissionNotificationsMock).not.toHaveBeenCalled();
   });
 
   it("stores a staff snapshot with submissions that target an employee", async () => {

@@ -38,6 +38,7 @@ export const createSubmissionRequestSchema = z
     attachmentMediaAssetIds: z.array(z.string()).max(SUBMISSION_PHOTO_LIMIT).optional(),
     attachmentOwnerId: z.string().max(120).optional(),
     bodyText: z.string().max(SUBMISSION_BODY_MAX_LENGTH).optional(),
+    clientRequestId: z.string().trim().min(8).max(120),
     customerAllowsReply: z.boolean().optional(),
     customerContactPhone: z.string().max(SUBMISSION_CONTACT_MAX_LENGTH).optional(),
     customerDisplayName: z.string().max(SUBMISSION_DISPLAY_NAME_MAX_LENGTH).optional(),
