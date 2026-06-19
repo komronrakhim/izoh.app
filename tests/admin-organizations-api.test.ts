@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { Prisma } from "../prisma/generated/prisma/client";
 
 import { createApiApp } from "~/server/api/app";
 import {
@@ -100,6 +101,59 @@ describe("admin organizations API", () => {
     });
 
     expect(organizationCreate).not.toHaveBeenCalled();
+  });
+
+  it("returns the existing organization when concurrent creation hits the idempotency key", async () => {
+    const duplicateRequestError = new Prisma.PrismaClientKnownRequestError(
+      "Unique constraint failed on the fields: (`creation_client_request_id`)",
+      {
+        clientVersion: "test",
+        code: "P2002",
+        meta: {
+          target: ["creation_client_request_id"]
+        }
+      }
+    );
+    const db = {
+      organization: {
+        count: vi.fn(async () => 0),
+        create: vi.fn(async () => {
+          throw duplicateRequestError;
+        }),
+        findFirst: vi
+          .fn()
+          .mockResolvedValueOnce(null)
+          .mockResolvedValueOnce({
+            contact_text: "",
+            description: "",
+            id: "org_1",
+            locale: "ru",
+            name: "Мой дом",
+            slug: "moy-dom",
+            subscription: null
+          }),
+        findUnique: vi.fn(async () => null)
+      }
+    } as never;
+
+    await expect(
+      createAdminOrganization(
+        {
+          clientRequestId: "create-org-request-1",
+          locale: "ru",
+          name: "Мой дом",
+          ownerUserId: "user_1"
+        },
+        db
+      )
+    ).resolves.toMatchObject({
+      activeOrganizationId: "org_1",
+      organization: {
+        id: "org_1",
+        name: "Мой дом",
+        slug: "moy-dom"
+      }
+    });
   });
 
   it("queues organization deletion without deleting synchronously", async () => {
