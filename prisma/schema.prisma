@@ -198,12 +198,13 @@ model Organization {
   owner_user_id       String
   status              OrganizationStatus @default(ACTIVE)
   name                String
-  slug                String             @unique
-  description         String             @default("")
-  contact_text        String             @default("")
-  logo_media_asset_id String?
-  locale              String             @default("ru")
-  time_zone           String             @default("UTC")
+  slug                       String             @unique
+  creation_client_request_id String?            @unique
+  description                String             @default("")
+  contact_text               String             @default("")
+  logo_media_asset_id        String?
+  locale                     String             @default("ru")
+  time_zone                  String             @default("UTC")
 
   owner                             User                                        @relation("OwnedOrganizations", fields: [owner_user_id], references: [id], onDelete: Cascade)
   module_settings                   OrganizationModuleSetting[]

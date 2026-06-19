@@ -62,6 +62,46 @@ describe("admin organizations API", () => {
     expect(organizationCreate).not.toHaveBeenCalled();
   });
 
+  it("returns the existing organization for a repeated creation request", async () => {
+    const organizationCreate = vi.fn();
+    const db = {
+      organization: {
+        count: vi.fn(),
+        create: organizationCreate,
+        findFirst: vi.fn(async () => ({
+          contact_text: "",
+          description: "",
+          id: "org_1",
+          locale: "ru",
+          name: "Мой дом",
+          slug: "moy-dom",
+          subscription: null
+        }))
+      }
+    } as never;
+
+    await expect(
+      createAdminOrganization(
+        {
+          clientRequestId: "create-org-request-1",
+          locale: "ru",
+          name: "Мой дом",
+          ownerUserId: "user_1"
+        },
+        db
+      )
+    ).resolves.toMatchObject({
+      activeOrganizationId: "org_1",
+      organization: {
+        id: "org_1",
+        name: "Мой дом",
+        slug: "moy-dom"
+      }
+    });
+
+    expect(organizationCreate).not.toHaveBeenCalled();
+  });
+
   it("queues organization deletion without deleting synchronously", async () => {
     const tx = {
       organization: {
@@ -136,6 +176,7 @@ describe("admin organizations API", () => {
 
     const response = await createApiApp().request("/api/admin/organizations", {
       body: JSON.stringify({
+        clientRequestId: "create-org-request-1",
         locale: "ru",
         name: "Coffee Place"
       }),

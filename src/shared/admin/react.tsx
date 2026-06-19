@@ -14,6 +14,7 @@ import { useTma } from "~/shared/tma";
 
 type CreateAdminOrganizationInput = {
   businessType?: OrganizationPresetId;
+  clientRequestId: string;
   contactText?: string;
   locale: AdminOrganizationLocale;
   name: string;
@@ -118,6 +119,7 @@ export const AdminOrganizationProvider = ({ children }: { children: React.ReactN
   const createOrganizationMutation = useMutation({
     mutationFn: ({
       businessType,
+      clientRequestId,
       contactText,
       locale,
       name,
@@ -126,6 +128,7 @@ export const AdminOrganizationProvider = ({ children }: { children: React.ReactN
       fetchApiJson<CreateAdminOrganizationPayload>("/api/admin/organizations", {
         body: JSON.stringify({
           businessType,
+          clientRequestId,
           contactText,
           locale,
           name,

@@ -54,6 +54,14 @@ const ORGANIZATION_NAME_MIN_LENGTH = 2;
 const ORGANIZATION_NAME_MAX_LENGTH = 80;
 const ORGANIZATION_CONTACT_MAX_LENGTH = 120;
 
+const createClientRequestId = () => {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+};
+
 const createHeaders = (initDataRaw?: string, headers?: HeadersInit) => {
   const nextHeaders = new Headers(headers);
 
@@ -87,6 +95,12 @@ export const AdminOrganizationCreatePage = () => {
   const [didTouchName, setDidTouchName] = React.useState(false);
   const logoInputId = React.useId();
   const logoInputRef = React.useRef<HTMLInputElement>(null);
+  const isSubmittingRef = React.useRef(false);
+  const clientRequestIdRef = React.useRef<string | null>(null);
+
+  if (!clientRequestIdRef.current) {
+    clientRequestIdRef.current = createClientRequestId();
+  }
 
   const cleanName = name.trim();
   const cleanContactText = contactText.trim();
@@ -240,7 +254,7 @@ export const AdminOrganizationCreatePage = () => {
   const saveOrganization = React.useCallback(async () => {
     setDidAttemptSubmit(true);
 
-    if (nameValidationError || isSaving || isOrganizationLimitReached) {
+    if (nameValidationError || isSaving || isSubmittingRef.current || isOrganizationLimitReached) {
       if (nameValidationError) {
         tma.haptics.notification("error");
       }
@@ -248,14 +262,19 @@ export const AdminOrganizationCreatePage = () => {
       return;
     }
 
+    isSubmittingRef.current = true;
     setIsSaving(true);
     setLogoError(null);
 
     try {
+      const clientRequestId = clientRequestIdRef.current ?? createClientRequestId();
+      clientRequestIdRef.current = clientRequestId;
+
       const organization =
         createdOrganization ??
         (await createOrganization({
           businessType,
+          clientRequestId,
           contactText: cleanContactText,
           locale,
           name: cleanName,
@@ -283,6 +302,7 @@ export const AdminOrganizationCreatePage = () => {
       setLogoError(t("admin.organizations.createError"));
       tma.haptics.notification("error");
     } finally {
+      isSubmittingRef.current = false;
       setIsSaving(false);
     }
   }, [

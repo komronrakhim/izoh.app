@@ -147,6 +147,7 @@ const guestMenuItemSchema = z.object({
 
 const adminOrganizationSchema = z.object({
   businessType: z.enum(ORGANIZATION_PRESET_IDS).default(DEFAULT_ORGANIZATION_PRESET_ID),
+  clientRequestId: z.string().trim().min(8).max(120),
   contactText: z.string().trim().max(120).optional(),
   locale: z.enum(APP_LOCALES).optional(),
   name: z.string().trim().min(2).max(80),
@@ -1244,6 +1245,7 @@ export const createApiApp = () => {
       return c.json(
         await createAdminOrganization(
           {
+            clientRequestId: input.clientRequestId,
             contactText: input.contactText,
             locale,
             name: input.name,

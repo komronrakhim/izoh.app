@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient } from "../../../prisma/generated/prisma/client";
+import { Prisma, type PrismaClient } from "../../../prisma/generated/prisma/client";
 
 import { type DomainDb, getDomainDb } from "~/server/domain/shared";
 import {
@@ -72,6 +72,60 @@ const getUniqueOrganizationSlug = async (name: string, db: DomainDb) => {
   return `${base}-${Date.now().toString(36)}`;
 };
 
+const isUniqueConstraintError = (error: unknown, fieldName: string) => {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+    return false;
+  }
+
+  const target = error.meta?.target;
+
+  if (Array.isArray(target)) {
+    return target.includes(fieldName);
+  }
+
+  return typeof target === "string" && target.includes(fieldName);
+};
+
+const getExistingCreatedOrganization = async (
+  {
+    clientRequestId,
+    ownerUserId
+  }: {
+    clientRequestId: string | null;
+    ownerUserId: string;
+  },
+  db: DomainDb
+) => {
+  if (!clientRequestId) {
+    return null;
+  }
+
+  const organization = await db.organization.findFirst({
+    include: {
+      subscription: true
+    },
+    where: {
+      creation_client_request_id: clientRequestId,
+      owner_user_id: ownerUserId,
+      status: "ACTIVE"
+    }
+  });
+
+  if (!organization) {
+    return null;
+  }
+
+  const item = toAdminOrganization({
+    organization,
+    role: "OWNER"
+  });
+
+  return {
+    activeOrganizationId: item.id,
+    organization: item
+  };
+};
+
 export const getAdminOrganizations = async (userId: string, db: DomainDb = getDomainDb()) => {
   const organizations = await db.organization.findMany({
     include: {
@@ -131,6 +185,7 @@ export const getAdminOrganizations = async (userId: string, db: DomainDb = getDo
 export const createAdminOrganization = async (
   {
     contactText,
+    clientRequestId,
     locale,
     name,
     ownerUserId,
@@ -138,6 +193,7 @@ export const createAdminOrganization = async (
     timeZone
   }: {
     contactText?: string;
+    clientRequestId?: string;
     locale: AppLocale;
     name: string;
     ownerUserId: string;
@@ -148,7 +204,20 @@ export const createAdminOrganization = async (
 ) => {
   const cleanName = name.trim();
   const cleanContactText = contactText?.trim() ?? "";
+  const cleanClientRequestId = clientRequestId?.trim() || null;
   const organizationTimeZone = normalizeTimeZone(timeZone);
+  const existingOrganization = await getExistingCreatedOrganization(
+    {
+      clientRequestId: cleanClientRequestId,
+      ownerUserId
+    },
+    db
+  );
+
+  if (existingOrganization) {
+    return existingOrganization;
+  }
+
   const activeOrganizationsCount = await db.organization.count({
     where: {
       owner_user_id: ownerUserId,
@@ -163,35 +232,60 @@ export const createAdminOrganization = async (
   const slug = await getUniqueOrganizationSlug(cleanName, db);
   const subscriptionStartedAt = new Date();
 
-  const organization = await db.organization.create({
-    include: {
-      subscription: true
-    },
-    data: {
-      contact_text: cleanContactText,
-      locale,
-      module_settings: {
-        create: getOrganizationPresetItems(presetId).map((item) => ({
-          config: item.settings as Prisma.InputJsonObject,
-          enabled: item.enabled,
-          module: item.module
-        }))
+  const createOrganizationRecord = () =>
+    db.organization.create({
+      include: {
+        subscription: true
       },
-      name: cleanName,
-      notification_targets: {
-        create: {
-          recipient_user_id: ownerUserId,
-          type: "OWNER_DM"
-        }
-      },
-      owner_user_id: ownerUserId,
-      slug,
-      subscription: {
-        create: createInitialOrganizationSubscriptionData(subscriptionStartedAt)
-      },
-      time_zone: organizationTimeZone
+      data: {
+        contact_text: cleanContactText,
+        creation_client_request_id: cleanClientRequestId,
+        locale,
+        module_settings: {
+          create: getOrganizationPresetItems(presetId).map((item) => ({
+            config: item.settings as Prisma.InputJsonObject,
+            enabled: item.enabled,
+            module: item.module
+          }))
+        },
+        name: cleanName,
+        notification_targets: {
+          create: {
+            recipient_user_id: ownerUserId,
+            type: "OWNER_DM"
+          }
+        },
+        owner_user_id: ownerUserId,
+        slug,
+        subscription: {
+          create: createInitialOrganizationSubscriptionData(subscriptionStartedAt)
+        },
+        time_zone: organizationTimeZone
+      }
+    });
+  let organization: Awaited<ReturnType<typeof createOrganizationRecord>>;
+
+  try {
+    organization = await createOrganizationRecord();
+  } catch (error) {
+    if (!cleanClientRequestId || !isUniqueConstraintError(error, "creation_client_request_id")) {
+      throw error;
     }
-  });
+
+    const existingOrganization = await getExistingCreatedOrganization(
+      {
+        clientRequestId: cleanClientRequestId,
+        ownerUserId
+      },
+      db
+    );
+
+    if (existingOrganization) {
+      return existingOrganization;
+    }
+
+    throw error;
+  }
 
   if (organization.subscription) {
     await db.organizationSubscriptionEvent.create({
