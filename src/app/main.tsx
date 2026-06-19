@@ -9,10 +9,12 @@ import { I18nProvider } from "~/shared/i18n/react";
 import { AppQueryProvider } from "~/shared/query";
 import { TmaProvider } from "~/shared/tma";
 import { installApiFetchShim } from "~/shared/api";
+import { initTelegramAnalytics } from "~/shared/analytics/telegram";
 import { router } from "./router";
 import { TmaEnvironmentGate } from "./tma-environment-gate";
 
 installApiFetchShim();
+void initTelegramAnalytics();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

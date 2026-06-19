@@ -59,7 +59,14 @@ Required for the web service when API is deployed on another domain:
 VITE_API_BASE_URL="https://api.example.com"
 ```
 
+Required for Telegram Mini Apps Analytics and Trending Apps eligibility:
+
+```bash
+VITE_TG_ANALYTICS_TOKEN=""
+```
+
 `R2_PUBLIC_BASE_URL` must be a public HTTPS URL because Telegram needs reachable media URLs for submission attachments.
+`VITE_TG_ANALYTICS_TOKEN` is issued in TON Builders for the Mini App domain and bot URL.
 
 ## Scripts
 
