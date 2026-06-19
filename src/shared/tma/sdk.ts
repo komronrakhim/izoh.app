@@ -59,6 +59,7 @@ let backButtonVisibleCount = 0;
 let backButtonHideTimeout: number | undefined;
 let mainButtonVisibleCount = 0;
 let mainButtonHideTimeout: number | undefined;
+let activeMainButtonClickCleanup: (() => void) | undefined;
 let secondaryButtonVisibleCount = 0;
 let secondaryButtonHideTimeout: number | undefined;
 const hiddenMainButtonText = "Continue";
@@ -436,6 +437,13 @@ const cancelScheduledMainButtonHide = () => {
   mainButtonHideTimeout = undefined;
 };
 
+const clearActiveMainButtonClick = () => {
+  const cleanup = activeMainButtonClickCleanup;
+
+  activeMainButtonClickCleanup = undefined;
+  cleanup?.();
+};
+
 const hideTmaMainButton = (text = hiddenMainButtonText) => {
   const safeText = text.trim() || hiddenMainButtonText;
 
@@ -463,6 +471,7 @@ const hideTmaMainButton = (text = hiddenMainButtonText) => {
 };
 
 const forceHideTmaMainButton = (text = hiddenMainButtonText) => {
+  clearActiveMainButtonClick();
   cancelScheduledMainButtonHide();
   mainButtonVisibleCount = 0;
   callIfAvailable(mountMainButton);
@@ -934,6 +943,7 @@ export const configureTmaMainButton = (state: TmaButtonState | null, onClick: ()
     return () => undefined;
   }
 
+  clearActiveMainButtonClick();
   mainButtonVisibleCount += 1;
   cancelScheduledMainButtonHide();
   callIfAvailable(mountMainButton);
@@ -973,12 +983,25 @@ export const configureTmaMainButton = (state: TmaButtonState | null, onClick: ()
     emitTmaImpact("light");
     onClick();
   }) as (() => void) | undefined;
+  let didCleanup = false;
 
-  return () => {
+  const unregister = () => {
+    if (didCleanup) {
+      return;
+    }
+
+    didCleanup = true;
     cleanup?.();
+    if (activeMainButtonClickCleanup === unregister) {
+      activeMainButtonClickCleanup = undefined;
+    }
     mainButtonVisibleCount = Math.max(0, mainButtonVisibleCount - 1);
     scheduleMainButtonHide(state.text);
   };
+
+  activeMainButtonClickCleanup = unregister;
+
+  return unregister;
 };
 
 export const configureTmaSecondaryButton = (
