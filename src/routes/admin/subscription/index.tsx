@@ -226,6 +226,8 @@ export const AdminSubscriptionPage = () => {
   const queryClient = useQueryClient();
   const { locale, t } = useI18n();
   const [selectedPlanCode, setSelectedPlanCode] = React.useState<SubscriptionPlanCode>("MONTHLY");
+  const [isInvoiceFlowPending, setIsInvoiceFlowPending] = React.useState(false);
+  const isInvoiceFlowPendingRef = React.useRef(false);
   const successfulPaymentIdRef = React.useRef<string | null>(null);
 
   const goBack = React.useCallback(() => {
@@ -277,6 +279,11 @@ export const AdminSubscriptionPage = () => {
 
     return payload;
   }, [params.organizationId, queryClient, subscriptionQueryKey, tma.initDataRaw]);
+
+  const finishInvoiceFlow = React.useCallback(() => {
+    isInvoiceFlowPendingRef.current = false;
+    setIsInvoiceFlowPending(false);
+  }, []);
 
   const syncPaymentState = React.useCallback(
     async ({
@@ -364,14 +371,21 @@ export const AdminSubscriptionPage = () => {
         startSync(0);
       }, PAYMENT_SYNC_INITIAL_DELAY_MS);
 
-      void openTmaInvoice(payment.invoiceLink).then((status) => {
-        if (isPaidInvoiceStatus(status)) {
-          notifyPaymentSuccess(payment.invoiceId);
-          startSync(0);
-        }
-      });
+      void openTmaInvoice(payment.invoiceLink)
+        .then((status) => {
+          if (isPaidInvoiceStatus(status)) {
+            notifyPaymentSuccess(payment.invoiceId);
+            startSync(0);
+          }
+        })
+        .finally(finishInvoiceFlow);
     },
-    [notifyPaymentSuccess, subscriptionQuery.data?.subscription, syncPaymentState]
+    [
+      finishInvoiceFlow,
+      notifyPaymentSuccess,
+      subscriptionQuery.data?.subscription,
+      syncPaymentState
+    ]
   );
 
   const invoiceMutation = useMutation({
@@ -389,6 +403,7 @@ export const AdminSubscriptionPage = () => {
           method: "POST"
         }
       ),
+    onError: finishInvoiceFlow,
     onSuccess: handleInvoiceCreated
   });
 
@@ -401,7 +416,7 @@ export const AdminSubscriptionPage = () => {
     (subscription.status === "ACTIVE" || subscription.status === "GRANTED")
   );
   const showPaymentOptions = !hasSettledActiveSubscription;
-  const isPaying = invoiceMutation.isPending;
+  const isPaying = invoiceMutation.isPending || isInvoiceFlowPending;
   const canPay = subscriptionQuery.isSuccess && showPaymentOptions && !isPaying;
   const payButtonText = t("admin.subscription.payAction", {
     amount: selectedPlan.amountStars
@@ -419,7 +434,9 @@ export const AdminSubscriptionPage = () => {
         }
       : null,
     () => {
-      if (showPaymentOptions) {
+      if (showPaymentOptions && canPay && !isInvoiceFlowPendingRef.current) {
+        isInvoiceFlowPendingRef.current = true;
+        setIsInvoiceFlowPending(true);
         invoiceMutation.mutate(selectedPlanCode);
       }
     }

@@ -128,6 +128,38 @@ const telegramStartCoverPath = fileURLToPath(
   new URL("../assets/telegram/start-cover.jpg", import.meta.url)
 );
 
+const defaultAllowedCorsOrigins = new Set([
+  "https://izoh.app",
+  "https://www.izoh.app",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173"
+]);
+
+const getAllowedCorsOrigins = () => {
+  const configuredOrigins = getOptionalEnv("CORS_ALLOWED_ORIGINS")
+    ?.split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  return new Set([...(configuredOrigins ?? []), ...defaultAllowedCorsOrigins]);
+};
+
+const getCorsOrigin = (origin: string) => {
+  if (!origin) {
+    return origin;
+  }
+
+  if (getAllowedCorsOrigins().has(origin)) {
+    return origin;
+  }
+
+  if (isNonProduction() && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    return origin;
+  }
+
+  return undefined;
+};
+
 const mediaUploadSchema = z.object({
   contentType: z.string(),
   fileName: z.string().min(1).max(180),
@@ -968,7 +1000,7 @@ export const createApiApp = () => {
       ],
       allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       credentials: true,
-      origin: (origin) => origin
+      origin: getCorsOrigin
     })
   );
 
@@ -2340,6 +2372,16 @@ export const createApiApp = () => {
 
     try {
       const user = await requireOrganizationOwner({ c, db, organizationId });
+      const rateLimitResponse = enforceRateLimit(c, {
+        key: `subscription-invoice:${organizationId}:${user?.id ?? getClientAddress(c)}`,
+        limit: 3,
+        windowMs: 60_000
+      });
+
+      if (rateLimitResponse) {
+        return rateLimitResponse;
+      }
+
       const organization = await db.organization.findFirst({
         select: {
           locale: true
