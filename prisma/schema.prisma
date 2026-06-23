@@ -93,6 +93,12 @@ enum TelegramDeliveryStatus {
   SKIPPED
 }
 
+enum QrPdfDeliveryStatus {
+  PROCESSING
+  SENT
+  FAILED
+}
+
 enum TelegramNotificationTargetType {
   OWNER_DM
   TELEGRAM_GROUP
@@ -183,6 +189,7 @@ model User {
   organization_deletion_jobs        OrganizationDeletionJob[]                   @relation("OrganizationDeletionJobsRequested")
   guest_entry_scans                 GuestEntryScan[]
   system_audit_logs                 SystemAuditLog[]                            @relation("SystemAuditLogActor")
+  qr_pdf_deliveries                 QrPdfDelivery[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -218,6 +225,7 @@ model Organization {
   staff_members                     StaffMember[]
   submissions                       Submission[]
   deletion_jobs                     OrganizationDeletionJob[]
+  qr_pdf_deliveries                 QrPdfDelivery[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -455,6 +463,28 @@ model SystemAuditLog {
   @@index([target_type, target_id, created_at])
   @@index([action, created_at])
   @@index([created_at])
+}
+
+model QrPdfDelivery {
+  id                  String              @id @default(cuid())
+  organization_id     String
+  user_id             String
+  client_request_id   String              @unique
+  status              QrPdfDeliveryStatus @default(PROCESSING)
+  file_name           String
+  telegram_message_id Int?
+  error               String?
+  sent_at             DateTime?
+  failed_at           DateTime?
+
+  organization Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([organization_id, user_id, created_at])
+  @@index([status, created_at])
 }
 
 model StaffMember {

@@ -1,6 +1,6 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
-import { InputFile } from "grammy";
+import { GrammyError, HttpError, InputFile } from "grammy";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
@@ -35,6 +35,11 @@ import {
   getOrCreateOrganizationGuestContext,
   getOrganizationGuestContextByCode
 } from "~/server/domain/guest-contexts";
+import {
+  createQrPdfDeliveryAttempt,
+  markQrPdfDeliveryFailed,
+  markQrPdfDeliverySent
+} from "~/server/domain/qr-pdf-deliveries";
 import {
   createOrganizationStaffMember,
   deleteOrganizationStaffMember,
@@ -195,6 +200,7 @@ const qrHeadlineMaxLength = Math.max(...QR_FORMATS.map((format) => format.headli
 
 const organizationQrPdfSchema = z.object({
   caption: z.string().trim().max(qrCaptionMaxLength).optional(),
+  clientRequestId: z.string().trim().min(8).max(120).optional(),
   context: z.string().trim().max(80).optional(),
   customColors: z
     .object({
@@ -272,6 +278,128 @@ const enforceRateLimit = (
   }
 
   return c.json({ error: "Too many requests. Please try again later." }, 429);
+};
+
+const redactSensitiveTelegramText = (value: string) =>
+  value.replace(/https:\/\/api\.telegram\.org\/bot[^\s)]+/gi, "[telegram-bot-api-url]");
+
+const getSafeErrorText = (error: unknown) => {
+  if (error instanceof GrammyError) {
+    return redactSensitiveTelegramText(
+      `GrammyError ${error.error_code}: ${error.description || "Telegram request failed."}`
+    );
+  }
+
+  if (error instanceof HttpError) {
+    return redactSensitiveTelegramText(`HttpError: ${error.message}`);
+  }
+
+  if (error instanceof Error) {
+    return redactSensitiveTelegramText(error.message);
+  }
+
+  return redactSensitiveTelegramText(String(error));
+};
+
+const getTelegramDocumentDeliveryFailure = (error: unknown) => {
+  const safeError = getSafeErrorText(error);
+
+  if (error instanceof GrammyError) {
+    if (error.error_code === 403) {
+      return {
+        error: safeError,
+        message: "Telegram bot is blocked by the user.",
+        status: 403 as const
+      };
+    }
+
+    if (error.error_code === 429) {
+      return {
+        error: safeError,
+        message: "Telegram is rate limiting file delivery. Please try again later.",
+        status: 429 as const
+      };
+    }
+  }
+
+  return {
+    error: safeError,
+    message: "Telegram could not deliver the PDF.",
+    status: 502 as const
+  };
+};
+
+const respondWithTelegramDocumentDeliveryFailure = (
+  c: Context,
+  failure: ReturnType<typeof getTelegramDocumentDeliveryFailure>
+) => {
+  if (failure.status === 403) {
+    return c.json({ error: failure.message }, 403);
+  }
+
+  if (failure.status === 429) {
+    return c.json({ error: failure.message }, 429);
+  }
+
+  return c.json({ error: failure.message }, 502);
+};
+
+const respondWithExistingQrPdfDelivery = (
+  c: Context,
+  delivery: Awaited<ReturnType<typeof createQrPdfDeliveryAttempt>>["delivery"]
+) => {
+  if (delivery.status === "SENT") {
+    return c.json({
+      duplicate: true,
+      ok: true,
+      status: delivery.status
+    });
+  }
+
+  if (delivery.status === "PROCESSING") {
+    return c.json(
+      {
+        duplicate: true,
+        ok: true,
+        status: delivery.status
+      },
+      202
+    );
+  }
+
+  return c.json(
+    {
+      duplicate: true,
+      error: "PDF delivery already failed for this request.",
+      status: delivery.status
+    },
+    409
+  );
+};
+
+const markQrPdfDeliveryFailedBestEffort = async ({
+  db,
+  deliveryId,
+  error
+}: {
+  db: NonNullable<ReturnType<typeof getPrisma>>;
+  deliveryId: string;
+  error: string;
+}) => {
+  try {
+    await markQrPdfDeliveryFailed(
+      {
+        deliveryId,
+        error
+      },
+      db
+    );
+  } catch (markError) {
+    console.warn("QR PDF delivery status update failed", {
+      deliveryId,
+      error: getSafeErrorText(markError)
+    });
+  }
 };
 
 const getCachedGuestEntryConfig = ({
@@ -1459,31 +1587,119 @@ export const createApiApp = () => {
         contextCode,
         organizationRef: organization.slug
       });
-      const pdf = await renderOrganizationQrPdf({
-        locale: fromPrismaLocale(organization.locale),
-        organizationLogoUrl: logoAsset ? getMediaPublicUrl(logoAsset) : null,
-        organizationName: organization.name,
-        template: {
-          ...input,
-          context: qrContext
-        },
-        url: getTelegramMiniAppUrl(startParam)
-      });
       const fileName = createQrPdfFileName({
         context: qrContext,
         organizationName: organization.name,
         organizationSlug: organization.slug
       });
+      const chatDelivery = shouldSendToChat
+        ? await (async () => {
+            if (!user) {
+              return c.json({ error: "Telegram user is required." }, 401);
+            }
+
+            if (!input.clientRequestId) {
+              return c.json({ error: "QR PDF request id is required." }, 400);
+            }
+
+            const deliveryAttempt = await createQrPdfDeliveryAttempt(
+              {
+                clientRequestId: input.clientRequestId,
+                fileName,
+                organizationId: organization.id,
+                userId: user.id
+              },
+              db
+            );
+
+            if (!deliveryAttempt.created) {
+              return respondWithExistingQrPdfDelivery(c, deliveryAttempt.delivery);
+            }
+
+            const rateLimitResponse = enforceRateLimit(c, {
+              key: `qr-pdf:${organization.id}:${user.id}`,
+              limit: 3,
+              windowMs: 60_000
+            });
+
+            if (rateLimitResponse) {
+              await markQrPdfDeliveryFailedBestEffort({
+                db,
+                deliveryId: deliveryAttempt.delivery.id,
+                error: "Rate limited before Telegram delivery."
+              });
+
+              return rateLimitResponse;
+            }
+
+            return deliveryAttempt;
+          })()
+        : null;
+
+      if (chatDelivery instanceof Response) {
+        return chatDelivery;
+      }
+
+      let pdf: Buffer;
+
+      try {
+        pdf = await renderOrganizationQrPdf({
+          locale: fromPrismaLocale(organization.locale),
+          organizationLogoUrl: logoAsset ? getMediaPublicUrl(logoAsset) : null,
+          organizationName: organization.name,
+          template: {
+            ...input,
+            context: qrContext
+          },
+          url: getTelegramMiniAppUrl(startParam)
+        });
+      } catch (error) {
+        if (chatDelivery?.created) {
+          await markQrPdfDeliveryFailedBestEffort({
+            db,
+            deliveryId: chatDelivery.delivery.id,
+            error: getSafeErrorText(error)
+          });
+        }
+
+        throw error;
+      }
 
       if (shouldSendToChat) {
-        if (!user) {
+        if (!chatDelivery?.created) {
+          return c.json({ error: "QR PDF delivery was not created." }, 409);
+        }
+
+        const chatUser = user;
+
+        if (!chatUser) {
           return c.json({ error: "Telegram user is required." }, 401);
         }
 
-        await getTelegramBot().api.sendDocument(
-          user.telegram_id.toString(),
-          new InputFile(pdf, fileName)
-        );
+        try {
+          const message = await getTelegramBot().api.sendDocument(
+            chatUser.telegram_id.toString(),
+            new InputFile(pdf, fileName)
+          );
+
+          await markQrPdfDeliverySent(
+            {
+              deliveryId: chatDelivery.delivery.id,
+              telegramMessageId: message.message_id
+            },
+            db
+          );
+        } catch (error) {
+          const failure = getTelegramDocumentDeliveryFailure(error);
+
+          await markQrPdfDeliveryFailedBestEffort({
+            db,
+            deliveryId: chatDelivery.delivery.id,
+            error: failure.error
+          });
+
+          return respondWithTelegramDocumentDeliveryFailure(c, failure);
+        }
 
         return c.json({ ok: true });
       }

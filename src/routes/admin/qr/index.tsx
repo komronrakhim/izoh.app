@@ -69,6 +69,14 @@ const createDefaultDraft = (t: (key: string) => string): QrTemplateDraft => ({
 const QR_CAPTION_MAX_LENGTH = Math.max(...QR_FORMATS.map((format) => format.captionMaxLength));
 const QR_HEADLINE_MAX_LENGTH = Math.max(...QR_FORMATS.map((format) => format.headlineMaxLength));
 
+const createQrPdfClientRequestId = () => {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `qr-pdf-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+};
+
 const readDraft = (
   t: (key: string) => string,
   storageKey = QR_DRAFT_STORAGE_KEY
@@ -855,6 +863,8 @@ export const AdminQrConstructor = () => {
   const [customColors, setCustomColors] = React.useState<QrCustomColors>(initialDraft.customColors);
   const [showContext, setShowContext] = React.useState(initialDraft.showContext);
   const [isPdfActionPending, setIsPdfActionPending] = React.useState(false);
+  const isPdfActionPendingRef = React.useRef(false);
+  const pdfClientRequestIdRef = React.useRef<string | null>(null);
 
   const currentFormat = QR_FORMAT_BY_ID[formatId];
   const activeQrStyle = getQrFormatVisualStyle(formatId, qrStyle);
@@ -971,16 +981,20 @@ export const AdminQrConstructor = () => {
   };
 
   const handlePdfAction = React.useCallback(async () => {
-    if (!organization || isPdfActionPending) {
+    if (!organization || isPdfActionPendingRef.current) {
       return;
     }
 
+    isPdfActionPendingRef.current = true;
     setIsPdfActionPending(true);
 
     try {
+      const clientRequestId = pdfClientRequestIdRef.current ?? createQrPdfClientRequestId();
+      pdfClientRequestIdRef.current = clientRequestId;
       const response = await fetch(`/api/organizations/${organization.id}/qr-pdf?delivery=chat`, {
         body: JSON.stringify({
           caption: cleanCaption,
+          clientRequestId,
           context: cleanQrContext,
           customColors,
           emojiOpacity,
@@ -1005,6 +1019,8 @@ export const AdminQrConstructor = () => {
     } catch {
       tmaHaptics.notification("error");
     } finally {
+      isPdfActionPendingRef.current = false;
+      pdfClientRequestIdRef.current = null;
       setIsPdfActionPending(false);
     }
   }, [
@@ -1015,7 +1031,6 @@ export const AdminQrConstructor = () => {
     emojiOpacity,
     emojiThemeId,
     formatId,
-    isPdfActionPending,
     organization,
     showContext,
     activeQrStyle,
@@ -1234,7 +1249,6 @@ export const AdminQrConstructor = () => {
             ) : null}
             <p className="ios-footnote px-1 text-muted">{t("qr.constructor.context.hint")}</p>
           </section>
-
         </div>
       </main>
     </PageTransition>
