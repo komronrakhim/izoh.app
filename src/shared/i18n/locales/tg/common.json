@@ -9,7 +9,9 @@
     "action": "Кушодани Izoh"
   },
   "actions": {
-    "clear": "Тоза кардан"
+    "clear": "Тоза кардан",
+    "save": "Захира кардан",
+    "close": "Пӯшидан"
   },
   "contactQuickFill": {
     "add": "Иловаи тамос",

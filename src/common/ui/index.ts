@@ -10,6 +10,7 @@ export * from "./toggle";
 export * from "./tooltip";
 export * from "./tabs";
 export * from "./dialog";
+export * from "./bottom-sheet";
 export * from "./select";
 export * from "./scroll-to-top";
 export * from "./list";

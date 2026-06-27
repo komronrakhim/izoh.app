@@ -9,7 +9,9 @@
     "action": "Izoh-u aç"
   },
   "actions": {
-    "clear": "Təmizlə"
+    "clear": "Təmizlə",
+    "save": "Saxla",
+    "close": "Bağla"
   },
   "contactQuickFill": {
     "add": "Kontaktı əlavə et",

@@ -61,7 +61,7 @@
     "logoSelected": "Loqo hazırdır",
     "logoRemove": "Loqotipi silin",
     "logoUpdateError": "Loqotipi yeniləmək alınmadı. Yenidən cəhd edin.",
-    "openGuestForm": "Qonaq forması",
+    "openGuestForm": "Qonaq formasına bax",
     "dangerTitle": "Silinmə",
     "dangerHint": "Silinmə geri qaytarıla bilməz.",
     "delete": "Yeri silin",
@@ -90,6 +90,10 @@
     "capabilities": {
       "title": "Formalar",
       "hint": "Linki açdıqdan sonra yalnız qonaqların həqiqətən ehtiyac duyduqlarını daxil edin."
+    },
+    "publicReviews": {
+      "title": "Açıq rəylər",
+      "hint": "Qonaqlara məkanınızı Google, Yandex Maps və ya 2GIS-də asanlıqla tövsiyə etməyə kömək edin."
     },
     "staff": {
       "title": "Heyət",
@@ -131,6 +135,7 @@
     "review": "Rəylər",
     "complaint": "Şikayətlər",
     "suggestion": "Təkliflər",
+    "publicReviews": "Açıq rəylər",
     "staff": "Heyət",
     "feed": "Müraciətlər",
     "feedHint": "Rəylər, şikayətlər və təkliflər.",
@@ -144,6 +149,12 @@
     "faq": "Suallar",
     "support": "Dəstək",
     "system": "Nəbz"
+  },
+  "quickActions": {
+    "guestForm": "Forma",
+    "qr": "QR",
+    "link": "Link",
+    "notifications": "Çat"
   },
   "system": {
     "badge": "Sistem",
@@ -802,69 +813,55 @@
     "showHint": "Deaktiv edilərsə, qonaq formada bu bölməni görməyəcək.",
     "analytics": {
       "hint": "Reytinq və dinamika.",
-      "rows": [
-        "Orta reytinq",
-        "Gündüz",
-        "Nöqtə-nöqtə"
-      ]
+      "rows": ["Orta reytinq", "Gündüz", "Nöqtə-nöqtə"]
     },
     "feed": {
       "hint": "Rəylər, şikayətlər və təkliflər bir siyahıda.",
-      "rows": [
-        "Rəylər",
-        "Şikayətlər",
-        "Təkliflər"
-      ]
+      "rows": ["Rəylər", "Şikayətlər", "Təkliflər"]
     },
     "review": {
       "hint": "Onlar qonaqları nəyin sevindirdiyini və harada inkişaf etdirə biləcəyinizi anlamağa kömək edir.",
-      "rows": [
-        "Qiymətləndirmə",
-        "Şərh",
-        "Foto"
-      ]
+      "rows": ["Qiymətləndirmə", "Şərh", "Foto"]
     },
     "complaint": {
       "hint": "Onlar problemi tez görməyə və uzun yazışmalar olmadan təfərrüatları əldə etməyə kömək edir.",
-      "rows": [
-        "Mətn",
-        "Foto",
-        "Qəbul edənlər"
-      ]
+      "rows": ["Mətn", "Foto", "Qəbul edənlər"]
     },
     "suggestion": {
       "hint": "Qonaq fikirlərini toplamağa və təxmin etmədən xidməti yaxşılaşdırmağa kömək edir.",
-      "rows": [
-        "Mətn",
-        "Foto",
-        "Qəbul edənlər"
-      ]
+      "rows": ["Mətn", "Foto", "Qəbul edənlər"]
     },
     "notifications": {
       "hint": "Botun hansı sorğuları dərhal göndərəcəyini və hara getdiyini konfiqurasiya edin.",
-      "rows": [
-        "Şəxsi mesajlar",
-        "Qrup",
-        "Müraciət növləri"
-      ]
+      "rows": ["Şəxsi mesajlar", "Qrup", "Müraciət növləri"]
     },
     "qr": {
       "hint": "Qonaq linki avtomatik yaradılır. QR onu masaya, piştaxtaya və ya stikerə səliqəli yerləşdirməyə kömək edir.",
-      "rows": [
-        "Link",
-        "Poster A4",
-        "Stiker"
-      ]
+      "rows": ["Link", "Poster A4", "Stiker"]
     },
     "staff": {
       "show": "Kadr seçimi",
       "showHint": "Aktiv edilərsə, işçi seçimi rəylərdə və şikayətlərdə görünəcək.",
       "hint": "Qonağın kim haqqında yazdığını anlamağa və rəy və şikayətləri daha dəqiq təhlil etməyə kömək edir.",
-      "rows": [
-        "İşçilər",
-        "Formalarda"
-      ]
+      "rows": ["İşçilər", "Formalarda"]
     }
   },
-  "sectionShellHint": "Bölmə hazır olduqda parametrlər burada görünəcək."
+  "sectionShellHint": "Bölmə hazır olduqda parametrlər burada görünəcək.",
+  "publicReviews": {
+    "title": "Açıq rəylər",
+    "subtitle": "Qonaqlar məkanınız haqqında başqalarına danışa bilsin: uyğun platformanı seçib açıq rəy səhifəsinə keçəcəklər.",
+    "ruleTitle": "Nə vaxt göstərilsin",
+    "ruleHint": "Keçidin hansı qiymətdən göstəriləcəyini seçin. Aşağı qiymətlər yalnız komandanın içində qalacaq.",
+    "enabled": "Keçidi göstərmək",
+    "enabledSubtitle": "Son ekranda «Başqalarına tövsiyə edin» görünəcək.",
+    "threshold": "Qiymət olduqda",
+    "thresholdValue": "{{value}} və yuxarı",
+    "thresholdDecrease": "Qiyməti azaltmaq",
+    "thresholdIncrease": "Qiyməti artırmaq",
+    "providersTitle": "Platformalar",
+    "providersMeta": "{{enabled}} aktiv · {{clicks}} keçid",
+    "providerClicks": "{{value}} keçid",
+    "providersHint": "Məkanınızın səhifələrinə keçidləri əlavə edin. Yalnız linkin düzgün açıldığı platformaları aktiv edin.",
+    "validationError": "Keçidləri yoxlayın: məkan səhifəsinə tam URL lazımdır."
+  }
 }

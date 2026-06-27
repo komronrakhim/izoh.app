@@ -223,6 +223,11 @@
         "title": "Təşəkkürlər",
         "subtitle": "Mesaj komandaya çatdı."
       },
+      "publicReview": {
+        "cta": "Rəyi paylaşın",
+        "title": "Harada rahatdır?",
+        "hint": "Açıq rəy yazmaq üçün sizə uyğun platformanı seçin."
+      },
       "reviewByRating": {
         "1": {
           "title": "Yazdığınız üçün təşəkkürlər",

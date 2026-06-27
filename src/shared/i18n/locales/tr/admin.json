@@ -61,7 +61,7 @@
     "logoSelected": "Logo hazır",
     "logoRemove": "Logoyu kaldır",
     "logoUpdateError": "Logo güncellenemedi. Tekrar deneyin.",
-    "openGuestForm": "Misafir formu",
+    "openGuestForm": "Misafir formunu görüntüle",
     "dangerTitle": "Kaldırma",
     "dangerHint": "Silme işlemi geri alınamaz.",
     "delete": "Yeri sil",
@@ -90,6 +90,10 @@
     "capabilities": {
       "title": "Formlar",
       "hint": "Yalnızca konukların bağlantıyı açtıktan sonra gerçekten ihtiyaç duydukları şeyleri ekleyin."
+    },
+    "publicReviews": {
+      "title": "Herkese açık yorumlar",
+      "hint": "Konukların yerinizi Google, Yandex Maps veya 2GIS’te kolayca önermesine yardımcı olun."
     },
     "staff": {
       "title": "Personel",
@@ -131,6 +135,7 @@
     "review": "Yorumlar",
     "complaint": "Şikayetler",
     "suggestion": "Öneriler",
+    "publicReviews": "Herkese açık yorumlar",
     "staff": "Personel",
     "feed": "Geri bildirimler",
     "feedHint": "Yorumlar, şikayetler ve öneriler.",
@@ -144,6 +149,12 @@
     "faq": "Sorular",
     "support": "Destek",
     "system": "Nabız"
+  },
+  "quickActions": {
+    "guestForm": "Form",
+    "qr": "QR",
+    "link": "Bağlantı",
+    "notifications": "Sohbet"
   },
   "system": {
     "badge": "Sistem",
@@ -802,69 +813,55 @@
     "showHint": "Devre dışı bırakılırsa misafir bu bölümü formda görmez.",
     "analytics": {
       "hint": "Derecelendirme ve dinamikler.",
-      "rows": [
-        "Ortalama derecelendirme",
-        "Güne göre",
-        "Nokta nokta"
-      ]
+      "rows": ["Ortalama derecelendirme", "Güne göre", "Nokta nokta"]
     },
     "feed": {
       "hint": "İncelemeler, şikayetler ve öneriler tek listede.",
-      "rows": [
-        "Yorumlar",
-        "Şikayetler",
-        "Öneriler"
-      ]
+      "rows": ["Yorumlar", "Şikayetler", "Öneriler"]
     },
     "review": {
       "hint": "Konukları neyin mutlu ettiğini ve nereleri geliştirebileceğinizi anlamanıza yardımcı olurlar.",
-      "rows": [
-        "Değerlendirme",
-        "Yorum",
-        "Fotoğraf"
-      ]
+      "rows": ["Değerlendirme", "Yorum", "Fotoğraf"]
     },
     "complaint": {
       "hint": "Sorunu hızlı bir şekilde görmenize ve uzun yazışmalara gerek kalmadan ayrıntıları almanıza yardımcı olurlar.",
-      "rows": [
-        "Metin",
-        "Fotoğraf",
-        "Alıcılar"
-      ]
+      "rows": ["Metin", "Fotoğraf", "Alıcılar"]
     },
     "suggestion": {
       "hint": "Tahmine gerek kalmadan konukların fikirlerini toplamaya ve hizmeti iyileştirmeye yardımcı olur.",
-      "rows": [
-        "Metin",
-        "Fotoğraf",
-        "Alıcılar"
-      ]
+      "rows": ["Metin", "Fotoğraf", "Alıcılar"]
     },
     "notifications": {
       "hint": "Botun hangi istekleri anında göndereceğini ve bunların nereye gideceğini yapılandırın.",
-      "rows": [
-        "Kişisel mesajlar",
-        "Grup",
-        "İstek türleri"
-      ]
+      "rows": ["Kişisel mesajlar", "Grup", "İstek türleri"]
     },
     "qr": {
       "hint": "Misafir bağlantısı otomatik oluşturulur. QR, onu masaya, tezgaha veya çıkartmaya düzenli yerleştirmenize yardımcı olur.",
-      "rows": [
-        "Bağlantı",
-        "Poster A4",
-        "Etiket"
-      ]
+      "rows": ["Bağlantı", "Poster A4", "Etiket"]
     },
     "staff": {
       "show": "Personel seçimi",
       "showHint": "Etkinleştirilirse, çalışan seçimi incelemelerde ve şikayetlerde görünecektir.",
       "hint": "Konuğun kimin hakkında yazdığını anlamanıza ve değerlendirmeleri ve şikayetleri daha doğru bir şekilde analiz etmenize yardımcı olur.",
-      "rows": [
-        "Çalışanlar",
-        "formlarda"
-      ]
+      "rows": ["Çalışanlar", "formlarda"]
     }
   },
-  "sectionShellHint": "Bölüm hazır olduğunda ayarlar burada görünecektir."
+  "sectionShellHint": "Bölüm hazır olduğunda ayarlar burada görünecektir.",
+  "publicReviews": {
+    "title": "Herkese açık yorumlar",
+    "subtitle": "Konukların yerinizi başkalarına anlatmasına izin verin: uygun platformu seçip herkese açık yorum sayfasına geçebilirler.",
+    "ruleTitle": "Ne zaman gösterilsin",
+    "ruleHint": "Bağlantının hangi puandan itibaren gösterileceğini seçin. Daha düşük puanlar yalnızca ekip içinde kalır.",
+    "enabled": "Bağlantıyı göster",
+    "enabledSubtitle": "Son ekranda “Başkalarına öner” görünecek.",
+    "threshold": "Puan",
+    "thresholdValue": "{{value}} ve üzeri",
+    "thresholdDecrease": "Puan değerini düşür",
+    "thresholdIncrease": "Puan değerini yükselt",
+    "providersTitle": "Platformlar",
+    "providersMeta": "{{enabled}} açık · {{clicks}} geçiş",
+    "providerClicks": "{{value}} geçiş",
+    "providersHint": "Yerinizin sayfalarına ait bağlantıları ekleyin. Yalnızca bağlantının doğru açıldığı platformları açın.",
+    "validationError": "Bağlantıları kontrol edin: yerinizin sayfasına tam URL gerekiyor."
+  }
 }

@@ -14,11 +14,18 @@ import { useI18n } from "~/shared/i18n/react";
 import {
   COMPLAINT_CATEGORY_IDS,
   SUGGESTION_TOPIC_IDS,
+  getEnabledPublicReviewLinks,
   type ComplaintCategoryId,
+  type PublicReviewLink,
   type SuggestionTopicId
 } from "~/shared/module-settings";
 import { queryKeys } from "~/shared/query";
-import { SUBMISSION_PHOTO_LIMIT, SUBMISSION_PHOTO_MAX_BYTES } from "~/shared/submissions";
+import {
+  SUBMISSION_PHOTO_LIMIT,
+  SUBMISSION_PHOTO_MAX_BYTES,
+  type CreateSubmissionResponsePayload
+} from "~/shared/submissions";
+import { isBrandedPublicReviewProviderId } from "~/shared/public-reviews/logos";
 import { hideTmaMainButtonNow, type TmaButtonState, useTma } from "~/shared/tma";
 
 import {
@@ -101,6 +108,7 @@ type CustomerWizardContextValue = {
     current: number;
     total: number;
   };
+  publicReviewLinks: PublicReviewLink[];
   rating: number;
   resetToChoice: () => void;
   resolveRouteStep: (step: WizardRouteStep) => WizardRouteStep | "choice";
@@ -116,6 +124,7 @@ type CustomerWizardContextValue = {
   showTopics: boolean;
   staffTargetId: string;
   staffTargets: StaffTarget[];
+  submittedSubmissionId: null | string;
   summaryHint?: string;
   topicOptions: TopicOption[];
   validationAttemptedStep: WizardStep | null;
@@ -191,6 +200,7 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
   const [attachmentOwnerId, setAttachmentOwnerId] = React.useState(createUploadOwnerId);
   const [photos, setPhotos] = React.useState<SubmissionPhotoDraft[]>([]);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [submittedSubmissionId, setSubmittedSubmissionId] = React.useState<null | string>(null);
   const [validationAttemptedStep, setValidationAttemptedStep] = React.useState<WizardStep | null>(
     null
   );
@@ -212,6 +222,7 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
     setStaffTargetId("");
     setPhotos([]);
     setAttachmentOwnerId(createUploadOwnerId());
+    setSubmittedSubmissionId(null);
     isSubmittingRef.current = false;
     clientRequestIdRef.current = createSubmissionClientRequestId();
   }, []);
@@ -242,6 +253,20 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
   }, [guestEntryConfig?.channels]);
 
   const activeChannel = kind ? channelsById.get(kind) : undefined;
+  const publicReviewLinks = React.useMemo(() => {
+    if (
+      !activeChannel ||
+      activeChannel.id !== "review" ||
+      !activeChannel.settings.publicReview.enabled ||
+      rating < activeChannel.settings.publicReview.minRating
+    ) {
+      return [];
+    }
+
+    return getEnabledPublicReviewLinks(activeChannel.settings).filter((link) =>
+      isBrandedPublicReviewProviderId(link.provider)
+    );
+  }, [activeChannel, rating]);
 
   const choices = React.useMemo<WizardChoice[]>(() => {
     const review = channelsById.get("review");
@@ -1078,6 +1103,9 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
           throw new Error("Submission failed.");
         }
 
+        const payload = (await response.json()) as CreateSubmissionResponsePayload;
+
+        setSubmittedSubmissionId(payload.submission.id);
         hideTmaMainButtonNow();
         setIsSubmitting(false);
         goToStep("done", {
@@ -1206,6 +1234,7 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
       photos,
       photosEnabled,
       progressMetaForStep,
+      publicReviewLinks,
       rating,
       resetToChoice,
       resolveRouteStep,
@@ -1221,6 +1250,7 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
       showTopics,
       staffTargetId,
       staffTargets,
+      submittedSubmissionId,
       summaryHint,
       topicOptions,
       validationAttemptedStep,
@@ -1258,6 +1288,7 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
       photoHint,
       photosEnabled,
       progressMetaForStep,
+      publicReviewLinks,
       rating,
       removePhoto,
       resetToChoice,
@@ -1274,6 +1305,7 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
       showTopics,
       staffTargetId,
       staffTargets,
+      submittedSubmissionId,
       summaryHint,
       tma.haptics,
       toggleTopic,

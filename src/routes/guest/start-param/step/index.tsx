@@ -2,8 +2,17 @@ import { useParams } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
 
+import { fetchApiJson } from "~/shared/api";
 import { useI18n } from "~/shared/i18n/react";
-import { pickTmaContact, useTma, useTmaBackButton, useTmaMainButton } from "~/shared/tma";
+import type { PublicReviewLink } from "~/shared/module-settings";
+import { type ExternalReviewClickResponsePayload } from "~/shared/public-reviews";
+import {
+  openTmaLink,
+  pickTmaContact,
+  useTma,
+  useTmaBackButton,
+  useTmaMainButton
+} from "~/shared/tma";
 
 import {
   WizardContactStep,
@@ -33,6 +42,7 @@ export const CustomerWizardStepPage = () => {
   const { t } = useI18n();
   const tma = useTma();
   const [isAddingContact, setIsAddingContact] = React.useState(false);
+  const [isPublicReviewOpening, setIsPublicReviewOpening] = React.useState(false);
   const resolvedStep = routeStep ? wizard.resolveRouteStep(routeStep) : "choice";
   const step = routeStep && resolvedStep === routeStep ? routeStep : null;
   const mainButtonState = step ? wizard.getMainButtonState(step) : null;
@@ -93,6 +103,43 @@ export const CustomerWizardStepPage = () => {
     }
   }, [t, tma.haptics, tma.initDataRaw, tma.user?.username, wizard.onContactChange]);
 
+  const handlePublicReviewLinkClick = React.useCallback(
+    async (link: PublicReviewLink) => {
+      if (!wizard.guestEntryConfig || !wizard.submittedSubmissionId || isPublicReviewOpening) {
+        tma.haptics.notification("error");
+        return;
+      }
+
+      setIsPublicReviewOpening(true);
+
+      try {
+        const payload = await fetchApiJson<ExternalReviewClickResponsePayload>(
+          "/api/external-review-clicks",
+          {
+            body: JSON.stringify({
+              guestEntryScanId: wizard.guestEntryConfig.scanId ?? undefined,
+              linkId: link.id,
+              organizationId: wizard.guestEntryConfig.organization.id,
+              submissionId: wizard.submittedSubmissionId
+            }),
+            headers: {
+              "Content-Type": "application/json"
+            },
+            method: "POST"
+          }
+        );
+
+        tma.haptics.notification("success");
+        openTmaLink(payload.url);
+      } catch {
+        tma.haptics.notification("error");
+      } finally {
+        setIsPublicReviewOpening(false);
+      }
+    },
+    [isPublicReviewOpening, tma.haptics, wizard.guestEntryConfig, wizard.submittedSubmissionId]
+  );
+
   if (!step) {
     return null;
   }
@@ -117,7 +164,13 @@ export const CustomerWizardStepPage = () => {
           >
             {step === "done" ? (
               <WizardDoneStep
+                isPublicReviewOpening={isPublicReviewOpening}
+                onPublicReviewLinkClick={handlePublicReviewLinkClick}
                 poweredByLabel={t("common.poweredBy")}
+                publicReviewCloseLabel={t("common.actions.close")}
+                publicReviewCtaLabel={t("customer.wizard.done.publicReview.cta")}
+                publicReviewSheetTitle={t("customer.wizard.done.publicReview.title")}
+                publicReviewLinks={wizard.submittedSubmissionId ? wizard.publicReviewLinks : []}
                 title={wizard.getStepTitle(step)}
                 subtitle={wizard.getStepSubtitle(step)}
               />

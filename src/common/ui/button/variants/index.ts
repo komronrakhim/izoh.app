@@ -6,7 +6,8 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         primary: "iz-liquid-primary",
-        secondary: "iz-glass iz-liquid-control text-foreground",
+        secondary:
+          "border-border/70 bg-surface-2 text-foreground hover:border-border hover:bg-surface-3 active:bg-surface-3",
         outline: "iz-glass iz-liquid-control text-primary",
         ghost:
           "border-transparent text-muted hover:bg-foreground/[0.055] hover:text-foreground active:bg-foreground/[0.075]",

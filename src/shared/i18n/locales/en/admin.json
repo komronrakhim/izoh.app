@@ -61,7 +61,7 @@
     "logoSelected": "The logo is ready",
     "logoRemove": "Remove logo",
     "logoUpdateError": "Failed to update the logo. Try again.",
-    "openGuestForm": "Guest form",
+    "openGuestForm": "Preview guest form",
     "dangerTitle": "Removal",
     "dangerHint": "The deletion cannot be undone.",
     "delete": "Delete place",
@@ -90,6 +90,10 @@
     "capabilities": {
       "title": "Forms",
       "hint": "Include only what guests actually need after opening the link."
+    },
+    "publicReviews": {
+      "title": "Public reviews",
+      "hint": "Help guests easily recommend your place on Google, Yandex Maps, or 2GIS."
     },
     "staff": {
       "title": "Staff",
@@ -131,6 +135,7 @@
     "review": "Reviews",
     "complaint": "Complaints",
     "suggestion": "Suggestions",
+    "publicReviews": "Public reviews",
     "staff": "Staff",
     "feed": "Submissions",
     "feedHint": "Reviews, complaints, and suggestions.",
@@ -144,6 +149,12 @@
     "faq": "Questions",
     "support": "Support",
     "system": "Pulse"
+  },
+  "quickActions": {
+    "guestForm": "Form",
+    "qr": "QR",
+    "link": "Link",
+    "notifications": "Chat"
   },
   "system": {
     "badge": "System",
@@ -802,69 +813,55 @@
     "showHint": "If disabled, the guest will not see this section on the form.",
     "analytics": {
       "hint": "Rating and dynamics.",
-      "rows": [
-        "Average rating",
-        "By day",
-        "Point by point"
-      ]
+      "rows": ["Average rating", "By day", "Point by point"]
     },
     "feed": {
       "hint": "Reviews, complaints and suggestions in one list.",
-      "rows": [
-        "Reviews",
-        "Complaints",
-        "Suggestions"
-      ]
+      "rows": ["Reviews", "Complaints", "Suggestions"]
     },
     "review": {
       "hint": "They help you understand what makes guests happy and where you can improve.",
-      "rows": [
-        "Evaluation",
-        "Comment",
-        "Photo"
-      ]
+      "rows": ["Evaluation", "Comment", "Photo"]
     },
     "complaint": {
       "hint": "They help you quickly see the problem and get details without lengthy correspondence.",
-      "rows": [
-        "Text",
-        "Photo",
-        "Recipients"
-      ]
+      "rows": ["Text", "Photo", "Recipients"]
     },
     "suggestion": {
       "hint": "Helps gather guest ideas and improve service without guesswork.",
-      "rows": [
-        "Text",
-        "Photo",
-        "Recipients"
-      ]
+      "rows": ["Text", "Photo", "Recipients"]
     },
     "notifications": {
       "hint": "Configure which requests the bot sends immediately and where they go.",
-      "rows": [
-        "Personal messages",
-        "Group",
-        "Types of requests"
-      ]
+      "rows": ["Personal messages", "Group", "Types of requests"]
     },
     "qr": {
       "hint": "The guest link is created automatically. QR helps place it neatly on a table, counter, or sticker.",
-      "rows": [
-        "Link",
-        "Poster A4",
-        "Sticker"
-      ]
+      "rows": ["Link", "Poster A4", "Sticker"]
     },
     "staff": {
       "show": "Personnel selection",
       "showHint": "If enabled, employee selection will appear in reviews and complaints.",
       "hint": "Helps you understand who the guest is writing about and more accurately analyze reviews and complaints.",
-      "rows": [
-        "Employees",
-        "In forms"
-      ]
+      "rows": ["Employees", "In forms"]
     }
   },
-  "sectionShellHint": "The settings will appear here when the section is ready."
+  "sectionShellHint": "The settings will appear here when the section is ready.",
+  "publicReviews": {
+    "title": "Public reviews",
+    "subtitle": "Let guests tell others about your place: they can choose a platform and open a public review page.",
+    "ruleTitle": "When to show it",
+    "ruleHint": "Choose the rating that should show the link. Lower ratings stay inside the team.",
+    "enabled": "Show the link",
+    "enabledSubtitle": "The final screen will show “Recommend to others”.",
+    "threshold": "For rating",
+    "thresholdValue": "{{value}} and up",
+    "thresholdDecrease": "Lower the rating value",
+    "thresholdIncrease": "Raise the rating value",
+    "providersTitle": "Platforms",
+    "providersMeta": "{{enabled}} enabled · {{clicks}} clicks",
+    "providerClicks": "{{value}} clicks",
+    "providersHint": "Paste links to your place profiles. Turn on only platforms where the link already opens correctly.",
+    "validationError": "Check the links: use the full URL to your place profile."
+  }
 }

@@ -223,6 +223,11 @@
         "title": "Thank you",
         "subtitle": "The message is already with the team."
       },
+      "publicReview": {
+        "cta": "Share a review",
+        "title": "Where is easiest?",
+        "hint": "Choose where it is easiest to leave a public review."
+      },
       "reviewByRating": {
         "1": {
           "title": "Thank you for writing",

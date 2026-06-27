@@ -9,7 +9,9 @@
     "action": "Izoh'u aç"
   },
   "actions": {
-    "clear": "Temizle"
+    "clear": "Temizle",
+    "save": "Kaydet",
+    "close": "Kapat"
   },
   "contactQuickFill": {
     "add": "Kişi ekle",

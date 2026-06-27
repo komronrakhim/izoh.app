@@ -9,7 +9,9 @@
     "action": "Открыть Izoh"
   },
   "actions": {
-    "clear": "Очистить"
+    "clear": "Очистить",
+    "save": "Сохранить",
+    "close": "Закрыть"
   },
   "contactQuickFill": {
     "add": "Подставить контакт",

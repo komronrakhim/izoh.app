@@ -79,7 +79,7 @@ describe("module settings API", () => {
       }
     });
 
-    expect(settings).toEqual({
+    expect(settings).toMatchObject({
       commentRequired: true,
       contactEnabled: false,
       lowRatingCommentEnabled: false,
@@ -103,13 +103,274 @@ describe("module settings API", () => {
       }
     });
 
-    expect(settings).toEqual({
+    expect(settings).toMatchObject({
       commentRequired: false,
       contactEnabled: true,
       lowRatingCommentEnabled: false,
       lowRatingThreshold: 4,
       photosEnabled: true
     });
+  });
+
+  it("returns default public review settings", () => {
+    const settings = parseModuleSettingsConfig({
+      config: {},
+      itemId: "review"
+    });
+
+    expect(settings.publicReview).toEqual({
+      enabled: false,
+      links: [],
+      minRating: 4
+    });
+  });
+
+  it("deep-merges public review settings when patching one nested field", () => {
+    const settings = mergeModuleSettings({
+      current: {
+        publicReview: {
+          enabled: true,
+          links: [
+            {
+              enabled: true,
+              id: "google",
+              label: "Google",
+              provider: "google",
+              sortOrder: 0,
+              url: "https://google.com/maps/place/example"
+            }
+          ],
+          minRating: 4
+        }
+      },
+      itemId: "review",
+      patch: {
+        publicReview: {
+          minRating: 3
+        }
+      }
+    });
+
+    expect(settings.publicReview).toEqual({
+      enabled: true,
+      links: [
+        {
+          enabled: true,
+          id: "google",
+          label: "Google",
+          provider: "google",
+          sortOrder: 0,
+          url: "https://google.com/maps/place/example"
+        }
+      ],
+      minRating: 3
+    });
+  });
+
+  it("requires public review minimum rating to be 4 or lower", () => {
+    expect(() =>
+      mergeModuleSettings({
+        itemId: "review",
+        patch: {
+          publicReview: {
+            minRating: 5
+          }
+        }
+      })
+    ).toThrow();
+  });
+
+  it("validates public review links", () => {
+    expect(() =>
+      mergeModuleSettings({
+        itemId: "review",
+        patch: {
+          publicReview: {
+            links: [
+              {
+                enabled: true,
+                id: "google",
+                label: "Google",
+                provider: "google",
+                sortOrder: 0,
+                url: "not-a-url"
+              }
+            ]
+          }
+        }
+      })
+    ).toThrow();
+
+    expect(() =>
+      mergeModuleSettings({
+        itemId: "review",
+        patch: {
+          publicReview: {
+            links: [
+              {
+                enabled: true,
+                id: "google",
+                label: "Google",
+                provider: "google",
+                sortOrder: 0,
+                url: "https://google.evil.example/maps/place/fake"
+              }
+            ]
+          }
+        }
+      })
+    ).toThrow();
+
+    expect(() =>
+      mergeModuleSettings({
+        itemId: "review",
+        patch: {
+          publicReview: {
+            links: [
+              {
+                enabled: true,
+                id: "custom",
+                label: "Custom reviews",
+                provider: "custom",
+                sortOrder: 0,
+                url: "https://example.com/reviews"
+              }
+            ]
+          }
+        }
+      })
+    ).toThrow();
+
+    expect(() =>
+      mergeModuleSettings({
+        itemId: "review",
+        patch: {
+          publicReview: {
+            links: [
+              {
+                enabled: true,
+                id: "custom",
+                label: "",
+                provider: "custom",
+                sortOrder: 0,
+                url: "https://example.com/reviews"
+              }
+            ]
+          }
+        }
+      })
+    ).toThrow();
+
+    expect(() =>
+      mergeModuleSettings({
+        itemId: "review",
+        patch: {
+          publicReview: {
+            links: [
+              {
+                enabled: true,
+                id: "google",
+                label: "Google",
+                provider: "google",
+                sortOrder: 0,
+                url: "https://example.com/reviews"
+              }
+            ]
+          }
+        }
+      })
+    ).toThrow();
+
+    expect(() =>
+      mergeModuleSettings({
+        itemId: "review",
+        patch: {
+          publicReview: {
+            links: [
+              {
+                enabled: true,
+                id: "google",
+                label: "Google",
+                provider: "google",
+                sortOrder: 0,
+                url: "https://google.com/maps/place/example"
+              },
+              {
+                enabled: true,
+                id: "google",
+                label: "Google duplicate",
+                provider: "google",
+                sortOrder: 1,
+                url: "https://maps.google.com/?cid=123"
+              }
+            ]
+          }
+        }
+      })
+    ).toThrow();
+  });
+
+  it("drops unsupported stored public review links", () => {
+    const settings = parseModuleSettingsConfig({
+      config: {
+        publicReview: {
+          enabled: true,
+          links: [
+            {
+              enabled: true,
+              id: "legacy-custom",
+              label: "Legacy custom",
+              provider: "custom",
+              sortOrder: 0,
+              url: "https://example.com/reviews"
+            },
+            {
+              enabled: true,
+              id: "manual-google",
+              label: "Manual Google",
+              provider: "google",
+              sortOrder: 1,
+              url: "https://example.com/reviews"
+            },
+            {
+              enabled: true,
+              id: "manual-yandex",
+              label: "Yandex",
+              provider: "yandex",
+              sortOrder: 2,
+              url: "https://yandex.uz/maps/org/example"
+            }
+          ],
+          minRating: 4
+        }
+      },
+      itemId: "review"
+    });
+
+    expect(settings.publicReview.links).toEqual([
+      {
+        enabled: true,
+        id: "yandex",
+        label: "Yandex",
+        provider: "yandex",
+        sortOrder: 2,
+        url: "https://yandex.uz/maps/org/example"
+      }
+    ]);
+  });
+
+  it("clamps stored public review minimum rating to 4 or lower", () => {
+    const settings = parseModuleSettingsConfig({
+      config: {
+        publicReview: {
+          enabled: true,
+          minRating: 5
+        }
+      },
+      itemId: "review"
+    });
+
+    expect(settings.publicReview.minRating).toBe(4);
   });
 
   it("returns default complaint category settings", () => {

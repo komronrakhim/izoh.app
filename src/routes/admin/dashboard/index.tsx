@@ -6,6 +6,8 @@ import {
   BadgeCheck,
   Bell,
   ChevronRight,
+  ExternalLink,
+  Eye,
   Globe2,
   Headset,
   ImagePlus,
@@ -17,8 +19,8 @@ import {
   MessageSquareText,
   Plus,
   QrCode,
+  Share2,
   ShieldCheck,
-  SquareArrowOutUpRight,
   Star,
   Trash2,
   UsersRound,
@@ -60,6 +62,7 @@ type IconTone =
   | "faq"
   | "feed"
   | "guestLink"
+  | "integrations"
   | "locale"
   | "notifications"
   | "qr"
@@ -77,6 +80,7 @@ const iconToneClassNames: Record<IconTone, string> = {
   faq: "bg-[#5856D6] text-white",
   feed: "bg-[#2AABEE] text-white",
   guestLink: "bg-[#32ADE6] text-white",
+  integrations: "bg-[#5856D6] text-white",
   locale: "bg-[#BF5AF2] text-white",
   notifications: "bg-[#FF3B30] text-white",
   qr: "bg-[#FF9500] text-white",
@@ -120,6 +124,43 @@ const RowSuffix = ({ children, muted = true }: { children?: string; muted?: bool
     <ChevronRight aria-hidden="true" size={17} className="shrink-0 text-muted/84" />
   </span>
 );
+
+const QuickActionTile = ({
+  disabled,
+  icon: Icon,
+  label,
+  onClick
+}: {
+  disabled?: boolean;
+  icon: LucideIcon;
+  label: string;
+  onClick: () => void;
+}) => (
+  <button
+    aria-label={label}
+    className="group flex h-[64px] w-full min-w-0 flex-col items-center justify-center gap-0.5 rounded-[17px] bg-[#F2F2F7] px-0.5 text-primary outline-none transition-[background-color,opacity,transform] active:scale-[0.98] active:bg-[#E5E5EA] disabled:pointer-events-none disabled:opacity-45 dark:bg-[#1C1C1E] dark:active:bg-[#2C2C2E]"
+    disabled={disabled}
+    type="button"
+    onClick={onClick}
+  >
+    <Icon aria-hidden="true" className="shrink-0" size={24} strokeWidth={2.25} />
+    <span className="min-w-0 max-w-full whitespace-nowrap text-center text-[11px] font-normal leading-4 tracking-normal">
+      {label}
+    </span>
+  </button>
+);
+
+const createTelegramShareUrl = ({ text, url }: { text?: string; url: string }) => {
+  const shareUrl = new URL("https://t.me/share/url");
+
+  shareUrl.searchParams.set("url", url);
+
+  if (text?.trim()) {
+    shareUrl.searchParams.set("text", text.trim());
+  }
+
+  return shareUrl.toString();
+};
 
 const capabilityMeta: Record<GuestMenuItemId, { icon: LucideIcon; tone: IconTone }> = {
   complaint: {
@@ -579,6 +620,49 @@ export const AdminOrganizationOverview = ({
     openTmaTelegramLink(guestFormUrl);
   }, [guestFormUrl, tma.haptics]);
 
+  const goToQr = React.useCallback(() => {
+    if (!organization) {
+      return;
+    }
+
+    tma.haptics.selection();
+    void navigate({
+      params: {
+        organizationId: organization.id
+      },
+      to: "/admin/$organizationId/qr"
+    });
+  }, [navigate, organization, tma.haptics]);
+
+  const shareGuestLink = React.useCallback(() => {
+    if (!guestFormUrl || !organization) {
+      return;
+    }
+
+    tma.haptics.selection();
+    openTmaTelegramLink(
+      createTelegramShareUrl({
+        text: organization.name,
+        url: guestFormUrl
+      })
+    );
+  }, [guestFormUrl, organization, tma.haptics]);
+
+  const goToNotifications = React.useCallback(() => {
+    if (!organization) {
+      return;
+    }
+
+    tma.haptics.selection();
+    void navigate({
+      params: {
+        organizationId: organization.id,
+        section: "notifications"
+      },
+      to: "/admin/$organizationId/$section"
+    });
+  }, [navigate, organization, tma.haptics]);
+
   if (isLoading && !organization) {
     return <PendingScreen label={t("common.loading")} />;
   }
@@ -640,33 +724,30 @@ export const AdminOrganizationOverview = ({
           onChange={handleLogoChange}
         />
 
-        <div className="grid max-w-[420px] justify-items-center gap-2">
-          <h2 className="max-w-full text-center">
-            <button
-              aria-busy={guestLinkQuery.isLoading}
-              aria-label={`${organization.name}. ${t("admin.organizations.openGuestForm")}`}
-              className={cn(
-                "ios-title-2 inline-flex max-w-full items-center justify-center gap-1.5 rounded-full px-2 py-1 font-semibold tracking-normal text-foreground outline-none transition-[color,opacity,background-color] active:opacity-75",
-                "hover:bg-foreground/[0.055] hover:text-primary focus-visible:ring-2 focus-visible:ring-primary/35",
-                (!guestFormUrl || guestLinkQuery.isLoading) && "pointer-events-none opacity-70"
-              )}
-              disabled={!guestFormUrl || guestLinkQuery.isLoading}
-              type="button"
-              onClick={openGuestForm}
-            >
-              <span className="min-w-0 truncate">{organization.name}</span>
-              {guestLinkQuery.isLoading ? (
-                <Spinner size={16} />
-              ) : (
-                <SquareArrowOutUpRight
-                  aria-hidden="true"
-                  className="shrink-0 text-primary"
-                  size={17}
-                  strokeWidth={2.35}
-                />
-              )}
-            </button>
+        <div className="grid w-full max-w-[420px] justify-items-center gap-2.5">
+          <h2 className="ios-title-2 max-w-full truncate text-center font-semibold tracking-normal text-foreground">
+            {organization.name}
           </h2>
+          <div className="grid w-full grid-cols-[repeat(4,minmax(0,1fr))] gap-2.5 pt-1">
+            <QuickActionTile
+              disabled={!guestFormUrl || guestLinkQuery.isLoading}
+              icon={Eye}
+              label={t("admin.quickActions.guestForm")}
+              onClick={openGuestForm}
+            />
+            <QuickActionTile icon={QrCode} label={t("admin.quickActions.qr")} onClick={goToQr} />
+            <QuickActionTile
+              disabled={!guestFormUrl || guestLinkQuery.isLoading}
+              icon={Share2}
+              label={t("admin.quickActions.link")}
+              onClick={shareGuestLink}
+            />
+            <QuickActionTile
+              icon={Bell}
+              label={t("admin.quickActions.notifications")}
+              onClick={goToNotifications}
+            />
+          </div>
           {logoError ? (
             <p id={`${logoInputId}-error`} className="ios-footnote px-4 text-center text-danger">
               {logoError}
@@ -734,6 +815,20 @@ export const AdminOrganizationOverview = ({
               title: t(`admin.capabilities.${id}.title`)
             };
           })}
+        />
+
+        <List
+          hint={t("admin.blocks.publicReviews.hint")}
+          items={[
+            {
+              addon: {
+                after: <RowSuffix>{t("admin.values.setup")}</RowSuffix>,
+                before: <SettingsIcon icon={ExternalLink} tone="integrations" />
+              },
+              href: `/admin/${organization.id}/integrations`,
+              title: t("admin.rows.publicReviews")
+            }
+          ]}
         />
 
         <List

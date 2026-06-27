@@ -40,6 +40,7 @@ import {
   markQrPdfDeliveryFailed,
   markQrPdfDeliverySent
 } from "~/server/domain/qr-pdf-deliveries";
+import { createExternalReviewClick, getPublicReviewMetrics } from "~/server/domain/public-reviews";
 import {
   createOrganizationStaffMember,
   deleteOrganizationStaffMember,
@@ -108,6 +109,7 @@ import {
   ORGANIZATION_PRESET_IDS
 } from "~/shared/organization-presets";
 import { createSubmissionRequestSchema, submissionKindSchema } from "~/shared/submissions";
+import { createExternalReviewClickRequestSchema } from "~/shared/public-reviews";
 import { isAdminAnalyticsPeriod } from "~/shared/analytics";
 import { isSystemPulsePeriod } from "~/shared/system";
 import {
@@ -2153,6 +2155,29 @@ export const createApiApp = () => {
     }
   });
 
+  app.get("/api/organizations/:organizationId/integrations/metrics", async (c) => {
+    const organizationId = c.req.param("organizationId");
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    try {
+      await requireOrganizationOwner({ c, db, organizationId });
+
+      return c.json(await getPublicReviewMetrics({ organizationId }, db));
+    } catch (error) {
+      if (error instanceof Error) {
+        const status = getAdminAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      throw error;
+    }
+  });
+
   app.patch("/api/organizations/:organizationId/modules/:itemId/settings", async (c) => {
     const organizationId = c.req.param("organizationId");
     const itemId = c.req.param("itemId");
@@ -2768,6 +2793,42 @@ export const createApiApp = () => {
     return c.json({
       assets
     });
+  });
+
+  app.post("/api/external-review-clicks", async (c) => {
+    const input = createExternalReviewClickRequestSchema.parse(await c.req.json());
+    const rateLimitResponse = enforceRateLimit(c, {
+      key: `external-review-click:${getClientAddress(c)}:${input.organizationId}:${input.submissionId}`,
+      limit: 20,
+      windowMs: 10 * 60 * 1000
+    });
+    const db = getPrisma();
+
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    try {
+      return c.json(await createExternalReviewClick(input, db));
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("Submission is not available")) {
+        return c.json({ error: error.message }, 404);
+      }
+
+      if (
+        error instanceof Error &&
+        (error.message.includes("External review link") ||
+          error.message.includes("Guest entry scan"))
+      ) {
+        return c.json({ error: error.message }, 400);
+      }
+
+      throw error;
+    }
   });
 
   app.post("/api/submissions", async (c) => {

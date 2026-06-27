@@ -9,7 +9,9 @@
     "action": "Izohni ochish"
   },
   "actions": {
-    "clear": "Tozalash"
+    "clear": "Tozalash",
+    "save": "Saqlash",
+    "close": "Yopish"
   },
   "contactQuickFill": {
     "add": "Kontakt qo‘shish",

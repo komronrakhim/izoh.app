@@ -23,6 +23,7 @@ import {
   onBackButtonClick,
   onMainButtonClick,
   onSecondaryButtonClick,
+  openLink,
   openInvoice as openInvoiceSdk,
   openTelegramLink,
   requestContentSafeAreaInsets,
@@ -1205,6 +1206,37 @@ export const openTmaTelegramLink = (url: string | URL) => {
       }
     } else {
       openTelegramLink(url);
+      return;
+    }
+  } catch {
+    // Fall through to browser navigation below.
+  }
+
+  if (typeof window !== "undefined") {
+    window.location.href = href;
+  }
+};
+
+export const openTmaLink = (url: string | URL) => {
+  const href = url.toString();
+
+  if (!isTelegramEnvironment()) {
+    if (typeof window !== "undefined") {
+      window.location.href = href;
+    }
+
+    return;
+  }
+
+  try {
+    if (typeof openLink.ifAvailable === "function") {
+      const result = openLink.ifAvailable(url);
+
+      if (result[0]) {
+        return;
+      }
+    } else {
+      openLink(url);
       return;
     }
   } catch {

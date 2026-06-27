@@ -61,7 +61,7 @@
     "logoSelected": "Logotip tayyor",
     "logoRemove": "Logotipni olib tashlash",
     "logoUpdateError": "Logotip yangilanmadi. Qayta urinib ko‘ring.",
-    "openGuestForm": "Mehmon formasi",
+    "openGuestForm": "Mehmon formasini ko‘rish",
     "dangerTitle": "O‘chirish",
     "dangerHint": "O‘chirishni qaytarib bo‘lmaydi.",
     "delete": "Joyni o‘chirish",
@@ -90,6 +90,10 @@
     "capabilities": {
       "title": "Formalar",
       "hint": "Mehmon havolani ochganda kerak bo‘ladigan formalarnigina yoqing."
+    },
+    "publicReviews": {
+      "title": "Ommaviy izohlar",
+      "hint": "Mehmonlarga joyingizni Google, Yandex Maps yoki 2GIS’da oson tavsiya qilishga yordam bering."
     },
     "staff": {
       "title": "Xodimlar",
@@ -131,6 +135,7 @@
     "review": "Izohlar",
     "complaint": "Shikoyatlar",
     "suggestion": "Takliflar",
+    "publicReviews": "Ommaviy izohlar",
     "staff": "Xodimlar",
     "feed": "Murojaatlar",
     "feedHint": "Izohlar, shikoyatlar va takliflar.",
@@ -144,6 +149,12 @@
     "faq": "Savollar",
     "support": "Yordam",
     "system": "Puls"
+  },
+  "quickActions": {
+    "guestForm": "Forma",
+    "qr": "QR",
+    "link": "Havola",
+    "notifications": "Chat"
   },
   "system": {
     "badge": "Tizim",
@@ -802,69 +813,55 @@
     "showHint": "O‘chirilsa, mehmon bu bo‘limni formada ko‘rmaydi.",
     "analytics": {
       "hint": "Reyting va dinamika.",
-      "rows": [
-        "O‘rtacha reyting",
-        "Kunlar bo‘yicha",
-        "Bo‘limlar bo‘yicha"
-      ]
+      "rows": ["O‘rtacha reyting", "Kunlar bo‘yicha", "Bo‘limlar bo‘yicha"]
     },
     "feed": {
       "hint": "Izohlar, shikoyatlar va takliflar bitta ro‘yxatda.",
-      "rows": [
-        "Izohlar",
-        "Shikoyatlar",
-        "Takliflar"
-      ]
+      "rows": ["Izohlar", "Shikoyatlar", "Takliflar"]
     },
     "review": {
       "hint": "Mehmonlarga nima yoqishini va nimani yaxshilash mumkinligini ko‘rsatadi.",
-      "rows": [
-        "Baho",
-        "Izoh",
-        "Rasm"
-      ]
+      "rows": ["Baho", "Izoh", "Rasm"]
     },
     "complaint": {
       "hint": "Muammoni tez ko‘rish va tafsilotlarni ortiqcha yozishmasiz olishga yordam beradi.",
-      "rows": [
-        "Matn",
-        "Rasm",
-        "Oluvchilar"
-      ]
+      "rows": ["Matn", "Rasm", "Oluvchilar"]
     },
     "suggestion": {
       "hint": "Mehmon g‘oyalarini yig‘ib, servisni taxminlarsiz yaxshilashga yordam beradi.",
-      "rows": [
-        "Matn",
-        "Rasm",
-        "Oluvchilar"
-      ]
+      "rows": ["Matn", "Rasm", "Oluvchilar"]
     },
     "notifications": {
       "hint": "Bot qaysi murojaatlarni darhol yuborishi va qayerga kelishini sozlang.",
-      "rows": [
-        "Shaxsiy xabarlar",
-        "Guruh",
-        "Murojaat turlari"
-      ]
+      "rows": ["Shaxsiy xabarlar", "Guruh", "Murojaat turlari"]
     },
     "qr": {
       "hint": "Mehmon havolasi avtomatik yaratiladi. QR uni stol, stoyka yoki stikerda chiroyli joylashtirish uchun kerak.",
-      "rows": [
-        "Havola",
-        "A4 poster",
-        "Stiker"
-      ]
+      "rows": ["Havola", "A4 poster", "Stiker"]
     },
     "staff": {
       "show": "Xodim tanlovi",
       "showHint": "Yoqilsa, izoh va shikoyatlarda xodim tanlovi chiqadi.",
       "hint": "Mehmon kim haqida yozayotganini bilib, izoh va shikoyatlarni aniqroq ko‘rishga yordam beradi.",
-      "rows": [
-        "Xodimlar",
-        "Formalarda"
-      ]
+      "rows": ["Xodimlar", "Formalarda"]
     }
   },
-  "sectionShellHint": "Bo‘lim tayyor bo‘lganda sozlamalar shu yerda chiqadi."
+  "sectionShellHint": "Bo‘lim tayyor bo‘lganda sozlamalar shu yerda chiqadi.",
+  "publicReviews": {
+    "title": "Ommaviy izohlar",
+    "subtitle": "Mehmonlarga joyingiz haqida boshqalarga aytish imkonini bering: ular qulay platformani tanlab, ommaviy izohga o‘tadi.",
+    "ruleTitle": "Qachon ko‘rsatish",
+    "ruleHint": "Qaysi bahodan boshlab o‘tishni ko‘rsatishni tanlang. Pastroq baholar faqat jamoa ichida qoladi.",
+    "enabled": "O‘tishni ko‘rsatish",
+    "enabledSubtitle": "Yakuniy ekranda «Boshqalarga tavsiya qiling» paydo bo‘ladi.",
+    "threshold": "Baho bo‘lsa",
+    "thresholdValue": "{{value}} va yuqori",
+    "thresholdDecrease": "Baho qiymatini pasaytirish",
+    "thresholdIncrease": "Baho qiymatini oshirish",
+    "providersTitle": "Platformalar",
+    "providersMeta": "{{enabled}} yoqilgan · {{clicks}} o‘tish",
+    "providerClicks": "{{value}} o‘tish",
+    "providersHint": "Joyingiz sahifalariga havolalarni kiriting. Havola to‘g‘ri ochiladigan platformalarnigina yoqing.",
+    "validationError": "Havolalarni tekshiring: joyingiz sahifasiga to‘liq URL kerak."
+  }
 }

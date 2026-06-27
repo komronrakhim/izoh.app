@@ -34,12 +34,146 @@ export type SuggestionTopicId = (typeof SUGGESTION_TOPIC_IDS)[number];
 
 const suggestionTopicIdSchema = z.enum(SUGGESTION_TOPIC_IDS);
 
+export const PUBLIC_REVIEW_PROVIDER_IDS = ["google", "yandex", "2gis"] as const;
+export const PUBLIC_REVIEW_LINK_MAX_COUNT = PUBLIC_REVIEW_PROVIDER_IDS.length;
+export const PUBLIC_REVIEW_LINK_ID_MAX_LENGTH = 80;
+export const PUBLIC_REVIEW_LINK_LABEL_MAX_LENGTH = 80;
+export const PUBLIC_REVIEW_LINK_URL_MAX_LENGTH = 1000;
+export const PUBLIC_REVIEW_MIN_RATING = 1;
+export const PUBLIC_REVIEW_MAX_RATING = 4;
+export const PUBLIC_REVIEW_DEFAULT_MIN_RATING = 4;
+
+export type PublicReviewProviderId = (typeof PUBLIC_REVIEW_PROVIDER_IDS)[number];
+
+const publicReviewProviderIdSchema = z.enum(PUBLIC_REVIEW_PROVIDER_IDS);
+const isPublicReviewProviderId = (value: unknown): value is PublicReviewProviderId =>
+  typeof value === "string" && PUBLIC_REVIEW_PROVIDER_IDS.includes(value as PublicReviewProviderId);
+const normalizeUrlHostname = (url: string) =>
+  new URL(url).hostname.toLowerCase().replace(/\.$/, "");
+const hasDomainPart = (hostname: string, domain: string) =>
+  hostname === domain || hostname.endsWith(`.${domain}`);
+const hasAnyDomainPart = (hostname: string, domains: readonly string[]) =>
+  domains.some((domain) => hasDomainPart(hostname, domain));
+
+const publicReviewProviderHostRules = {
+  "2gis": (hostname: string) =>
+    hasAnyDomainPart(hostname, ["2gis.ru", "2gis.uz", "2gis.kz", "2gis.kg", "2gis.ae", "2gis.com"]),
+  google: (hostname: string) =>
+    hasAnyDomainPart(hostname, ["google.com", "g.page", "maps.app.goo.gl", "goo.gl", "g.co"]),
+  yandex: (hostname: string) =>
+    hasAnyDomainPart(hostname, [
+      "yandex.ru",
+      "yandex.com",
+      "yandex.uz",
+      "yandex.kz",
+      "yandex.tj",
+      "yandex.az",
+      "ya.ru"
+    ])
+} satisfies Record<PublicReviewProviderId, (hostname: string) => boolean>;
+
+export const isAllowedPublicReviewUrl = (provider: PublicReviewProviderId, url: string) => {
+  try {
+    return publicReviewProviderHostRules[provider](normalizeUrlHostname(url));
+  } catch {
+    return false;
+  }
+};
+
+const publicReviewUrlSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(PUBLIC_REVIEW_LINK_URL_MAX_LENGTH)
+  .url()
+  .refine((value) => {
+    try {
+      const url = new URL(value);
+
+      return url.protocol === "https:" || url.protocol === "http:";
+    } catch {
+      return false;
+    }
+  });
+
+export const publicReviewLinkSchema = z
+  .object({
+    enabled: z.boolean().default(true),
+    id: z
+      .string()
+      .trim()
+      .min(1)
+      .max(PUBLIC_REVIEW_LINK_ID_MAX_LENGTH)
+      .regex(/^[a-z0-9_-]+$/i),
+    label: z.string().trim().min(1).max(PUBLIC_REVIEW_LINK_LABEL_MAX_LENGTH),
+    provider: publicReviewProviderIdSchema,
+    sortOrder: z.number().int().min(0).max(999).default(0),
+    url: publicReviewUrlSchema
+  })
+  .strict()
+  .superRefine((link, context) => {
+    if (link.id !== link.provider) {
+      context.addIssue({
+        code: "custom",
+        message: "Public review link id must match provider.",
+        path: ["id"]
+      });
+    }
+
+    if (!isAllowedPublicReviewUrl(link.provider, link.url)) {
+      context.addIssue({
+        code: "custom",
+        message: "Public review link URL does not match provider.",
+        path: ["url"]
+      });
+    }
+  });
+
+const publicReviewSettingsObjectSchema = z
+  .object({
+    enabled: z.boolean().default(false),
+    links: z.array(publicReviewLinkSchema).max(PUBLIC_REVIEW_LINK_MAX_COUNT).default([]),
+    minRating: z
+      .number()
+      .int()
+      .min(PUBLIC_REVIEW_MIN_RATING)
+      .max(PUBLIC_REVIEW_MAX_RATING)
+      .default(PUBLIC_REVIEW_DEFAULT_MIN_RATING)
+  })
+  .superRefine((settings, context) => {
+    const seenProviders = new Set<PublicReviewProviderId>();
+
+    settings.links.forEach((link, index) => {
+      if (seenProviders.has(link.provider)) {
+        context.addIssue({
+          code: "custom",
+          message: "Public review provider must be unique.",
+          path: ["links", index, "provider"]
+        });
+      }
+
+      seenProviders.add(link.provider);
+    });
+  });
+
+export const publicReviewSettingsSchema = publicReviewSettingsObjectSchema.default({
+  enabled: false,
+  links: [],
+  minRating: PUBLIC_REVIEW_DEFAULT_MIN_RATING
+});
+const publicReviewSettingsPatchSchema = z.object({
+  enabled: z.boolean().optional(),
+  links: z.array(publicReviewLinkSchema).max(PUBLIC_REVIEW_LINK_MAX_COUNT).optional(),
+  minRating: z.number().int().min(PUBLIC_REVIEW_MIN_RATING).max(PUBLIC_REVIEW_MAX_RATING).optional()
+});
+
 export const reviewModuleSettingsSchema = z.object({
   commentRequired: z.boolean().default(false),
   contactEnabled: z.boolean().default(true),
   lowRatingCommentEnabled: z.boolean().default(true),
   lowRatingThreshold: z.number().int().min(1).max(5).default(3),
-  photosEnabled: z.boolean().default(true)
+  photosEnabled: z.boolean().default(true),
+  publicReview: publicReviewSettingsSchema
 });
 
 export const complaintModuleSettingsSchema = z.object({
@@ -79,13 +213,78 @@ const moduleSettingsSchemaById = {
 
 const moduleSettingsPatchSchemaById = {
   complaint: complaintModuleSettingsSchema.partial(),
-  review: reviewModuleSettingsSchema.partial(),
+  review: reviewModuleSettingsSchema.omit({ publicReview: true }).partial().extend({
+    publicReview: publicReviewSettingsPatchSchema.optional()
+  }),
   staff: staffModuleSettingsSchema.partial(),
   suggestion: suggestionModuleSettingsSchema.partial()
 } as const satisfies Record<GuestMenuItemId, z.ZodType>;
 
 const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
+
+const normalizeStoredPublicReviewLink = (
+  value: unknown,
+  seenProviders: Set<PublicReviewProviderId>
+): PublicReviewLink | null => {
+  if (!isObjectRecord(value) || !isPublicReviewProviderId(value.provider)) {
+    return null;
+  }
+
+  if (seenProviders.has(value.provider)) {
+    return null;
+  }
+
+  const provider = value.provider;
+  const parsed = publicReviewLinkSchema.safeParse({
+    enabled: typeof value.enabled === "boolean" ? value.enabled : true,
+    id: provider,
+    label: typeof value.label === "string" && value.label.trim() ? value.label : provider,
+    provider,
+    sortOrder:
+      typeof value.sortOrder === "number"
+        ? value.sortOrder
+        : PUBLIC_REVIEW_PROVIDER_IDS.indexOf(provider),
+    url: typeof value.url === "string" ? value.url : ""
+  });
+
+  if (!parsed.success) {
+    return null;
+  }
+
+  seenProviders.add(provider);
+
+  return parsed.data;
+};
+
+const normalizePublicReviewMinRating = (value: unknown) => {
+  if (typeof value !== "number" || !Number.isInteger(value)) {
+    return undefined;
+  }
+
+  return Math.min(PUBLIC_REVIEW_MAX_RATING, Math.max(PUBLIC_REVIEW_MIN_RATING, value));
+};
+
+const sanitizeStoredPublicReviewSettings = (config: Record<string, unknown>) => {
+  if (!isObjectRecord(config.publicReview)) {
+    return config;
+  }
+
+  const seenProviders = new Set<PublicReviewProviderId>();
+
+  return {
+    ...config,
+    publicReview: {
+      ...config.publicReview,
+      links: Array.isArray(config.publicReview.links)
+        ? config.publicReview.links
+            .map((link) => normalizeStoredPublicReviewLink(link, seenProviders))
+            .filter((link): link is PublicReviewLink => Boolean(link))
+        : undefined,
+      minRating: normalizePublicReviewMinRating(config.publicReview.minRating)
+    }
+  };
+};
 
 const sanitizeStoredIdArray = <T extends readonly string[]>(value: unknown, allowedIds: T) => {
   if (!Array.isArray(value)) {
@@ -128,6 +327,10 @@ const sanitizeStoredModuleSettingsConfig = <T extends GuestMenuItemId>({
     };
   }
 
+  if (itemId === "review") {
+    return sanitizeStoredPublicReviewSettings(config);
+  }
+
   return config;
 };
 
@@ -135,6 +338,8 @@ export type ReviewModuleSettings = z.infer<typeof reviewModuleSettingsSchema>;
 export type ComplaintModuleSettings = z.infer<typeof complaintModuleSettingsSchema>;
 export type SuggestionModuleSettings = z.infer<typeof suggestionModuleSettingsSchema>;
 export type StaffModuleSettings = z.infer<typeof staffModuleSettingsSchema>;
+export type PublicReviewLink = z.infer<typeof publicReviewLinkSchema>;
+export type PublicReviewSettings = z.infer<typeof publicReviewSettingsSchema>;
 
 export type ModuleSettingsById = {
   complaint: ComplaintModuleSettings;
@@ -142,6 +347,14 @@ export type ModuleSettingsById = {
   staff: StaffModuleSettings;
   suggestion: SuggestionModuleSettings;
 };
+
+export const getEnabledPublicReviewLinks = (settings: ReviewModuleSettings) =>
+  [...settings.publicReview.links]
+    .filter((link) => link.enabled)
+    .sort(
+      (first, second) =>
+        first.sortOrder - second.sortOrder || first.label.localeCompare(second.label)
+    );
 
 export type ModuleSettingsPayload<T extends GuestMenuItemId = GuestMenuItemId> = {
   enabled: boolean;
@@ -211,7 +424,15 @@ export const mergeModuleSettings = <T extends GuestMenuItemId>({
 
   return moduleSettingsSchemaById[itemId].parse({
     ...parsedCurrent,
-    ...parsedPatch
+    ...parsedPatch,
+    ...(itemId === "review" && "publicReview" in parsedPatch
+      ? {
+          publicReview: publicReviewSettingsSchema.parse({
+            ...(parsedCurrent as ReviewModuleSettings).publicReview,
+            ...(parsedPatch as Partial<ReviewModuleSettings>).publicReview
+          })
+        }
+      : {})
   }) as ModuleSettingsById[T];
 };
 

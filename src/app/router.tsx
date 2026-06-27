@@ -57,6 +57,11 @@ const AdminFeedPage = lazyRouteComponent(() =>
     default: module.AdminFeedPage
   }))
 );
+const AdminIntegrationsPage = lazyRouteComponent(() =>
+  import("~/routes/admin/integrations").then((module) => ({
+    default: module.AdminIntegrationsPage
+  }))
+);
 const AdminLanguagePage = lazyRouteComponent(() =>
   import("~/routes/admin/language").then((module) => ({
     default: module.AdminLanguagePage
@@ -270,6 +275,12 @@ const adminAnalyticsRoute = createRoute({
   component: AdminAnalyticsPage
 });
 
+const adminIntegrationsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/$organizationId/integrations",
+  component: AdminIntegrationsPage
+});
+
 const adminStaffCreateRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/admin/$organizationId/staff/new",
@@ -329,6 +340,7 @@ const routeTree = rootRoute.addChildren([
   adminQrRoute,
   adminFeedRoute,
   adminAnalyticsRoute,
+  adminIntegrationsRoute,
   adminStaffCreateRoute,
   adminStaffMemberRoute,
   adminSubscriptionRoute,

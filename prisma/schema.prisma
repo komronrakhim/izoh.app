@@ -201,10 +201,10 @@ model User {
 }
 
 model Organization {
-  id                  String             @id @default(cuid())
-  owner_user_id       String
-  status              OrganizationStatus @default(ACTIVE)
-  name                String
+  id                         String             @id @default(cuid())
+  owner_user_id              String
+  status                     OrganizationStatus @default(ACTIVE)
+  name                       String
   slug                       String             @unique
   creation_client_request_id String?            @unique
   description                String             @default("")
@@ -224,6 +224,7 @@ model Organization {
   guest_entry_scans                 GuestEntryScan[]
   staff_members                     StaffMember[]
   submissions                       Submission[]
+  external_review_clicks            ExternalReviewClick[]
   deletion_jobs                     OrganizationDeletionJob[]
   qr_pdf_deliveries                 QrPdfDelivery[]
 
@@ -435,9 +436,10 @@ model GuestEntryScan {
   locale          String?
   platform        String?
 
-  organization Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
-  user         User?        @relation(fields: [user_id], references: [id], onDelete: SetNull)
-  submissions  Submission[]
+  organization           Organization          @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  user                   User?                 @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  submissions            Submission[]
+  external_review_clicks ExternalReviewClick[]
 
   created_at DateTime @default(now())
 
@@ -529,6 +531,7 @@ model Submission {
   target_staff_member     StaffMember?                   @relation(fields: [target_staff_member_id], references: [id], onDelete: SetNull)
   attachments             SubmissionAttachment[]
   notification_deliveries TelegramNotificationDelivery[]
+  external_review_clicks  ExternalReviewClick[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -539,6 +542,28 @@ model Submission {
   @@index([guest_entry_scan_id])
   @@index([target_staff_member_id, created_at])
   @@index([customer_user_id, created_at])
+}
+
+model ExternalReviewClick {
+  id                  String  @id @default(cuid())
+  organization_id     String
+  submission_id       String
+  guest_entry_scan_id String?
+  link_id             String
+  provider            String
+  rating              Int
+  target_host         String
+
+  organization     Organization    @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  submission       Submission      @relation(fields: [submission_id], references: [id], onDelete: Cascade)
+  guest_entry_scan GuestEntryScan? @relation(fields: [guest_entry_scan_id], references: [id], onDelete: SetNull)
+
+  created_at DateTime @default(now())
+
+  @@index([organization_id, created_at])
+  @@index([organization_id, provider, created_at])
+  @@index([submission_id, created_at])
+  @@index([guest_entry_scan_id, created_at])
 }
 
 model SubmissionAttachment {

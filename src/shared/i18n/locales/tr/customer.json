@@ -223,6 +223,11 @@
         "title": "Teşekkürler",
         "subtitle": "Mesaj ekibe ulaştı."
       },
+      "publicReview": {
+        "cta": "Yorumu paylaş",
+        "title": "Neresi uygun?",
+        "hint": "Herkese açık yorum bırakmanın kolay olduğu platformu seçin."
+      },
       "reviewByRating": {
         "1": {
           "title": "Yazdığınız için teşekkürler",

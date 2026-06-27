@@ -38,6 +38,8 @@ export const queryKeys = {
     ["organization", organizationId, "guest-menu", itemId, initDataRaw] as const,
   moduleSettings: (organizationId: string, moduleId: string, initDataRaw: string) =>
     ["organization", organizationId, "module-settings", moduleId, initDataRaw] as const,
+  publicReviewMetrics: (organizationId: string, initDataRaw: string) =>
+    ["organization", organizationId, "public-review-metrics", initDataRaw] as const,
   notificationSettings: (organizationId: string, initDataRaw: string) =>
     ["organization", organizationId, "notification-settings", initDataRaw] as const,
   subscription: (organizationId: string, initDataRaw: string) =>

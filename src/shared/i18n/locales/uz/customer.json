@@ -223,6 +223,11 @@
         "title": "Rahmat",
         "subtitle": "Xabar jamoaga yetib bordi."
       },
+      "publicReview": {
+        "cta": "Izohni ulashish",
+        "title": "Qayerda qulay?",
+        "hint": "Ommaviy izoh qoldirish qulay bo‘lgan platformani tanlang."
+      },
       "reviewByRating": {
         "1": {
           "title": "Yozganingiz uchun rahmat",

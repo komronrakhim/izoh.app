@@ -14,6 +14,11 @@ const createReviewChannel = (
     lowRatingCommentEnabled: true,
     lowRatingThreshold: 3,
     photosEnabled: true,
+    publicReview: {
+      enabled: false,
+      links: [],
+      minRating: 4
+    },
     ...settings
   }
 });

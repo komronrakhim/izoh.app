@@ -9,7 +9,9 @@
     "action": "Open Izoh"
   },
   "actions": {
-    "clear": "Clear"
+    "clear": "Clear",
+    "save": "Save",
+    "close": "Close"
   },
   "contactQuickFill": {
     "add": "Add contact",

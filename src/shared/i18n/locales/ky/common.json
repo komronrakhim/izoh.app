@@ -9,7 +9,9 @@
     "action": "Izoh ачуу"
   },
   "actions": {
-    "clear": "Тазалоо"
+    "clear": "Тазалоо",
+    "save": "Сактоо",
+    "close": "Жабуу"
   },
   "contactQuickFill": {
     "add": "Контакт кошуу",
