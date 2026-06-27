@@ -4,9 +4,10 @@
   "loading": "Loading...",
   "poweredBy": "Izoh",
   "tmaOnly": {
-    "title": "Open in Telegram",
-    "subtitle": "Izoh works as a Mini App, so the admin area and guest form are available only inside Telegram.",
-    "action": "Open Izoh"
+    "title": "Almost there",
+    "subtitle": "We'll open the right place right away, so you can continue smoothly without extra steps.",
+    "action": "Open in Telegram",
+    "hint": "If Telegram asks, allow the switch."
   },
   "actions": {
     "clear": "Clear",

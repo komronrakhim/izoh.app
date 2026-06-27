@@ -1,0 +1,170 @@
+{
+  "nav": {
+    "howItWorks": "Qanday ishlaydi",
+    "features": "Imkoniyatlar",
+    "forWhom": "Kimlar uchun",
+    "faq": "Savollar"
+  },
+  "cta": {
+    "header": "Telegramda ochish",
+    "footer": "Telegramda sinab ko‘rish"
+  },
+  "language": {
+    "action": "Tilni tanlash"
+  },
+  "seo": {
+    "title": "Izoh — QR orqali mehmon fikrlari",
+    "description": "Izoh QR orqali mehmon izohlari, shikoyatlari va takliflarini yig‘ishga, Telegramda xabar olishga va mamnun mehmonlardan ommaviy izoh so‘rashga yordam beradi.",
+    "keywords": "Izoh, mehmon fikrlari, QR izohlar, mijoz fikri, mehmon shikoyatlari, mehmon takliflari, ommaviy izohlar, Google izohlar, Yandex Maps izohlar, 2GIS izohlar",
+    "ogImageAlt": "Izoh QR orqali mehmon izohlari, shikoyatlari va takliflarini yig‘ishga yordam beradi"
+  },
+  "hero": {
+    "badge": "QR orqali fikr-mulohaza",
+    "title": "Mehmonlarni vaqtida eshiting",
+    "subtitle": "Mehmon QRni skanerlab, izoh, shikoyat yoki g‘oya qoldiradi. Jamoa Telegramda joy, foto va tafsilotlarni darhol ko‘radi.",
+    "mockupAlt": "Telegramdagi mehmon fikri ekrani"
+  },
+  "valueLines": {
+    "scan": {
+      "before": "Mehmon QRni skanerlab",
+      "accent": "taassurotini shu zahoti ulashadi",
+      "after": ""
+    },
+    "lowRating": {
+      "before": "Past baho",
+      "accent": "avval jamoaga keladi",
+      "after": ""
+    },
+    "context": {
+      "before": "Murojaatda allaqachon",
+      "accent": "joy, foto va tafsilotlar",
+      "after": "bor"
+    },
+    "resolve": {
+      "before": "Shikoyatni",
+      "accent": "ko‘rib chiqish mumkin",
+      "after": "ommaviy izohdan oldin"
+    },
+    "publicReview": {
+      "before": "Yaxshi taassurot",
+      "accent": "ommaviy izohga",
+      "after": "aylanishi mumkin"
+    }
+  },
+  "features": {
+    "title": "Mehmon aytgan hammasi bir joyda",
+    "subtitle": "Izohlar, shikoyatlar, takliflar, foto va joy jamoa ishlaydigan joyga keladi.",
+    "cards": {
+      "guest": {
+        "title": "Mehmon avval sizga yozadi",
+        "body": "QR qisqa ekranni ochadi: izoh, shikoyat, taklif yoki xodim haqida murojaat."
+      },
+      "alert": {
+        "title": "Shikoyat o‘z vaqtida keladi",
+        "body": "Past baho, matn va joy darhol jamoaga tushadi, hali vaziyatni yumshatish mumkin bo‘lgan paytda."
+      },
+      "idea": {
+        "title": "Takliflar yo‘qolmaydi",
+        "body": "Mehmonlar nimani yaxshilash, qo‘shish yoki e’tibor berish kerakligini aytadi."
+      },
+      "public": {
+        "title": "Yaxshi tajriba obro‘ni oshiradi",
+        "body": "Yuqori bahodan keyin Izoh tanlangan maydonda izoh qoldirishni muloyim taklif qiladi."
+      }
+    },
+    "visualAlt": {
+      "guest": "Izohda fikr-mulohaza turini tanlash",
+      "alert": "Izohda shikoyat bildirishnomasi",
+      "idea": "Izohda mehmon taklifi",
+      "public": "Izohda ommaviy izoh maydonini tanlash"
+    }
+  },
+  "context": {
+    "title": "Tezroq tushunish uchun kontekst",
+    "subtitle": "Kim tilga olingan, qayerda bo‘lgan, nima takrorlanadi va foto bormi — hammasi murojaat yonida.",
+    "cards": {
+      "staff": {
+        "title": "Xodimlar",
+        "body": "Mehmon xodimni yoki butun jamoani belgilashi mumkin, shunda kimga rahmat aytilgani yoki qayerni ko‘rish kerakligi aniq bo‘ladi."
+      },
+      "analytics": {
+        "title": "Analitika",
+        "body": "Qaysi baholar, shikoyatlar, mavzular va joylar ko‘proq takrorlanishini ko‘rasiz."
+      },
+      "photos": {
+        "title": "Murojaatlardagi fotolar",
+        "body": "Fotolar vaziyatni tezroq va ortiqcha savollarsiz tushunishga yordam beradi."
+      }
+    }
+  },
+  "ratingFlow": {
+    "title": "Izoh vaqtida ulgurishga yordam beradi",
+    "subtitle": "Salbiy fikr avval jamoaga keladi, yaxshi taassurot esa ommaviy izohga aylanishi mumkin.",
+    "lines": {
+      "teamFirst": {
+        "before": "Mehmon bahosini",
+        "accent": "avval jamoa eshitadi",
+        "after": ""
+      },
+      "details": {
+        "before": "Agar nimadir joyida bo‘lmasa,",
+        "accent": "nima va qayerda bo‘lgani",
+        "after": "aniq bo‘ladi"
+      },
+      "resolve": {
+        "before": "Shikoyatni",
+        "accent": "hal qilish mumkin",
+        "after": "shu vaqtning o‘zida"
+      },
+      "publicReview": {
+        "before": "Yaxshi taassurot",
+        "accent": "ommaviy izohga",
+        "after": "aylanishi mumkin"
+      }
+    }
+  },
+  "forWhom": {
+    "title": "Obro‘ muhim bo‘lgan joylar uchun",
+    "subtitle": "Mehmonlar har kuni keladigan joyda ularni vaqtida eshitish muhim: qiyini hal qilish, yaxshisini yo‘qotmaslik.",
+    "places": {
+      "cafe": "Kafe",
+      "studios": "Studiyalar",
+      "clinics": "Klinikalar",
+      "shops": "Do‘konlar",
+      "hotels": "Mehmonxonalar",
+      "services": "Servislar",
+      "coworking": "Kovorkinglar",
+      "education": "Ta’lim"
+    }
+  },
+  "faq": {
+    "title": "Savollar",
+    "subtitle": "Ishga tushirish, mehmonlar, jamoa va ommaviy izohlar haqida qisqa javoblar.",
+    "items": {
+      "install": {
+        "question": "Mehmonga ilova o‘rnatish kerakmi?",
+        "answer": "Yo‘q. Mehmon ekranni QR orqali ochadi, jamoa esa Telegramda ishlaydi."
+      },
+      "lowRating": {
+        "question": "Past baho bilan nima bo‘ladi?",
+        "answer": "Jamoa uni tafsilotlari bilan Izoh ichida oladi va vaziyatni tushunishga ulguradi."
+      },
+      "teamSees": {
+        "question": "Jamoa nimani ko‘radi?",
+        "answer": "Baho, matn, foto, joy va xodimlar yoqilgan bo‘lsa, mehmon kimni belgilaganini."
+      },
+      "publicReviews": {
+        "question": "Ommaviy izohlarni sozlash mumkinmi?",
+        "answer": "Ha. Maydonlarni va Izoh bu qadamni qaysi bahodan keyin ko‘rsatishini tanlaysiz."
+      },
+      "notOnlyRestaurants": {
+        "question": "Izoh faqat restoranlar uchunmi?",
+        "answer": "Yo‘q. Izoh mehmonlari, mijozlari yoki tashrifchilari bor joylarga mos keladi."
+      }
+    }
+  },
+  "footer": {
+    "title": "Mehmonlarni birinchi bo‘lib eshiting",
+    "subtitle": "QR qo‘ying va izohlar, shikoyatlar hamda takliflarni shu zahoti yig‘ing."
+  }
+}

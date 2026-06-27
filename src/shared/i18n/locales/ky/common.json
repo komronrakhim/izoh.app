@@ -4,9 +4,10 @@
   "loading": "Жүктөлүүдө...",
   "poweredBy": "Izoh",
   "tmaOnly": {
-    "title": "Telegram ичинде ачыңыз",
-    "subtitle": "Izoh Mini App катары иштейт, ошондуктан админ бөлүгү жана конок формасы Telegram ичинде гана ачылат.",
-    "action": "Izoh ачуу"
+    "title": "Даяр болуп калды",
+    "subtitle": "Керектүү жер дароо ачылат, ошондо ашыкча кадамсыз жай улантасыз.",
+    "action": "Telegram'да ачуу",
+    "hint": "Telegram сураса, өтүүгө уруксат бериңиз."
   },
   "actions": {
     "clear": "Тазалоо",

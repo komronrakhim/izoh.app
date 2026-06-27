@@ -243,6 +243,32 @@
 }
 
 @layer utilities {
+  @keyframes landingEmojiFloat {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) rotate(var(--landing-emoji-rotate, 0deg));
+    }
+
+    50% {
+      transform: translate3d(0, var(--landing-emoji-drift, -12px), 0)
+        rotate(var(--landing-emoji-rotate, 0deg));
+    }
+  }
+
+  .landing-emoji-float {
+    animation: landingEmojiFloat var(--landing-emoji-duration, 8s) ease-in-out
+      var(--landing-emoji-delay, 0s) infinite;
+    transform: rotate(var(--landing-emoji-rotate, 0deg));
+    will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .landing-emoji-float {
+      animation: none;
+      will-change: auto;
+    }
+  }
+
   @keyframes iz-rating-picker-pop {
     0% {
       opacity: 1;

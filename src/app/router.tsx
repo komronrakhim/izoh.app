@@ -27,6 +27,11 @@ const lazyRouteComponent = (
   };
 };
 
+const LandingPage = lazyRouteComponent(() =>
+  import("~/routes/landing").then((module) => ({
+    default: module.LandingPage
+  }))
+);
 const AdminAnalyticsPage = lazyRouteComponent(() =>
   import("~/routes/admin/analytics").then((module) => ({
     default: module.AdminAnalyticsPage
@@ -153,6 +158,9 @@ const RootComponent = () => {
     Boolean(guestTargetPath) &&
     (location.pathname === guestTargetPath || location.pathname.startsWith(`${guestTargetPath}/`));
   const shouldOpenGuestEntry = tma.isReady && Boolean(guestStartParam) && !isInsideGuestTarget;
+  const isTelegramMiniApp = tma.isTelegram && Boolean(tma.initDataRaw);
+  const shouldOpenAdminEntry =
+    tma.isReady && isTelegramMiniApp && !guestStartParam && location.pathname === "/";
 
   React.useEffect(() => {
     if (!shouldOpenGuestEntry || !guestStartParam) {
@@ -168,7 +176,18 @@ const RootComponent = () => {
     });
   }, [guestStartParam, navigate, shouldOpenGuestEntry]);
 
-  if (!tma.isReady || shouldOpenGuestEntry) {
+  React.useEffect(() => {
+    if (!shouldOpenAdminEntry) {
+      return;
+    }
+
+    void navigate({
+      replace: true,
+      to: "/admin"
+    });
+  }, [navigate, shouldOpenAdminEntry]);
+
+  if (!tma.isReady || shouldOpenGuestEntry || shouldOpenAdminEntry) {
     return <PendingScreen />;
   }
 
@@ -182,7 +201,7 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: AdminDashboard
+  component: LandingPage
 });
 
 const adminRoute = createRoute({

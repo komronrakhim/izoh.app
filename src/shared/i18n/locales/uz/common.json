@@ -4,9 +4,10 @@
   "loading": "Yuklanmoqda...",
   "poweredBy": "Izoh",
   "tmaOnly": {
-    "title": "Telegramda oching",
-    "subtitle": "Izoh Mini App sifatida ishlaydi, shuning uchun admin panel va mehmon formasi faqat Telegram ichida ochiladi.",
-    "action": "Izohni ochish"
+    "title": "Deyarli tayyor",
+    "subtitle": "Kerakli joy darhol ochiladi, shunda ortiqcha qadamlarsiz bemalol davom etasiz.",
+    "action": "Telegramda ochish",
+    "hint": "Telegram so‘rasa, o‘tishga ruxsat bering."
   },
   "actions": {
     "clear": "Tozalash",

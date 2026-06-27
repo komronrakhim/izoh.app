@@ -2,7 +2,7 @@ export const APP_LOCALES = ["ru", "uz", "en", "tr", "kk", "ky", "tg", "az", "uk"
 
 export type AppLocale = (typeof APP_LOCALES)[number];
 
-export const DEFAULT_LOCALE: AppLocale = "ru";
+export const DEFAULT_LOCALE: AppLocale = "en";
 
 export const APP_INTL_LOCALE_BY_LOCALE = {
   az: "az-AZ",

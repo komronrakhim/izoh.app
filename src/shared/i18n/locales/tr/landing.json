@@ -1,0 +1,170 @@
+{
+  "nav": {
+    "howItWorks": "Nasıl çalışır",
+    "features": "Özellikler",
+    "forWhom": "Kimler için",
+    "faq": "Sorular"
+  },
+  "cta": {
+    "header": "Telegram'da aç",
+    "footer": "Telegram'da dene"
+  },
+  "language": {
+    "action": "Dil seç"
+  },
+  "seo": {
+    "title": "Izoh — QR ile misafir geri bildirimi",
+    "description": "Izoh, misafir yorumlarını, şikayetlerini ve önerilerini QR ile toplamanıza, Telegram’da bildirim almanıza ve memnun misafirlerden herkese açık yorum istemenize yardımcı olur.",
+    "keywords": "Izoh, misafir geri bildirimi, QR yorumlar, müşteri yorumları, misafir şikayetleri, misafir önerileri, herkese açık yorumlar, Google yorumları, Yandex Haritalar yorumları, 2GIS yorumları",
+    "ogImageAlt": "Izoh QR ile misafir yorumlarını, şikayetlerini ve önerilerini toplamaya yardımcı olur"
+  },
+  "hero": {
+    "badge": "QR ile geri bildirim",
+    "title": "Misafirleri zamanında dinleyin",
+    "subtitle": "Misafir QR'yi tarar ve yorum, şikayet veya fikir paylaşır. Ekip yeri, fotoğrafı ve detayları Telegram'da hemen görür.",
+    "mockupAlt": "Telegram'da misafir geri bildirim ekranı"
+  },
+  "valueLines": {
+    "scan": {
+      "before": "Misafir QR'yi tarar ve",
+      "accent": "izlenimini o anda paylaşır",
+      "after": ""
+    },
+    "lowRating": {
+      "before": "Düşük puan",
+      "accent": "önce ekibe gelir",
+      "after": ""
+    },
+    "context": {
+      "before": "Başvuruda zaten",
+      "accent": "yer, fotoğraf ve detaylar",
+      "after": "vardır"
+    },
+    "resolve": {
+      "before": "Şikayet",
+      "accent": "ele alınabilir",
+      "after": "herkese açık yorumdan önce"
+    },
+    "publicReview": {
+      "before": "İyi bir deneyim",
+      "accent": "herkese açık yoruma",
+      "after": "dönüşebilir"
+    }
+  },
+  "features": {
+    "title": "Misafirin söylediği her şey tek yerde",
+    "subtitle": "Yorumlar, şikayetler, öneriler, fotoğraflar ve yer bilgisi ekibin çalıştığı yerde toplanır.",
+    "cards": {
+      "guest": {
+        "title": "Misafir önce size söyler",
+        "body": "QR kısa bir ekran açar: yorum, şikayet, öneri veya çalışan hakkında başvuru."
+      },
+      "alert": {
+        "title": "Şikayet o anda gelir",
+        "body": "Düşük puan, metin ve yer bilgisi, hâlâ ilgilenmek mümkünken doğrudan ekibe düşer."
+      },
+      "idea": {
+        "title": "Öneriler kaybolmaz",
+        "body": "Misafirler neyin iyileştirileceğini, ekleneceğini veya fark edilmesi gerektiğini paylaşır."
+      },
+      "public": {
+        "title": "İyi deneyim itibarı güçlendirir",
+        "body": "Yüksek puandan sonra Izoh, seçtiğiniz platformda yorum bırakmayı nazikçe önerir."
+      }
+    },
+    "visualAlt": {
+      "guest": "Izoh'da geri bildirim türü seçimi",
+      "alert": "Izoh'da şikayet bildirimi",
+      "idea": "Izoh'da misafir önerisi",
+      "public": "Izoh'da herkese açık yorum platformu seçimi"
+    }
+  },
+  "context": {
+    "title": "Daha hızlı anlamak için bağlam",
+    "subtitle": "Kimin adı geçti, nerede oldu, ne tekrar ediyor ve fotoğraf var mı — hepsi başvurunun yanında.",
+    "cards": {
+      "staff": {
+        "title": "Personel",
+        "body": "Misafir çalışanı veya tüm ekibi işaretleyebilir, böylece kime teşekkür edildiği veya nerede bakmak gerektiği anlaşılır."
+      },
+      "analytics": {
+        "title": "Analitik",
+        "body": "Hangi puanların, şikayetlerin, konuların ve yerlerin daha sık tekrar ettiğini görün."
+      },
+      "photos": {
+        "title": "Başvurulardaki fotoğraflar",
+        "body": "Fotoğraflar durumu daha hızlı ve uzun ek sorular olmadan anlamaya yardımcı olur."
+      }
+    }
+  },
+  "ratingFlow": {
+    "title": "Izoh zamanında yetişmeye yardımcı olur",
+    "subtitle": "Olumsuz geri bildirim önce ekibe gelir, iyi deneyim ise herkese açık yoruma dönüşebilir.",
+    "lines": {
+      "teamFirst": {
+        "before": "Misafir puanını",
+        "accent": "önce ekip duyar",
+        "after": ""
+      },
+      "details": {
+        "before": "Bir şey yolunda değilse,",
+        "accent": "ne olduğu ve nerede olduğu",
+        "after": "anlaşılır"
+      },
+      "resolve": {
+        "before": "Şikayet",
+        "accent": "çözülebilir",
+        "after": "o anda"
+      },
+      "publicReview": {
+        "before": "İyi bir deneyim",
+        "accent": "herkese açık yoruma",
+        "after": "dönüşebilir"
+      }
+    }
+  },
+  "forWhom": {
+    "title": "İtibarın önemli olduğu yerler için",
+    "subtitle": "Misafirlerin her gün geldiği yerde onları zamanında duymak önemlidir: zoru çözmek, iyiyi kaybetmemek.",
+    "places": {
+      "cafe": "Kafeler",
+      "studios": "Stüdyolar",
+      "clinics": "Klinikler",
+      "shops": "Mağazalar",
+      "hotels": "Oteller",
+      "services": "Servisler",
+      "coworking": "Coworking",
+      "education": "Eğitim"
+    }
+  },
+  "faq": {
+    "title": "Sık sorular",
+    "subtitle": "Başlatma, misafirler, ekip ve herkese açık yorumlar hakkında kısa cevaplar.",
+    "items": {
+      "install": {
+        "question": "Misafirin uygulama yüklemesi gerekir mi?",
+        "answer": "Hayır. Misafir ekranı QR ile açar, ekip Telegram'da çalışır."
+      },
+      "lowRating": {
+        "question": "Düşük puanda ne olur?",
+        "answer": "Ekip bunu detaylarla birlikte Izoh içinde alır ve durumu anlamaya zaman kazanır."
+      },
+      "teamSees": {
+        "question": "Ekip ne görür?",
+        "answer": "Puanı, metni, fotoğrafı, yeri ve personel açıksa misafirin kimi işaretlediğini."
+      },
+      "publicReviews": {
+        "question": "Herkese açık yorumlar ayarlanabilir mi?",
+        "answer": "Evet. Platformları ve Izoh'un bu adımı hangi puandan sonra göstereceğini seçersiniz."
+      },
+      "notOnlyRestaurants": {
+        "question": "Izoh sadece restoranlar için mi?",
+        "answer": "Hayır. Izoh misafirleri, müşterileri veya ziyaretçileri olan yerler için uygundur."
+      }
+    }
+  },
+  "footer": {
+    "title": "Misafirleri ilk siz duymaya başlayın",
+    "subtitle": "QR koyun ve yorumları, şikayetleri ve önerileri o anda toplayın."
+  }
+}

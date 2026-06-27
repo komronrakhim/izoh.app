@@ -1,0 +1,170 @@
+{
+  "nav": {
+    "howItWorks": "Necə işləyir",
+    "features": "İmkanlar",
+    "forWhom": "Kimlər üçün",
+    "faq": "Suallar"
+  },
+  "cta": {
+    "header": "Telegramda aç",
+    "footer": "Telegramda sına"
+  },
+  "language": {
+    "action": "Dil seçin"
+  },
+  "seo": {
+    "title": "Izoh — QR ilə qonaq rəyləri",
+    "description": "Izoh QR ilə qonaq rəylərini, şikayətlərini və təkliflərini toplamağa, Telegramda bildiriş almağa və razı qonaqlardan ictimai rəy istəməyə kömək edir.",
+    "keywords": "Izoh, qonaq rəyləri, QR rəylər, müştəri rəyləri, qonaq şikayətləri, qonaq təklifləri, ictimai rəylər, Google rəyləri, Yandex Maps rəyləri, 2GIS rəyləri",
+    "ogImageAlt": "Izoh QR ilə qonaq rəylərini, şikayətlərini və təkliflərini toplamağa kömək edir"
+  },
+  "hero": {
+    "badge": "QR ilə rəy",
+    "title": "Qonaqları vaxtında dinləyin",
+    "subtitle": "Qonaq QR-i skan edir və rəy, şikayət və ya fikir paylaşır. Komanda yeri, fotonu və detalları Telegramda dərhal görür.",
+    "mockupAlt": "Telegramda qonaq rəy ekranı"
+  },
+  "valueLines": {
+    "scan": {
+      "before": "Qonaq QR-i skan edir və",
+      "accent": "təəssüratını həmin anda paylaşır",
+      "after": ""
+    },
+    "lowRating": {
+      "before": "Aşağı qiymət",
+      "accent": "əvvəl komandaya gəlir",
+      "after": ""
+    },
+    "context": {
+      "before": "Müraciətdə artıq",
+      "accent": "yer, foto və detallar",
+      "after": "var"
+    },
+    "resolve": {
+      "before": "Şikayəti",
+      "accent": "araşdırmaq olar",
+      "after": "ictimai rəydən əvvəl"
+    },
+    "publicReview": {
+      "before": "Yaxşı təcrübə",
+      "accent": "ictimai rəyə",
+      "after": "çevrilə bilər"
+    }
+  },
+  "features": {
+    "title": "Qonağın dediyi hər şey bir yerdə",
+    "subtitle": "Rəylər, şikayətlər, təkliflər, fotolar və yer məlumatı komandanın işlədiyi yerə gəlir.",
+    "cards": {
+      "guest": {
+        "title": "Qonaq əvvəl sizə deyir",
+        "body": "QR qısa ekran açır: rəy, şikayət, təklif və ya əməkdaş haqqında müraciət."
+      },
+      "alert": {
+        "title": "Şikayət həmin anda gəlir",
+        "body": "Aşağı qiymət, mətn və yer məlumatı vəziyyəti həll etmək mümkün olan anda komandaya düşür."
+      },
+      "idea": {
+        "title": "Təkliflər itməz",
+        "body": "Qonaqlar nəyi yaxşılaşdırmaq, əlavə etmək və ya diqqətə almaq lazım olduğunu deyirlər."
+      },
+      "public": {
+        "title": "Yaxşı təcrübə reputasiyanı gücləndirir",
+        "body": "Yüksək qiymətdən sonra Izoh seçdiyiniz platformada rəy yazmağı yumşaq şəkildə təklif edir."
+      }
+    },
+    "visualAlt": {
+      "guest": "Izoh-da rəy növünün seçilməsi",
+      "alert": "Izoh-da şikayət bildirişi",
+      "idea": "Izoh-da qonaq təklifi",
+      "public": "Izoh-da ictimai rəy platformasının seçilməsi"
+    }
+  },
+  "context": {
+    "title": "Daha tez anlamaq üçün kontekst",
+    "subtitle": "Kim qeyd olunub, harada baş verib, nə təkrarlanır və foto varmı — hamısı müraciətin yanında.",
+    "cards": {
+      "staff": {
+        "title": "Personal",
+        "body": "Qonaq əməkdaşı və ya bütün komandanı qeyd edə bilər, beləliklə kimə təşəkkür edildiyi və ya haraya baxmaq lazım olduğu aydın olur."
+      },
+      "analytics": {
+        "title": "Analitika",
+        "body": "Hansı qiymətlərin, şikayətlərin, mövzuların və yerlərin daha çox təkrarlandığını görün."
+      },
+      "photos": {
+        "title": "Müraciətlərdə fotolar",
+        "body": "Fotolar vəziyyəti daha tez və uzun əlavə suallar olmadan anlamağa kömək edir."
+      }
+    }
+  },
+  "ratingFlow": {
+    "title": "Izoh vaxtında çatmağa kömək edir",
+    "subtitle": "Mənfi rəy əvvəl komandaya gəlir, yaxşı təcrübə isə ictimai rəyə çevrilə bilər.",
+    "lines": {
+      "teamFirst": {
+        "before": "Qonağın qiymətini",
+        "accent": "əvvəl komanda eşidir",
+        "after": ""
+      },
+      "details": {
+        "before": "Nəsə yolunda deyilsə,",
+        "accent": "nə və harada baş verdiyi",
+        "after": "aydın olur"
+      },
+      "resolve": {
+        "before": "Şikayəti",
+        "accent": "həll etmək olar",
+        "after": "elə həmin anda"
+      },
+      "publicReview": {
+        "before": "Yaxşı təcrübə",
+        "accent": "ictimai rəyə",
+        "after": "çevrilə bilər"
+      }
+    }
+  },
+  "forWhom": {
+    "title": "Reputasiyanın vacib olduğu yerlər üçün",
+    "subtitle": "Qonaqlar hər gün gələndə onları vaxtında eşitmək vacibdir: çətini həll etmək, yaxşını itirməmək.",
+    "places": {
+      "cafe": "Kafelər",
+      "studios": "Studiyalar",
+      "clinics": "Klinikalar",
+      "shops": "Mağazalar",
+      "hotels": "Otellər",
+      "services": "Servislər",
+      "coworking": "Kovorkinqlər",
+      "education": "Təhsil"
+    }
+  },
+  "faq": {
+    "title": "Tez-tez verilən suallar",
+    "subtitle": "Başlama, qonaqlar, komanda və ictimai rəylər haqqında qısa cavablar.",
+    "items": {
+      "install": {
+        "question": "Qonağa tətbiq quraşdırmaq lazımdır?",
+        "answer": "Xeyr. Qonaq ekranı QR ilə açır, komanda Telegramda işləyir."
+      },
+      "lowRating": {
+        "question": "Aşağı qiymətlə nə baş verir?",
+        "answer": "Komanda onu detallarla birlikdə Izoh daxilində alır və vəziyyəti anlamağa vaxt qazanır."
+      },
+      "teamSees": {
+        "question": "Komanda nə görür?",
+        "answer": "Qiymət, mətn, foto, yer və personal aktivdirsə, qonağın kimi qeyd etdiyini."
+      },
+      "publicReviews": {
+        "question": "İctimai rəyləri tənzimləmək olar?",
+        "answer": "Bəli. Platformaları və Izoh-un bu addımı hansı qiymətdən sonra göstərəcəyini seçirsiniz."
+      },
+      "notOnlyRestaurants": {
+        "question": "Izoh yalnız restoranlar üçündür?",
+        "answer": "Xeyr. Izoh qonaqları, müştəriləri və ya ziyarətçiləri olan yerlər üçün uyğundur."
+      }
+    }
+  },
+  "footer": {
+    "title": "Qonaqları ilk siz eşitməyə başlayın",
+    "subtitle": "QR yerləşdirin və rəyləri, şikayətləri və təklifləri həmin anda toplayın."
+  }
+}

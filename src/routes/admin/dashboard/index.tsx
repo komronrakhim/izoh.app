@@ -138,7 +138,7 @@ const QuickActionTile = ({
 }) => (
   <button
     aria-label={label}
-    className="group flex h-[64px] w-full min-w-0 flex-col items-center justify-center gap-0.5 rounded-[17px] bg-[#F2F2F7] px-0.5 text-primary outline-none transition-[background-color,opacity,transform] active:scale-[0.98] active:bg-[#E5E5EA] disabled:pointer-events-none disabled:opacity-45 dark:bg-[#1C1C1E] dark:active:bg-[#2C2C2E]"
+    className="group flex h-[64px] w-full min-w-0 flex-col items-center justify-center gap-0.5 rounded-[17px] bg-white px-0.5 text-primary outline-none transition-[background-color,opacity,transform] active:scale-[0.98] active:bg-[#F2F2F7] disabled:pointer-events-none disabled:opacity-45 dark:bg-[#1C1C1E] dark:active:bg-[#2C2C2E]"
     disabled={disabled}
     type="button"
     onClick={onClick}

@@ -23,14 +23,14 @@ const collectMessagePaths = (value: unknown, prefix = ""): string[] => {
 };
 
 describe("shared i18n", () => {
-  it("normalizes Telegram language code with Russian fallback", () => {
+  it("normalizes Telegram language code with English fallback", () => {
     expect(normalizeAppLocale("uz-UZ")).toBe("uz");
     expect(normalizeAppLocale("ru")).toBe("ru");
     expect(normalizeAppLocale("en-US")).toBe("en");
     expect(normalizeAppLocale("tr-TR")).toBe("tr");
     expect(normalizeAppLocale("kk-KZ")).toBe("kk");
     expect(normalizeAppLocale("uk-UA")).toBe("uk");
-    expect(normalizeAppLocale(undefined)).toBe("ru");
+    expect(normalizeAppLocale(undefined)).toBe("en");
   });
 
   it("ships the same message keys for every supported locale", () => {

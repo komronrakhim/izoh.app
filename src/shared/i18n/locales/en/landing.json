@@ -1,0 +1,170 @@
+{
+  "nav": {
+    "howItWorks": "How it works",
+    "features": "Features",
+    "forWhom": "For whom",
+    "faq": "FAQ"
+  },
+  "cta": {
+    "header": "Open in Telegram",
+    "footer": "Try in Telegram"
+  },
+  "language": {
+    "action": "Choose language"
+  },
+  "seo": {
+    "title": "Izoh — guest feedback by QR",
+    "description": "Izoh helps teams collect guest reviews, complaints and suggestions by QR, get alerts in Telegram, and gently invite happy guests to leave public reviews.",
+    "keywords": "Izoh, guest feedback, QR feedback, customer reviews, guest complaints, guest suggestions, public reviews, Google reviews, Yandex Maps reviews, 2GIS reviews",
+    "ogImageAlt": "Izoh helps collect guest reviews, complaints and suggestions by QR"
+  },
+  "hero": {
+    "badge": "Feedback by QR",
+    "title": "Listen to guests in time",
+    "subtitle": "A guest scans the QR and shares a review, complaint, or idea. The team instantly sees the place, photo, and details in Telegram.",
+    "mockupAlt": "Guest feedback screen in Telegram"
+  },
+  "valueLines": {
+    "scan": {
+      "before": "A guest scans the QR and",
+      "accent": "shares their impression in the moment",
+      "after": ""
+    },
+    "lowRating": {
+      "before": "A low rating",
+      "accent": "goes to the team first",
+      "after": ""
+    },
+    "context": {
+      "before": "The request already has",
+      "accent": "place, photo, and details",
+      "after": "without extra questions"
+    },
+    "resolve": {
+      "before": "A complaint",
+      "accent": "can be handled",
+      "after": "before a public review"
+    },
+    "publicReview": {
+      "before": "A good experience can become",
+      "accent": "a public review",
+      "after": "on the chosen platform"
+    }
+  },
+  "features": {
+    "title": "Everything a guest said, in one place",
+    "subtitle": "Reviews, complaints, ideas, photos, and places arrive where your team already works.",
+    "cards": {
+      "guest": {
+        "title": "The guest tells you first",
+        "body": "The QR opens a short screen: review, complaint, suggestion, or a note about a staff member."
+      },
+      "alert": {
+        "title": "Complaints arrive in the moment",
+        "body": "A low rating, text, and place go straight to the team while there is still time to respond."
+      },
+      "idea": {
+        "title": "Suggestions do not get lost",
+        "body": "Guests can share what to improve, add, or notice in the service."
+      },
+      "public": {
+        "title": "Good experiences support reputation",
+        "body": "After a high rating, Izoh gently suggests leaving a review on the platform you choose."
+      }
+    },
+    "visualAlt": {
+      "guest": "Choosing a feedback type in Izoh",
+      "alert": "Complaint notification in Izoh",
+      "idea": "Guest suggestion in Izoh",
+      "public": "Choosing a public review platform in Izoh"
+    }
+  },
+  "context": {
+    "title": "Context to understand faster",
+    "subtitle": "Who was mentioned, where it happened, what repeats, and whether there is a photo — all next to the request.",
+    "cards": {
+      "staff": {
+        "title": "Staff",
+        "body": "A guest can mention an employee or the whole team, so it is clear who was thanked or where to look closer."
+      },
+      "analytics": {
+        "title": "Analytics",
+        "body": "See which ratings, complaints, topics, and places repeat most often."
+      },
+      "photos": {
+        "title": "Photos in requests",
+        "body": "Photos help the team understand the situation faster and without long follow-ups."
+      }
+    }
+  },
+  "ratingFlow": {
+    "title": "How Izoh helps you respond in time",
+    "subtitle": "Negative feedback reaches the team first, and a good experience can turn into a public review.",
+    "lines": {
+      "teamFirst": {
+        "before": "A guest rating",
+        "accent": "is heard by the team first",
+        "after": ""
+      },
+      "details": {
+        "before": "If something is wrong, it is clear",
+        "accent": "what happened and where",
+        "after": ""
+      },
+      "resolve": {
+        "before": "A complaint",
+        "accent": "can be resolved",
+        "after": "in the moment"
+      },
+      "publicReview": {
+        "before": "A good experience can become",
+        "accent": "a public review",
+        "after": "on the chosen platform"
+      }
+    }
+  },
+  "forWhom": {
+    "title": "For places where reputation matters",
+    "subtitle": "When guests come every day, it matters to hear them in the moment: handle the hard things and keep the good ones.",
+    "places": {
+      "cafe": "Cafes",
+      "studios": "Studios",
+      "clinics": "Clinics",
+      "shops": "Shops",
+      "hotels": "Hotels",
+      "services": "Services",
+      "coworking": "Coworking",
+      "education": "Education"
+    }
+  },
+  "faq": {
+    "title": "FAQ",
+    "subtitle": "Short answers about launch, guests, team work, and public reviews.",
+    "items": {
+      "install": {
+        "question": "Does a guest need to install an app?",
+        "answer": "No. The guest opens the screen by QR, and the team works in Telegram."
+      },
+      "lowRating": {
+        "question": "What happens with a low rating?",
+        "answer": "The team receives it inside Izoh with the details, so they have time to understand what happened."
+      },
+      "teamSees": {
+        "question": "What does the team see?",
+        "answer": "Rating, text, photo, place, and who the guest mentioned if staff is enabled."
+      },
+      "publicReviews": {
+        "question": "Can public reviews be configured?",
+        "answer": "Yes. Choose the platforms and the rating after which Izoh gently shows this step."
+      },
+      "notOnlyRestaurants": {
+        "question": "Is Izoh only for restaurants?",
+        "answer": "No. Izoh works for places with guests, customers, or visitors."
+      }
+    }
+  },
+  "footer": {
+    "title": "Start hearing guests first",
+    "subtitle": "Place a QR and collect reviews, complaints, and suggestions in the moment."
+  }
+}
