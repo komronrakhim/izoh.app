@@ -771,7 +771,7 @@ const SoftEdgeBlur = ({
 const FeatureVisual = ({ alt, visual }: { alt: string; visual: FeatureVisualKind }) => {
   if (visual === "guest") {
     return (
-      <div className="w-[292px] max-w-full sm:w-[340px] md:w-[370px]">
+      <div className="w-full max-w-[292px] sm:max-w-[340px] md:max-w-[370px]">
         <img
           alt={alt}
           className="h-auto w-full select-none"
@@ -786,7 +786,7 @@ const FeatureVisual = ({ alt, visual }: { alt: string; visual: FeatureVisualKind
 
   if (visual === "alert") {
     return (
-      <div className="w-[315px] max-w-full sm:w-[370px]">
+      <div className="w-full max-w-[315px] sm:max-w-[370px]">
         <img
           alt={alt}
           className="h-auto w-full select-none"
@@ -801,7 +801,7 @@ const FeatureVisual = ({ alt, visual }: { alt: string; visual: FeatureVisualKind
 
   if (visual === "idea") {
     return (
-      <div className="w-[315px] max-w-full sm:w-[370px]">
+      <div className="w-full max-w-[315px] sm:max-w-[370px]">
         <img
           alt={alt}
           className="h-auto w-full select-none"
@@ -815,7 +815,7 @@ const FeatureVisual = ({ alt, visual }: { alt: string; visual: FeatureVisualKind
   }
 
   return (
-    <div className="w-[292px] max-w-full sm:w-[340px] md:w-[370px]">
+    <div className="w-full max-w-[292px] sm:max-w-[340px] md:max-w-[370px]">
       <img
         alt={alt}
         className="h-auto w-full select-none"
@@ -867,7 +867,7 @@ const FeatureBlock = (item: FeatureBlockItem) => {
       <div
         className={[
           isTopEdgeMockup
-            ? `relative grid min-h-[430px] content-start justify-items-center self-start overflow-hidden rounded-[28px] ${tone.visualSurface} px-4 pb-4 pt-0 sm:min-h-[475px] md:min-h-[500px]`
+            ? `relative grid min-h-[430px] content-start justify-items-center self-start overflow-hidden rounded-[28px] ${tone.visualSurface} px-0 pb-4 pt-0 sm:min-h-[475px] sm:px-4 md:min-h-[500px]`
             : `grid place-items-center rounded-[28px] ${tone.visualSurface} p-4`,
           isTopEdgeMockup ? "" : isWide ? "min-h-[330px] md:min-h-[410px]" : "min-h-[260px]"
         ].join(" ")}
