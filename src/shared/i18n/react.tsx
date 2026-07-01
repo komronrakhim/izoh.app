@@ -183,6 +183,24 @@ export const I18nProvider = ({ children }: { children: React.ReactNode }) => {
     document.documentElement.lang = locale;
   }, [locale]);
 
+  // TODO: Find a better solution.
+  const value = React.useMemo<I18nContextValue>(
+      () => ({
+        locale,
+        setLocale,
+        t: i18n?.t?.bind(i18n) as TranslateFn,
+        tArray: (key) => {
+          const value = i18n?.t(key, {
+            returnObjects: true
+          });
+
+          return Array.isArray(value) ? value.map(String) : [];
+        }
+      }),
+      [i18n, locale, setLocale]
+  );
+
+
   if (!i18n) {
     return (
       <div
@@ -195,21 +213,6 @@ export const I18nProvider = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  const value = React.useMemo<I18nContextValue>(
-    () => ({
-      locale,
-      setLocale,
-      t: i18n.t.bind(i18n) as TranslateFn,
-      tArray: (key) => {
-        const value = i18n.t(key, {
-          returnObjects: true
-        });
-
-        return Array.isArray(value) ? value.map(String) : [];
-      }
-    }),
-    [i18n, locale, setLocale]
-  );
 
   return (
     <I18nextProvider i18n={i18n}>
