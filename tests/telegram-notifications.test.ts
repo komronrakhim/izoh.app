@@ -68,7 +68,7 @@ describe("Telegram submission notifications", () => {
     expect(normalized).toContain("🏪 Coffee Place");
     expect(normalized).toContain("Yangi shikoyat");
     expect(normalized).not.toContain("Turi:");
-    expect(normalized).toContain("🏷 Kutish · Xizmat · Sifat · +1");
+    expect(normalized).toContain("🏷 Kutish · Xizmat · Sifat · Tozalik");
     expect(normalized).toContain("📍 Bar");
   });
 

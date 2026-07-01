@@ -271,7 +271,7 @@
     },
     "pricing": {
       "title": "Subscription prices",
-      "heading": "Stars pricing",
+      "heading": "Subscription price",
       "hint": "Owners will see these amounts on the subscription page. New invoices use the updated prices.",
       "month": "Month",
       "year": "Year",
@@ -279,8 +279,8 @@
       "noDiscount": "No yearly discount right now.",
       "save": "Save",
       "error": "Could not save prices. Try again.",
-      "current": "Current: {{month}} Stars monthly and {{year}} Stars yearly.",
-      "pageHint": "Set monthly and yearly prices in Stars. Owners will see these amounts on the subscription page."
+      "current": "Current",
+      "pageHint": "Set monthly and yearly prices. Owners will see these amounts on the subscription page."
     }
   },
   "faq": {
@@ -826,7 +826,7 @@
     "plansHint": "The first 7 days are already included. Payment is required so that the form does not stop after the trial period.",
     "payAction": "Pay {{amount}}",
     "payError": "Failed to open payment. Try again.",
-    "fromPriceBadge": "From {{amount}} Stars"
+    "fromPriceBadge": "From {{amount}}"
   },
   "sections": {
     "show": "Show to guests",

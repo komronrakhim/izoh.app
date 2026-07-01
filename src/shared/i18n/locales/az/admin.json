@@ -271,7 +271,7 @@
     },
     "pricing": {
       "title": "Abunə qiymətləri",
-      "heading": "Stars qiyməti",
+      "heading": "Abunə qiyməti",
       "hint": "Bu məbləğləri sahiblər abunə səhifəsində görəcəklər. Yeni invoice-lar bu qiymətlərlə yaradılacaq.",
       "month": "Ay",
       "year": "İl",
@@ -279,8 +279,8 @@
       "noDiscount": "Hazırda illik endirim yoxdur.",
       "save": "Yadda saxla",
       "error": "Qiymətləri saxlamaq alınmadı. Yenidən cəhd edin.",
-      "current": "Hazırda: ayda {{month}} Stars və ildə {{year}} Stars.",
-      "pageHint": "Aylıq və illik qiyməti Stars ilə təyin edin. Sahiblər bu məbləğləri abunə səhifəsində görəcək."
+      "current": "Hazırda",
+      "pageHint": "Aylıq və illik qiyməti təyin edin. Sahiblər bu məbləğləri abunə səhifəsində görəcək."
     }
   },
   "faq": {
@@ -826,7 +826,7 @@
     "plansHint": "İlk 7 gün artıq daxil edilib. Formanın sınaq müddətindən sonra dayanmaması üçün ödəniş tələb olunur.",
     "payAction": "{{amount}} ödəyin",
     "payError": "Ödənişi açmaq alınmadı. Yenidən cəhd edin.",
-    "fromPriceBadge": "{{amount}} Stars-dan"
+    "fromPriceBadge": "{{amount}}-dan"
   },
   "sections": {
     "show": "Qonaqlara göstərin",

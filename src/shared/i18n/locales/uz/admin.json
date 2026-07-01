@@ -271,7 +271,7 @@
     },
     "pricing": {
       "title": "Obuna narxlari",
-      "heading": "Stars narxlari",
+      "heading": "Obuna narxi",
       "hint": "Bu summalar egalar obuna sahifasida ko‘radigan narxlardir. Yangi invoice’lar shu narx bilan yaratiladi.",
       "month": "Oy",
       "year": "Yil",
@@ -279,8 +279,8 @@
       "noDiscount": "Hozir yillik chegirma yo‘q.",
       "save": "Saqlash",
       "error": "Narxlarni saqlab bo‘lmadi. Qayta urinib ko‘ring.",
-      "current": "Hozir: oyiga {{month}} Stars va yiliga {{year}} Stars.",
-      "pageHint": "Oylik va yillik narxni Stars’da belgilang. Egalar bu summalarni obuna sahifasida ko‘radi."
+      "current": "Hozir",
+      "pageHint": "Oylik va yillik narxni belgilang. Egalar bu summalarni obuna sahifasida ko‘radi."
     }
   },
   "faq": {
@@ -826,7 +826,7 @@
     "plansHint": "Birinchi 7 kun allaqachon ochiq. To‘lov sinov davridan keyin forma to‘xtamasligi uchun kerak.",
     "payAction": "To‘lash {{amount}}",
     "payError": "To‘lov ochilmadi. Qayta urinib ko‘ring.",
-    "fromPriceBadge": "{{amount}} Stars dan"
+    "fromPriceBadge": "{{amount}} dan"
   },
   "sections": {
     "show": "Mehmonlarga ko‘rsatish",

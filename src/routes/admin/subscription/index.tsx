@@ -48,6 +48,7 @@ type SubscriptionPagePayload = {
 const PAYMENT_SYNC_ATTEMPTS = 12;
 const PAYMENT_SYNC_INITIAL_DELAY_MS = 1_200;
 const PAYMENT_SYNC_INTERVAL_MS = 1_500;
+const FROM_PRICE_AMOUNT_MARKER = "__IZOH_FROM_PRICE_AMOUNT__";
 const SUBSCRIPTION_BENEFITS = [
   {
     icon: QrCode,
@@ -417,6 +418,21 @@ export const AdminSubscriptionPage = () => {
   const selectedPlan =
     subscriptionQuery.data?.plans[selectedPlanCode] ?? SUBSCRIPTION_PLANS.MONTHLY;
   const monthlyPlan = subscriptionQuery.data?.plans.MONTHLY ?? SUBSCRIPTION_PLANS.MONTHLY;
+  const numberFormatter = React.useMemo(
+    () => new Intl.NumberFormat(getIntlLocale(locale)),
+    [locale]
+  );
+  const fromPriceBadgeParts = React.useMemo(() => {
+    const text = t("admin.subscription.fromPriceBadge", {
+      amount: FROM_PRICE_AMOUNT_MARKER
+    });
+    const [prefix = "", ...suffixParts] = text.split(FROM_PRICE_AMOUNT_MARKER);
+
+    return {
+      prefix,
+      suffix: suffixParts.join(FROM_PRICE_AMOUNT_MARKER)
+    };
+  }, [t]);
   const subscription = subscriptionQuery.data?.subscription;
   const hasSettledActiveSubscription = Boolean(
     subscription?.isActive &&
@@ -543,10 +559,13 @@ export const AdminSubscriptionPage = () => {
                   <span className="ios-caption-1 inline-flex items-center rounded-full bg-white/18 px-2.5 py-1 font-semibold text-white">
                     {t("admin.subscription.trialBadge")}
                   </span>
-                  <span className="ios-caption-1 inline-flex items-center gap-1.5 rounded-full bg-white/18 px-2.5 py-1 font-semibold text-white">
-                    {t("admin.subscription.fromPriceBadge", {
-                      amount: monthlyPlan.amountStars
-                    })}
+                  <span className="ios-caption-1 inline-flex items-center rounded-full bg-white/18 px-2.5 py-1 font-semibold text-white whitespace-pre">
+                    {fromPriceBadgeParts.prefix}
+                    <span className="inline-flex items-center gap-1 tabular-nums">
+                      {numberFormatter.format(monthlyPlan.amountStars)}
+                      <StarCurrencyIcon className="size-3 text-white" />
+                    </span>
+                    {fromPriceBadgeParts.suffix}
                   </span>
                 </div>
                 <div className="grid gap-2">

@@ -39,13 +39,7 @@ const getHeadlineEmoji = ({ kind, rating }: { kind: SubmissionKind; rating: null
 const formatLabeledLine = (icon: string, label: string, value: string) =>
   `${icon} ${label}: ${value}`;
 
-const formatCompactList = (values: string[], visibleCount = 3) => {
-  if (values.length <= visibleCount) {
-    return values.join(" · ");
-  }
-
-  return [...values.slice(0, visibleCount), `+${values.length - visibleCount}`].join(" · ");
-};
+const formatTopicList = (values: string[]) => values.join(" · ");
 
 const formatRatingText = ({ locale, rating }: { locale: AppLocale; rating: number }) => {
   const t = createTranslator(fromPrismaLocale(locale));
@@ -180,7 +174,7 @@ export const formatSubmissionNotificationText = ({
           : null
       ].filter(Boolean);
       const detailLines = [
-        topicLabels.length > 0 ? `🏷 ${escapeHtml(formatCompactList(topicLabels))}` : null,
+        topicLabels.length > 0 ? `🏷 ${escapeHtml(formatTopicList(topicLabels))}` : null,
         staffLabel ? `👤 ${escapeHtml(staffLabel)}` : null,
         submission.qr_context ? `📍 ${escapeHtml(submission.qr_context)}` : null,
         submission.customer_display_name
