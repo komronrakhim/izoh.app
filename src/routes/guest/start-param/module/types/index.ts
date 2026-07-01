@@ -55,22 +55,8 @@ export type SubmissionPhotoDraft = {
 
 export type PhotoInputRef = RefObject<HTMLInputElement | null>;
 
-export type MediaUploadSessionResponse = {
-  headers: Record<string, string>;
-  maxBytes: number;
-  method: "PUT";
-  session: {
-    id: string;
-  };
-  uploadUrl: string;
-};
-
 export type FinalizedMediaAsset = {
   id: string;
   kind: "ORGANIZATION_LOGO" | "STAFF_AVATAR" | "SUBMISSION_PHOTO" | "SUBMISSION_THUMBNAIL";
   public_url: string;
-};
-
-export type MediaFinalizeResponse = {
-  assets: FinalizedMediaAsset[];
 };

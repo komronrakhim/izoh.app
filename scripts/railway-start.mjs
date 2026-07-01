@@ -4,11 +4,30 @@ import { spawn } from "node:child_process";
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-const serviceName = (process.env.RAILWAY_SERVICE_NAME ?? "").toLowerCase();
+const serviceName = [
+  process.env.IZOH_SERVICE_ROLE,
+  process.env.RAILWAY_SERVICE_NAME,
+  process.env.RAILWAY_START_SCRIPT
+]
+  .filter(Boolean)
+  .join(" ")
+  .toLowerCase();
 
 const getStartScript = () => {
+  if (process.env.RAILWAY_START_SCRIPT) {
+    return process.env.RAILWAY_START_SCRIPT;
+  }
+
   if (serviceName.includes("notification") || serviceName.includes("dispatcher")) {
+    if (serviceName.includes("qr") || serviceName.includes("pdf")) {
+      return "start:qr-pdf-dispatcher";
+    }
+
     return "start:notification-dispatcher";
+  }
+
+  if (serviceName.includes("qr") || serviceName.includes("pdf")) {
+    return "start:qr-pdf-dispatcher";
   }
 
   if (serviceName.includes("deletion")) {

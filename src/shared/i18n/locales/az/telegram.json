@@ -1,6 +1,10 @@
 {
   "start": {
-    "message": "Salam! Mən Izoh ✨\n\nMəkanlara qonaqlardan qısa QR-forma ilə rəy, şikayət və təklif toplamağa kömək edirəm.\n\nMəkanınızı sazlamaq üçün aşağıdakı menyunu açın 👇"
+    "message": "Salam! Bu Izoh ✨\n\nQonaqları dinləməyin sadə yolu: rəylər, şikayətlər və təkliflər birbaşa Telegram-a gəlir.\n\nTətbiqi açın, məkanınızı yaradın və qonaqlar üçün QR-kod alın.",
+    "buttons": {
+      "open": "Aç",
+      "howItWorks": "Necə işləyir"
+    }
   },
   "groupConnect": {
     "success": "Bitdi, əlaqə saxlayıram ✨\n\n\"{{organizationName}}\" üçün bildirişlər indi bu qrupa göndəriləcək.\nQonaq rəy, şikayət və ya təklif buraxarsa, diqqətlə burada yerləşdirəcəyəm.",

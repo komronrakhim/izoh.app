@@ -65,16 +65,6 @@ enum MediaAssetStatus {
   DELETED
 }
 
-enum MediaUploadSessionStatus {
-  PENDING
-  UPLOADED
-  PROCESSING
-  READY
-  FAILED
-  CANCELED
-  EXPIRED
-}
-
 enum OrganizationNotificationMode {
   ALL
   IMPORTANT_ONLY
@@ -141,27 +131,6 @@ enum OrganizationSubscriptionEventType {
   RENEWED
 }
 
-enum BroadcastTargetKind {
-  ALL_USERS
-  ORGANIZATION_OWNERS
-  SYSTEM_ADMINS
-}
-
-enum BroadcastStatus {
-  DRAFT
-  SENDING
-  SENT
-  FAILED
-  CANCELED
-}
-
-enum BroadcastRecipientStatus {
-  PENDING
-  SENT
-  FAILED
-  SKIPPED
-}
-
 model User {
   id            String         @id @default(cuid())
   telegram_id   BigInt         @unique
@@ -177,15 +146,12 @@ model User {
 
   owned_organizations               Organization[]                              @relation("OwnedOrganizations")
   customer_submissions              Submission[]                                @relation("CustomerSubmissions")
-  media_upload_sessions             MediaUploadSession[]
   notification_targets              OrganizationNotificationTarget[]            @relation("RecipientUserNotificationTargets")
   notification_group_connect_tokens OrganizationNotificationGroupConnectToken[] @relation("NotificationGroupConnectTokensCreated")
   notification_deliveries           TelegramNotificationDelivery[]              @relation("RecipientUserDeliveries")
   subscription_grants               OrganizationSubscription[]                  @relation("GrantedOrganizationSubscriptions")
   subscription_payments             OrganizationSubscriptionPayment[]           @relation("SubscriptionPaymentsByUser")
   subscription_events               OrganizationSubscriptionEvent[]             @relation("SubscriptionEventsByUser")
-  created_broadcasts                Broadcast[]                                 @relation("CreatedBroadcasts")
-  broadcast_recipients              BroadcastRecipient[]
   organization_deletion_jobs        OrganizationDeletionJob[]                   @relation("OrganizationDeletionJobsRequested")
   guest_entry_scans                 GuestEntryScan[]
   system_audit_logs                 SystemAuditLog[]                            @relation("SystemAuditLogActor")
@@ -474,8 +440,13 @@ model QrPdfDelivery {
   client_request_id   String              @unique
   status              QrPdfDeliveryStatus @default(PROCESSING)
   file_name           String
+  start_param         String?
+  template            Json?
   telegram_message_id Int?
   error               String?
+  attempt_count       Int                 @default(0)
+  next_attempt_at     DateTime            @default(now())
+  locked_until        DateTime?
   sent_at             DateTime?
   failed_at           DateTime?
 
@@ -487,6 +458,7 @@ model QrPdfDelivery {
 
   @@index([organization_id, user_id, created_at])
   @@index([status, created_at])
+  @@index([status, next_attempt_at, locked_until])
 }
 
 model StaffMember {
@@ -582,62 +554,27 @@ model SubmissionAttachment {
   @@index([media_asset_id])
 }
 
-model MediaUploadSession {
-  id                String                   @id @default(cuid())
-  user_id           String?
-  owner_type        MediaOwnerType
-  owner_id          String
-  kind              MediaAssetKind
-  status            MediaUploadSessionStatus @default(PENDING)
-  bucket            String
-  temp_storage_key  String                   @unique
-  final_storage_key String?
-  file_name         String
-  content_type      String
-  size_limit_bytes  Int
-  expires_at        DateTime
-  uploaded_at       DateTime?
-  processed_at      DateTime?
-  failed_at         DateTime?
-  last_error        String?
-  metadata          Json?
-
-  user         User?        @relation(fields: [user_id], references: [id], onDelete: SetNull)
-  media_assets MediaAsset[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  @@index([user_id, status, created_at])
-  @@index([owner_type, owner_id, status, created_at])
-  @@index([status, expires_at])
-  @@index([kind, status, created_at])
-}
-
 model MediaAsset {
-  id                String           @id @default(cuid())
-  upload_session_id String?
-  owner_type        MediaOwnerType
-  owner_id          String
-  kind              MediaAssetKind
-  status            MediaAssetStatus @default(PROCESSING)
-  bucket            String
-  storage_key       String           @unique
-  public_url        String
-  content_type      String
-  size_bytes        Int?
-  width             Int?
-  height            Int?
-  checksum          String?
-  metadata          Json?
+  id           String           @id @default(cuid())
+  owner_type   MediaOwnerType
+  owner_id     String
+  kind         MediaAssetKind
+  status       MediaAssetStatus @default(PROCESSING)
+  bucket       String
+  storage_key  String           @unique
+  public_url   String
+  content_type String
+  size_bytes   Int?
+  width        Int?
+  height       Int?
+  checksum     String?
+  metadata     Json?
 
-  upload_session         MediaUploadSession?    @relation(fields: [upload_session_id], references: [id], onDelete: SetNull)
   submission_attachments SubmissionAttachment[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  @@index([upload_session_id])
   @@index([owner_type, owner_id, kind, created_at])
   @@index([kind, status, created_at])
 }
@@ -670,49 +607,5 @@ model TelegramNotificationDelivery {
   @@index([recipient_user_id, status, created_at])
   @@index([target_type, status, created_at])
   @@index([status, next_attempt_at, locked_until])
-}
-
-model Broadcast {
-  id                 String              @id @default(cuid())
-  created_by_user_id String?
-  target_kind        BroadcastTargetKind @default(ALL_USERS)
-  status             BroadcastStatus     @default(DRAFT)
-  locale             String?
-  text               String
-  metadata           Json?
-  started_at         DateTime?
-  sent_at            DateTime?
-  failed_at          DateTime?
-  error              String?
-
-  created_by_user User?                @relation("CreatedBroadcasts", fields: [created_by_user_id], references: [id], onDelete: SetNull)
-  recipients      BroadcastRecipient[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  @@index([created_by_user_id, created_at])
-  @@index([target_kind, status])
-  @@index([status, created_at])
-}
-
-model BroadcastRecipient {
-  id                  String                   @id @default(cuid())
-  broadcast_id        String
-  user_id             String
-  status              BroadcastRecipientStatus @default(PENDING)
-  telegram_chat_id    BigInt?
-  telegram_message_id Int?
-  error               String?
-  sent_at             DateTime?
-
-  broadcast Broadcast @relation(fields: [broadcast_id], references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  @@unique([broadcast_id, user_id])
-  @@index([user_id, status, created_at])
-  @@index([status, created_at])
+  @@unique([submission_id, target_id])
 }

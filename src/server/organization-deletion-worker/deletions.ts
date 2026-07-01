@@ -21,7 +21,6 @@ type StoredMediaObject = {
 
 type OrganizationDeletionPlan = {
   mediaAssetIds: string[];
-  mediaUploadSessionIds: string[];
   organizationExists: boolean;
   storedObjects: StoredMediaObject[];
 };
@@ -31,9 +30,6 @@ const getErrorMessage = (error: unknown) =>
 
 const getRetryDelayMs = (attemptCount: number) =>
   Math.min(15 * 60 * 1000, 30 * 1000 * 2 ** Math.max(0, attemptCount - 1));
-
-const uniqueStrings = (values: Array<null | string | undefined>) =>
-  Array.from(new Set(values.filter((value): value is string => Boolean(value))));
 
 const uniqueStoredObjects = (objects: StoredMediaObject[]) => {
   const seen = new Set<string>();
@@ -109,6 +105,34 @@ const deleteStoredMediaObject = async ({ bucket, storageKey }: StoredMediaObject
   }
 
   await deleteR2Object(storageKey);
+};
+
+const runWithConcurrency = async <T>(
+  items: T[],
+  concurrency: number,
+  task: (item: T) => Promise<void>
+) => {
+  const failed: unknown[] = [];
+  let nextIndex = 0;
+  const workerCount = Math.min(concurrency, items.length);
+
+  await Promise.all(
+    Array.from({ length: workerCount }, async () => {
+      while (nextIndex < items.length) {
+        const item = items[nextIndex];
+
+        nextIndex += 1;
+
+        try {
+          await task(item);
+        } catch (error) {
+          failed.push(error);
+        }
+      }
+    })
+  );
+
+  return failed;
 };
 
 export const claimPendingOrganizationDeletionJobs = async (
@@ -197,7 +221,6 @@ const collectOrganizationDeletionPlan = async (
   if (!organization) {
     return {
       mediaAssetIds: [],
-      mediaUploadSessionIds: [],
       organizationExists: false,
       storedObjects: []
     };
@@ -232,54 +255,21 @@ const collectOrganizationDeletionPlan = async (
     select: {
       bucket: true,
       id: true,
-      storage_key: true,
-      upload_session_id: true
+      storage_key: true
     },
     where: {
       OR: mediaOwnerFilters
-    }
-  });
-  const uploadSessionIdsFromAssets = uniqueStrings(
-    mediaAssets.map((asset) => asset.upload_session_id)
-  );
-  const mediaUploadSessions = await db.mediaUploadSession.findMany({
-    select: {
-      bucket: true,
-      final_storage_key: true,
-      id: true,
-      temp_storage_key: true
-    },
-    where: {
-      OR: [
-        ...mediaOwnerFilters,
-        ...(uploadSessionIdsFromAssets.length > 0
-          ? [
-              {
-                id: {
-                  in: uploadSessionIdsFromAssets
-                }
-              }
-            ]
-          : [])
-      ]
     }
   });
   const storedObjects = uniqueStoredObjects([
     ...mediaAssets.map((asset) => ({
       bucket: asset.bucket,
       storageKey: asset.storage_key
-    })),
-    ...mediaUploadSessions.flatMap((session) =>
-      uniqueStrings([session.temp_storage_key, session.final_storage_key]).map((storageKey) => ({
-        bucket: session.bucket,
-        storageKey
-      }))
-    )
+    }))
   ]);
 
   return {
     mediaAssetIds: mediaAssets.map((asset) => asset.id),
-    mediaUploadSessionIds: mediaUploadSessions.map((session) => session.id),
     organizationExists: true,
     storedObjects
   };
@@ -289,11 +279,9 @@ const deleteOrganizationRecords = async (
   db: OrganizationDeletionWorkerDb,
   {
     mediaAssetIds,
-    mediaUploadSessionIds,
     organizationId
   }: {
     mediaAssetIds: string[];
-    mediaUploadSessionIds: string[];
     organizationId: string;
   }
 ) => {
@@ -316,16 +304,6 @@ const deleteOrganizationRecords = async (
       });
     }
 
-    if (mediaUploadSessionIds.length > 0) {
-      await tx.mediaUploadSession.deleteMany({
-        where: {
-          id: {
-            in: mediaUploadSessionIds
-          }
-        }
-      });
-    }
-
     await tx.organization.deleteMany({
       where: {
         id: organizationId
@@ -335,11 +313,10 @@ const deleteOrganizationRecords = async (
 };
 
 const deleteStoredMediaObjects = async (storedObjects: StoredMediaObject[]) => {
-  const mediaDeletionResults = await Promise.allSettled(storedObjects.map(deleteStoredMediaObject));
-  const failedCount = mediaDeletionResults.filter((result) => result.status === "rejected").length;
+  const failed = await runWithConcurrency(storedObjects, 8, deleteStoredMediaObject);
 
-  if (failedCount > 0) {
-    throw new Error(`Failed to delete ${failedCount} organization media object(s).`);
+  if (failed.length > 0) {
+    throw new Error(`Failed to delete ${failed.length} organization media object(s).`);
   }
 };
 
@@ -455,7 +432,6 @@ export const processOrganizationDeletionJob = async (
 
         await deleteOrganizationRecords(db, {
           mediaAssetIds: plan.mediaAssetIds,
-          mediaUploadSessionIds: plan.mediaUploadSessionIds,
           organizationId: job.organization_id
         });
       }

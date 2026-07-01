@@ -394,8 +394,7 @@ const assertAttachments = async ({
 
   const assets = await db.mediaAsset.findMany({
     select: {
-      id: true,
-      upload_session_id: true
+      id: true
     },
     where: {
       id: {
@@ -414,7 +413,7 @@ const assertAttachments = async ({
   return assets;
 };
 
-const enqueueSubmissionNotificationsBestEffort = async (
+const enqueueSubmissionNotificationsReliably = async (
   {
     kind,
     organizationId,
@@ -428,19 +427,15 @@ const enqueueSubmissionNotificationsBestEffort = async (
   },
   db: DomainDb
 ) => {
-  try {
-    await enqueueSubmissionNotifications(
-      {
-        kind,
-        organizationId,
-        rating,
-        submissionId
-      },
-      db
-    );
-  } catch {
-    // Submission creation must stay fast for guests. The dispatcher handles queued deliveries.
-  }
+  await enqueueSubmissionNotifications(
+    {
+      kind,
+      organizationId,
+      rating,
+      submissionId
+    },
+    db
+  );
 };
 
 export const toAdminSubmissionItem = (submission: {
@@ -688,6 +683,16 @@ export const createSubmission = async (
   );
 
   if (existingSubmission) {
+    await enqueueSubmissionNotificationsReliably(
+      {
+        kind: existingSubmission.kind,
+        organizationId: existingSubmission.organization_id,
+        rating: existingSubmission.rating,
+        submissionId: existingSubmission.id
+      },
+      db
+    );
+
     return existingSubmission;
   }
 
@@ -769,48 +774,37 @@ export const createSubmission = async (
     );
 
     if (existingCreatedSubmission) {
+      await enqueueSubmissionNotificationsReliably(
+        {
+          kind: existingCreatedSubmission.kind,
+          organizationId: existingCreatedSubmission.organization_id,
+          rating: existingCreatedSubmission.rating,
+          submissionId: existingCreatedSubmission.id
+        },
+        db
+      );
+
       return existingCreatedSubmission;
     }
 
     throw error;
   }
 
-  const uploadSessionIds = attachmentAssets
-    .map((asset) => asset.upload_session_id)
-    .filter((value): value is string => Boolean(value));
-
-  if (attachmentIds.length > 0 || uploadSessionIds.length > 0) {
+  if (attachmentIds.length > 0) {
     await db.mediaAsset.updateMany({
       data: {
         owner_id: submission.id,
         owner_type: "SUBMISSION"
       },
       where: {
-        OR: [
-          ...(attachmentIds.length > 0
-            ? [
-                {
-                  id: {
-                    in: attachmentIds
-                  }
-                }
-              ]
-            : []),
-          ...(uploadSessionIds.length > 0
-            ? [
-                {
-                  upload_session_id: {
-                    in: uploadSessionIds
-                  }
-                }
-              ]
-            : [])
-        ]
+        id: {
+          in: attachmentIds
+        }
       }
     });
   }
 
-  await enqueueSubmissionNotificationsBestEffort(
+  await enqueueSubmissionNotificationsReliably(
     {
       kind: submission.kind,
       organizationId: organization.id,

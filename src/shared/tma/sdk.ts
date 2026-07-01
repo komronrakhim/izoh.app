@@ -2,6 +2,7 @@ import {
   bindMiniAppCssVars,
   bindThemeParamsCssVars,
   bindViewportCssVars,
+  closeMiniApp,
   disableVerticalSwipes,
   enableClosingConfirmation,
   expandViewport,
@@ -86,6 +87,7 @@ type TelegramButtonLike = {
 
 type TelegramWebAppLike = {
   colorScheme?: string;
+  close?: () => void;
   MainButton?: TelegramButtonLike;
   SecondaryButton?: TelegramButtonLike;
   offEvent?: (eventType: string, eventHandler: (...args: unknown[]) => void) => void;
@@ -704,6 +706,38 @@ const requestTmaFullscreen = () => {
 
     webApp.requestFullScreen?.();
     window.setTimeout(syncTmaSafeAreaFallback, 80);
+  });
+};
+
+export const closeTmaMiniApp = () => {
+  if (!isTelegramEnvironment()) {
+    return false;
+  }
+
+  try {
+    if (typeof closeMiniApp.ifAvailable === "function") {
+      const result = closeMiniApp.ifAvailable();
+
+      if (result[0]) {
+        return true;
+      }
+    } else {
+      closeMiniApp();
+      return true;
+    }
+  } catch {
+    // Fall through to Telegram's global WebApp API for older or unusual clients.
+  }
+
+  const webApp = getTelegramWebApp();
+
+  return safe(false, () => {
+    if (typeof webApp?.close !== "function") {
+      return false;
+    }
+
+    webApp.close();
+    return true;
   });
 };
 

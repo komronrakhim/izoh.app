@@ -47,11 +47,15 @@ export const createQrPdfDeliveryAttempt = async (
     clientRequestId,
     fileName,
     organizationId,
+    startParam,
+    template,
     userId
   }: {
     clientRequestId: string | undefined;
     fileName: string;
     organizationId: string;
+    startParam?: string;
+    template?: Prisma.InputJsonValue;
     userId: string;
   },
   db: DomainDb = getDomainDb()
@@ -84,6 +88,8 @@ export const createQrPdfDeliveryAttempt = async (
         client_request_id: cleanClientRequestId,
         file_name: fileName,
         organization_id: organizationId,
+        start_param: startParam,
+        template,
         user_id: userId
       }
     });
@@ -116,47 +122,3 @@ export const createQrPdfDeliveryAttempt = async (
     throw error;
   }
 };
-
-export const markQrPdfDeliverySent = async (
-  {
-    deliveryId,
-    telegramMessageId
-  }: {
-    deliveryId: string;
-    telegramMessageId?: number;
-  },
-  db: DomainDb = getDomainDb()
-) =>
-  db.qrPdfDelivery.update({
-    data: {
-      error: null,
-      failed_at: null,
-      sent_at: new Date(),
-      status: "SENT",
-      telegram_message_id: telegramMessageId
-    },
-    where: {
-      id: deliveryId
-    }
-  });
-
-export const markQrPdfDeliveryFailed = async (
-  {
-    deliveryId,
-    error
-  }: {
-    deliveryId: string;
-    error: string;
-  },
-  db: DomainDb = getDomainDb()
-) =>
-  db.qrPdfDelivery.update({
-    data: {
-      error,
-      failed_at: new Date(),
-      status: "FAILED"
-    },
-    where: {
-      id: deliveryId
-    }
-  });

@@ -202,7 +202,10 @@ describe("submission staff targeting", () => {
     };
 
     db.submission.findFirst.mockResolvedValueOnce({
-      id: "submission_existing"
+      id: "submission_existing",
+      kind: "REVIEW",
+      organization_id: "org_1",
+      rating: 5
     });
 
     await expect(
@@ -221,7 +224,15 @@ describe("submission staff targeting", () => {
 
     expect(db.submission.create).not.toHaveBeenCalled();
     expect(db.mediaAsset.updateMany).not.toHaveBeenCalled();
-    expect(enqueueSubmissionNotificationsMock).not.toHaveBeenCalled();
+    expect(enqueueSubmissionNotificationsMock).toHaveBeenCalledWith(
+      {
+        kind: "REVIEW",
+        organizationId: "org_1",
+        rating: 5,
+        submissionId: "submission_existing"
+      },
+      db
+    );
   });
 
   it("returns the existing submission when the client request races", async () => {
@@ -242,7 +253,10 @@ describe("submission staff targeting", () => {
     db.submission.findFirst
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce({
-        id: "submission_existing"
+        id: "submission_existing",
+        kind: "REVIEW",
+        organization_id: "org_1",
+        rating: 5
       });
     db.submission.create.mockRejectedValueOnce(uniqueError);
 
@@ -260,7 +274,15 @@ describe("submission staff targeting", () => {
       id: "submission_existing"
     });
 
-    expect(enqueueSubmissionNotificationsMock).not.toHaveBeenCalled();
+    expect(enqueueSubmissionNotificationsMock).toHaveBeenCalledWith(
+      {
+        kind: "REVIEW",
+        organizationId: "org_1",
+        rating: 5,
+        submissionId: "submission_existing"
+      },
+      db
+    );
   });
 
   it("stores a staff snapshot with submissions that target an employee", async () => {
@@ -469,7 +491,7 @@ describe("submission staff targeting", () => {
     ).rejects.toThrow("Complaint topic is not available");
   });
 
-  it("does not fail submission creation when notification enqueue fails", async () => {
+  it("surfaces notification enqueue failures so important alerts are not silently lost", async () => {
     enqueueSubmissionNotificationsMock.mockRejectedValueOnce(new Error("Database lock timeout"));
 
     await expect(
@@ -482,9 +504,74 @@ describe("submission staff targeting", () => {
         },
         createMockDb({})
       )
-    ).resolves.toMatchObject({
-      id: "submission_1"
-    });
+    ).rejects.toThrow("Database lock timeout");
+  });
+
+  it("re-enqueues notifications when an idempotent submission already exists", async () => {
+    const duplicateRequestError = new Prisma.PrismaClientKnownRequestError(
+      "Unique constraint failed on the fields: (`client_request_id`)",
+      {
+        clientVersion: "test",
+        code: "P2002",
+        meta: {
+          target: ["client_request_id"]
+        }
+      }
+    );
+    const existingSubmission = {
+      body_text: "Nice",
+      client_request_id: "submission-request-1",
+      customer_allows_reply: false,
+      customer_contact_phone: null,
+      customer_display_name: null,
+      customer_user_id: "user_1",
+      guest_entry_scan_id: null,
+      id: "submission_existing",
+      kind: "REVIEW" as const,
+      locale: "ru",
+      metadata: {},
+      organization_id: "org_1",
+      qr_context: null,
+      rating: 5,
+      target_staff_member_id: null
+    };
+    const db = createMockDb({}) as never as {
+      organization: unknown;
+      staffMember: unknown;
+      submission: {
+        create: ReturnType<typeof vi.fn>;
+        findFirst: ReturnType<typeof vi.fn>;
+      };
+      mediaAsset: unknown;
+      telegramNotificationDelivery: unknown;
+    };
+
+    db.submission.create.mockRejectedValueOnce(duplicateRequestError);
+    db.submission.findFirst.mockResolvedValueOnce(existingSubmission);
+
+    await expect(
+      createSubmission(
+        {
+          bodyText: "Nice",
+          clientRequestId: "submission-request-1",
+          customerUserId: "user_1",
+          kind: "REVIEW",
+          organizationId: "org_1",
+          rating: 5
+        },
+        db as never
+      )
+    ).resolves.toEqual(existingSubmission);
+
+    expect(enqueueSubmissionNotificationsMock).toHaveBeenCalledWith(
+      {
+        kind: "REVIEW",
+        organizationId: "org_1",
+        rating: 5,
+        submissionId: "submission_existing"
+      },
+      db
+    );
   });
 
   it("attaches ready photos and reassigns media assets to the created submission", async () => {
@@ -500,8 +587,7 @@ describe("submission staff targeting", () => {
 
     db.mediaAsset.findMany.mockResolvedValueOnce([
       {
-        id: "photo_1",
-        upload_session_id: "session_1"
+        id: "photo_1"
       }
     ]);
 
@@ -550,18 +636,9 @@ describe("submission staff targeting", () => {
           owner_type: "SUBMISSION"
         },
         where: {
-          OR: [
-            {
-              id: {
-                in: ["photo_1"]
-              }
-            },
-            {
-              upload_session_id: {
-                in: ["session_1"]
-              }
-            }
-          ]
+          id: {
+            in: ["photo_1"]
+          }
         }
       })
     );

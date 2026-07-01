@@ -846,7 +846,7 @@
       "rows": ["Employees", "In forms"]
     }
   },
-  "sectionShellHint": "The settings will appear here when the section is ready.",
+  "sectionShellHint": "The main items for this section are here.",
   "publicReviews": {
     "title": "Public reviews",
     "subtitle": "Let guests tell others about your place: they can choose a platform and open a public review page.",

@@ -49,6 +49,7 @@ import {
   type QrVisualStyle
 } from "~/shared/qr";
 import {
+  closeTmaMiniApp,
   tmaHaptics,
   useTma,
   useTmaBackButton,
@@ -97,7 +98,7 @@ const readDraft = (
 
     const draft = JSON.parse(raw) as Partial<QrTemplateDraft>;
 
-    return {
+    const normalizedDraft = {
       caption: normalizeQrText(draft.caption, QR_CAPTION_MAX_LENGTH),
       customColors: {
         background: normalizeQrHexColor(
@@ -117,6 +118,19 @@ const readDraft = (
       qrStyle: isQrVisualStyle(draft.qrStyle) ? draft.qrStyle : QR_DEFAULT_DRAFT.qrStyle,
       showContext:
         typeof draft.showContext === "boolean" ? draft.showContext : QR_DEFAULT_DRAFT.showContext
+    };
+    const savedFormat = QR_FORMAT_BY_ID[normalizedDraft.formatId];
+
+    return {
+      ...normalizedDraft,
+      caption:
+        savedFormat.allowCaption || normalizedDraft.caption
+          ? normalizedDraft.caption
+          : defaultDraft.caption,
+      headline:
+        savedFormat.allowCustomHeadline || normalizedDraft.headline
+          ? normalizedDraft.headline
+          : defaultDraft.headline
     };
   } catch {
     return defaultDraft;
@@ -916,12 +930,12 @@ export const AdminQrConstructor = () => {
     window.localStorage.setItem(
       qrDraftStorageKey,
       JSON.stringify({
-        caption: cleanCaption,
+        caption: normalizeQrText(caption, QR_CAPTION_MAX_LENGTH),
         customColors,
         emojiOpacity,
         emojiThemeId,
         formatId,
-        headline: cleanHeadline,
+        headline: normalizeQrText(headline, QR_HEADLINE_MAX_LENGTH),
         qrContext: cleanQrContext,
         qrStyle: activeQrStyle,
         showContext
@@ -929,13 +943,13 @@ export const AdminQrConstructor = () => {
     );
   }, [
     activeQrStyle,
-    cleanCaption,
-    cleanHeadline,
+    caption,
     cleanQrContext,
     customColors,
     emojiOpacity,
     emojiThemeId,
     formatId,
+    headline,
     organization,
     qrDraftStorageKey,
     showContext
@@ -978,12 +992,22 @@ export const AdminQrConstructor = () => {
         },
         method: "POST"
       });
+      const result = (await response.json().catch(() => null)) as {
+        ok?: boolean;
+        status?: string;
+      } | null;
 
-      if (!response.ok) {
+      const acceptedForDelivery = response.status === 202 && result?.status === "PROCESSING";
+
+      if ((!response.ok && !acceptedForDelivery) || (!result?.ok && !acceptedForDelivery)) {
         throw new Error("QR PDF action failed.");
       }
 
       tmaHaptics.notification("success");
+
+      if (typeof window !== "undefined") {
+        window.setTimeout(closeTmaMiniApp, 240);
+      }
     } catch {
       tmaHaptics.notification("error");
     } finally {

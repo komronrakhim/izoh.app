@@ -89,7 +89,8 @@ export const enqueueSubmissionNotifications = async (
   }
 
   const result = await db.telegramNotificationDelivery.createMany({
-    data: deliveryData
+    data: deliveryData,
+    skipDuplicates: true
   });
 
   return result.count;

@@ -35,6 +35,11 @@ describe("QR PDF deliveries", () => {
           clientRequestId: "qr-pdf-request-1",
           fileName: "qr-local-stol-5.pdf",
           organizationId: "org_1",
+          startParam: "place.table",
+          template: {
+            context: "Table 5",
+            formatId: "table"
+          },
           userId: "user_1"
         },
         db
@@ -85,5 +90,40 @@ describe("QR PDF deliveries", () => {
     });
 
     expect(deliveryCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it("stores the start param and template for background delivery", async () => {
+    const deliveryCreate = vi.fn(async ({ data }) => createDelivery("PROCESSING"));
+    const db = {
+      qrPdfDelivery: {
+        create: deliveryCreate,
+        findFirst: vi.fn(async () => null)
+      }
+    } as never;
+
+    await createQrPdfDeliveryAttempt(
+      {
+        clientRequestId: "qr-pdf-request-1",
+        fileName: "qr-local-stol-5.pdf",
+        organizationId: "org_1",
+        startParam: "place.table",
+        template: {
+          context: "Table 5",
+          formatId: "table"
+        },
+        userId: "user_1"
+      },
+      db
+    );
+
+    expect(deliveryCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        start_param: "place.table",
+        template: {
+          context: "Table 5",
+          formatId: "table"
+        }
+      })
+    });
   });
 });

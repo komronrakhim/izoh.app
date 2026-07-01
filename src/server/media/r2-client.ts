@@ -1,11 +1,9 @@
 import {
   DeleteObjectCommand,
   GetObjectCommand,
-  HeadObjectCommand,
   PutObjectCommand,
   S3Client
 } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { getRequiredEnv } from "~/server/config/env";
 
@@ -34,41 +32,6 @@ export const getR2Client = () => {
   }
 
   return r2Client;
-};
-
-export const createPresignedPutUrl = async ({
-  contentType,
-  expiresIn,
-  key
-}: {
-  contentType: string;
-  expiresIn: number;
-  key: string;
-}) => {
-  const config = getR2Config();
-
-  return getSignedUrl(
-    getR2Client(),
-    new PutObjectCommand({
-      Bucket: config.bucket,
-      ContentType: contentType,
-      Key: key
-    }),
-    {
-      expiresIn
-    }
-  );
-};
-
-export const headR2Object = async (key: string) => {
-  const config = getR2Config();
-
-  return getR2Client().send(
-    new HeadObjectCommand({
-      Bucket: config.bucket,
-      Key: key
-    })
-  );
 };
 
 export const getR2Object = async (key: string) => {

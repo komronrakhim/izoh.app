@@ -846,7 +846,7 @@
       "rows": ["Çalışanlar", "formlarda"]
     }
   },
-  "sectionShellHint": "Bölüm hazır olduğunda ayarlar burada görünecektir.",
+  "sectionShellHint": "Bu bölümün ana noktaları burada.",
   "publicReviews": {
     "title": "Herkese açık yorumlar",
     "subtitle": "Konukların yerinizi başkalarına anlatmasına izin verin: uygun platformu seçip herkese açık yorum sayfasına geçebilirler.",

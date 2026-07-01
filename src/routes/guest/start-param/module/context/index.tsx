@@ -11,6 +11,7 @@ import {
 } from "~/shared/guest-entry";
 import { toPrismaLocale } from "~/shared/i18n";
 import { useI18n } from "~/shared/i18n/react";
+import { uploadImageAsset } from "~/shared/media";
 import {
   COMPLAINT_CATEGORY_IDS,
   SUGGESTION_TOPIC_IDS,
@@ -43,8 +44,6 @@ import {
   getComplaintOptionalText
 } from "../copy";
 import type {
-  MediaFinalizeResponse,
-  MediaUploadSessionResponse,
   StaffTarget,
   SubmissionPhotoDraft,
   TopicOption,
@@ -936,57 +935,14 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
       }
 
       try {
-        const sessionResponse = await fetch("/api/media/upload-sessions", {
-          body: JSON.stringify({
-            contentType: file.type,
-            fileName: file.name,
-            kind: "SUBMISSION_PHOTO",
-            ownerId: attachmentOwnerId,
-            ownerType: "SUBMISSION"
-          }),
-          headers: {
-            "Content-Type": "application/json",
-            ...(tma.initDataRaw ? { "X-Telegram-Init-Data": tma.initDataRaw } : {})
-          },
-          method: "POST"
+        const assets = await uploadImageAsset({
+          file,
+          initDataRaw: tma.initDataRaw,
+          kind: "SUBMISSION_PHOTO",
+          ownerId: attachmentOwnerId,
+          ownerType: "SUBMISSION"
         });
-
-        if (!sessionResponse.ok) {
-          throw new Error("Upload session failed.");
-        }
-
-        const uploadSession = (await sessionResponse.json()) as MediaUploadSessionResponse;
-
-        if (file.size > uploadSession.maxBytes) {
-          throw new Error("File is too large.");
-        }
-
-        const uploadResponse = await fetch(uploadSession.uploadUrl, {
-          body: file,
-          headers: uploadSession.headers,
-          method: uploadSession.method
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error("Direct upload failed.");
-        }
-
-        const finalizeResponse = await fetch(
-          `/api/media/upload-sessions/${uploadSession.session.id}/finalize`,
-          {
-            headers: {
-              ...(tma.initDataRaw ? { "X-Telegram-Init-Data": tma.initDataRaw } : {})
-            },
-            method: "POST"
-          }
-        );
-
-        if (!finalizeResponse.ok) {
-          throw new Error("Upload finalization failed.");
-        }
-
-        const finalized = (await finalizeResponse.json()) as MediaFinalizeResponse;
-        const photoAsset = finalized.assets.find((asset) => asset.kind === "SUBMISSION_PHOTO");
+        const photoAsset = assets.find((asset) => asset.kind === "SUBMISSION_PHOTO");
 
         if (!photoAsset) {
           throw new Error("Processed photo was not returned.");
