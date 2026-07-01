@@ -2,7 +2,8 @@ import type { SubmissionKind } from "../../../prisma/generated/prisma/client";
 
 import { getDomainDb, type DomainDb } from "~/server/domain/shared";
 import { getMediaPublicUrl } from "~/server/media/public-url";
-import { createTranslator, fromPrismaLocale } from "~/shared/i18n";
+import { fromPrismaLocale } from "~/shared/i18n";
+import { createTranslator } from "~/shared/i18n/server";
 import type { AppLocale } from "~/shared/i18n";
 import { isImportantSubmission } from "~/shared/notifications";
 import { getRatingEmoji, getRatingLabelKey, normalizeRatingValue } from "~/shared/ratings";

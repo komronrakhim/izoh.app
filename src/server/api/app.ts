@@ -9,6 +9,10 @@ import type { Prisma } from "../../../prisma/generated/prisma/client";
 import { getPrisma } from "~/server/db";
 import { getOrganizationAnalytics } from "~/server/domain/analytics";
 import {
+  getSubscriptionPricingPayload,
+  updateSubscriptionPricing
+} from "~/server/domain/subscription-pricing";
+import {
   getOrganizationGuestMenu,
   updateOrganizationGuestMenuItem
 } from "~/server/domain/guest-menu";
@@ -117,7 +121,6 @@ import {
   createQrPdfFileName,
   type QrFormatId
 } from "~/shared/qr";
-import { SUBSCRIPTION_PLANS, getAnnualSubscriptionDiscountPercent } from "~/shared/subscriptions";
 import { TIME_ZONE_MAX_LENGTH } from "~/shared/time-zone";
 
 const telegramInitDataHeader = "X-Telegram-Init-Data";
@@ -222,6 +225,11 @@ const systemSubscriptionGrantSchema = z.object({
 
 const systemSubscriptionCancelSchema = z.object({
   reason: z.string().trim().max(160).optional()
+});
+
+const systemSubscriptionPricingSchema = z.object({
+  annualAmountStars: z.number().int().min(1).max(1_000_000),
+  monthlyAmountStars: z.number().int().min(1).max(1_000_000)
 });
 
 const qrHexColorSchema = z.string().regex(/^#[0-9a-f]{6}$/i);
@@ -1229,6 +1237,77 @@ export const createApiApp = () => {
 
       return c.json(await getSystemStars({ cursor, period: periodQuery, search }, db));
     } catch (error) {
+      if (error instanceof Error) {
+        const status = getSystemAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      throw error;
+    }
+  });
+
+  app.get("/api/system/subscription-pricing", async (c) => {
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    try {
+      await requireSystemAdmin({ c, db });
+
+      return c.json(await getSubscriptionPricingPayload(db));
+    } catch (error) {
+      if (error instanceof Error) {
+        const status = getSystemAccessStatus(error);
+
+        if (status) return c.json({ error: error.message }, status);
+      }
+
+      throw error;
+    }
+  });
+
+  app.patch("/api/system/subscription-pricing", async (c) => {
+    const db = getPrisma();
+
+    if (!db) {
+      return databaseRequired(c);
+    }
+
+    try {
+      const input = systemSubscriptionPricingSchema.parse(await c.req.json());
+      const user = await requireSystemAdmin({ c, db });
+      const pricing = await updateSubscriptionPricing(
+        {
+          annualAmountStars: input.annualAmountStars,
+          monthlyAmountStars: input.monthlyAmountStars,
+          updatedByUserId: user.id
+        },
+        db
+      );
+
+      await recordSystemAuditLog(
+        {
+          action: "SUBSCRIPTION_PRICING_UPDATED",
+          actorUserId: user.id,
+          metadata: {
+            annualAmountStars: input.annualAmountStars,
+            monthlyAmountStars: input.monthlyAmountStars
+          },
+          targetId: "subscription.pricing",
+          targetType: "SYSTEM_SETTING"
+        },
+        db
+      );
+
+      return c.json(pricing);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return c.json({ error: "Invalid subscription pricing." }, 400);
+      }
+
       if (error instanceof Error) {
         const status = getSystemAccessStatus(error);
 
@@ -2290,10 +2369,11 @@ export const createApiApp = () => {
 
     try {
       await requireOrganizationOwner({ c, db, organizationId });
+      const pricing = await getSubscriptionPricingPayload(db);
 
       return c.json({
-        annualDiscountPercent: getAnnualSubscriptionDiscountPercent(),
-        plans: SUBSCRIPTION_PLANS,
+        annualDiscountPercent: pricing.annualDiscountPercent,
+        plans: pricing.plans,
         subscription: await getOrganizationSubscriptionPayload(organizationId, db)
       });
     } catch (error) {

@@ -2,6 +2,7 @@ import type {
   OrganizationSubscriptionPaymentStatus,
   OrganizationSubscriptionSource,
   OrganizationSubscriptionStatus,
+  SubscriptionPlans,
   SubscriptionPlanCode
 } from "~/shared/subscriptions";
 import type { AdminSubmissionItem, SubmissionKindInput } from "~/shared/submissions";
@@ -186,6 +187,11 @@ export type SystemStarsPayload = {
     paidStars: number;
     refundedPayments: number;
   };
+};
+
+export type SystemSubscriptionPricingPayload = {
+  annualDiscountPercent: number;
+  plans: SubscriptionPlans;
 };
 
 export type SystemAuditLogItem = {

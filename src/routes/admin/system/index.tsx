@@ -43,6 +43,7 @@ import {
   type SystemPulsePeriod,
   type SystemStarsPayload,
   type SystemSubmissionItem,
+  type SystemSubscriptionPricingPayload,
   type SystemSubmissionsPayload,
   type SystemUserDetailPayload,
   type SystemUserItem,
@@ -59,7 +60,7 @@ type SystemMetricId =
   | "submissions"
   | "users";
 
-type SystemSectionId = "organizations" | "stars" | "submissions" | "users";
+type SystemSectionId = "organizations" | "pricing" | "stars" | "submissions" | "users";
 
 type SystemMetricMeta = {
   icon: LucideIcon;
@@ -105,6 +106,10 @@ const sectionMeta: Record<SystemSectionId, { icon: LucideIcon; tone: string }> =
   organizations: {
     icon: Building2,
     tone: "bg-[#007AFF] text-white"
+  },
+  pricing: {
+    icon: CircleDollarSign,
+    tone: "bg-[#6817FF] text-white"
   },
   stars: {
     icon: CircleDollarSign,
@@ -352,6 +357,179 @@ const EmptySection = ({ text }: { text: string }) => (
     {text}
   </div>
 );
+
+const normalizeStarsDraft = (value: string) => value.replace(/[^\d]/g, "").slice(0, 7);
+
+const getStarsDraftAmount = (value: string) => {
+  const amount = Number(value);
+
+  return Number.isInteger(amount) && amount > 0 ? amount : null;
+};
+
+const SubscriptionPricingForm = () => {
+  const tma = useTma();
+  const queryClient = useQueryClient();
+  const { locale, t } = useI18n();
+  const number = React.useMemo(() => new Intl.NumberFormat(getIntlLocale(locale)), [locale]);
+  const pricingQuery = useQuery({
+    enabled: tma.isReady && Boolean(tma.initDataRaw),
+    queryFn: () =>
+      fetchApiJson<SystemSubscriptionPricingPayload>("/api/system/subscription-pricing", {
+        initDataRaw: tma.initDataRaw
+      }),
+    queryKey: queryKeys.systemSubscriptionPricing(tma.initDataRaw)
+  });
+  const [monthlyDraft, setMonthlyDraft] = React.useState("");
+  const [annualDraft, setAnnualDraft] = React.useState("");
+
+  React.useEffect(() => {
+    const pricing = pricingQuery.data;
+
+    if (!pricing) {
+      return;
+    }
+
+    setMonthlyDraft(String(pricing.plans.MONTHLY.amountStars));
+    setAnnualDraft(String(pricing.plans.ANNUAL.amountStars));
+  }, [pricingQuery.data]);
+
+  const monthlyAmount = getStarsDraftAmount(monthlyDraft);
+  const annualAmount = getStarsDraftAmount(annualDraft);
+  const currentMonthlyAmount = pricingQuery.data?.plans.MONTHLY.amountStars ?? null;
+  const currentAnnualAmount = pricingQuery.data?.plans.ANNUAL.amountStars ?? null;
+  const isDirty =
+    monthlyAmount !== null &&
+    annualAmount !== null &&
+    (monthlyAmount !== currentMonthlyAmount || annualAmount !== currentAnnualAmount);
+  const discountPercent =
+    monthlyAmount && annualAmount
+      ? Math.max(0, Math.round(((monthlyAmount * 12 - annualAmount) / (monthlyAmount * 12)) * 100))
+      : 0;
+
+  const pricingMutation = useMutation({
+    mutationFn: ({
+      annualAmountStars,
+      monthlyAmountStars
+    }: {
+      annualAmountStars: number;
+      monthlyAmountStars: number;
+    }) =>
+      fetchApiJson<SystemSubscriptionPricingPayload>("/api/system/subscription-pricing", {
+        body: JSON.stringify({
+          annualAmountStars,
+          monthlyAmountStars
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        initDataRaw: tma.initDataRaw,
+        method: "PATCH"
+      }),
+    onError: () => {
+      tma.haptics.notification("error");
+    },
+    onSuccess: (payload) => {
+      tma.haptics.notification("success");
+      queryClient.setQueryData(queryKeys.systemSubscriptionPricing(tma.initDataRaw), payload);
+    }
+  });
+
+  const canSave =
+    pricingQuery.isSuccess &&
+    isDirty &&
+    monthlyAmount !== null &&
+    annualAmount !== null &&
+    !pricingMutation.isPending;
+
+  return (
+    <section className="grid gap-2.5">
+      <div className="iz-liquid-list grid gap-4 rounded-[28px] border px-4 py-4">
+        <div className="grid gap-1">
+          <h3 className="ios-headline font-semibold text-foreground">
+            {t("admin.system.pricing.heading")}
+          </h3>
+          <p className="ios-footnote text-muted">{t("admin.system.pricing.hint")}</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <label className="grid gap-1.5">
+            <span className="ios-caption-1 px-1 font-semibold text-muted">
+              {t("admin.system.pricing.month")}
+            </span>
+            <Input
+              clearable={false}
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="500"
+              size="sm"
+              value={monthlyDraft}
+              addon={{
+                after: <span className="ios-caption-1 font-semibold text-muted">Stars</span>
+              }}
+              onChange={(event) => setMonthlyDraft(normalizeStarsDraft(event.currentTarget.value))}
+            />
+          </label>
+
+          <label className="grid gap-1.5">
+            <span className="ios-caption-1 px-1 font-semibold text-muted">
+              {t("admin.system.pricing.year")}
+            </span>
+            <Input
+              clearable={false}
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="5000"
+              size="sm"
+              value={annualDraft}
+              addon={{
+                after: <span className="ios-caption-1 font-semibold text-muted">Stars</span>
+              }}
+              onChange={(event) => setAnnualDraft(normalizeStarsDraft(event.currentTarget.value))}
+            />
+          </label>
+        </div>
+
+        <div className="flex items-center justify-between gap-3">
+          <p className="ios-footnote min-w-0 text-muted">
+            {discountPercent > 0
+              ? t("admin.system.pricing.discount", {
+                  value: discountPercent
+                })
+              : t("admin.system.pricing.noDiscount")}
+          </p>
+          <Button
+            disabled={!canSave}
+            size="sm"
+            state={pricingMutation.isPending ? "loading" : "idle"}
+            onClick={() => {
+              if (monthlyAmount && annualAmount) {
+                pricingMutation.mutate({
+                  annualAmountStars: annualAmount,
+                  monthlyAmountStars: monthlyAmount
+                });
+              }
+            }}
+          >
+            {t("admin.system.pricing.save")}
+          </Button>
+        </div>
+
+        {pricingMutation.isError ? (
+          <p className="ios-footnote text-danger">{t("admin.system.pricing.error")}</p>
+        ) : null}
+
+        {pricingQuery.data ? (
+          <p className="ios-caption-1 text-muted">
+            {t("admin.system.pricing.current", {
+              month: number.format(pricingQuery.data.plans.MONTHLY.amountStars),
+              year: number.format(pricingQuery.data.plans.ANNUAL.amountStars)
+            })}
+          </p>
+        ) : null}
+      </div>
+    </section>
+  );
+};
 
 const SystemHeader = ({ subtitle, title }: { subtitle?: string; title: string }) => (
   <section className="grid gap-1 px-4">
@@ -1243,6 +1421,11 @@ export const AdminSystemPage = () => {
                       id: "stars",
                       suffix: number.format(pulse.totals.paidStars.value),
                       to: "/admin/system/stars"
+                    },
+                    {
+                      id: "pricing",
+                      suffix: "Stars",
+                      to: "/admin/system/subscription-pricing"
                     }
                   ] as const
                 ).map((item) => {
@@ -1280,6 +1463,31 @@ export const AdminSystemPage = () => {
               </section>
             </>
           ) : null}
+        </div>
+      </main>
+    </PageTransition>
+  );
+};
+
+export const AdminSystemSubscriptionPricingPage = () => {
+  const navigate = useNavigate();
+  const backToSystem = React.useCallback(() => {
+    void navigate({ to: "/admin/system" });
+  }, [navigate]);
+  const gate = useSystemGate(backToSystem);
+  const { t } = useI18n();
+
+  if (!gate.isAllowed) return gate.content;
+
+  return (
+    <PageTransition>
+      <main className="tma-page bg-surface text-foreground">
+        <div className="account-shell">
+          <SystemHeader
+            title={t("admin.system.pricing.title")}
+            subtitle={t("admin.system.pricing.pageHint")}
+          />
+          <SubscriptionPricingForm />
         </div>
       </main>
     </PageTransition>

@@ -132,6 +132,11 @@ const AdminSystemStarsPage = lazyRouteComponent(() =>
     default: module.AdminSystemStarsPage
   }))
 );
+const AdminSystemSubscriptionPricingPage = lazyRouteComponent(() =>
+  import("~/routes/admin/system").then((module) => ({
+    default: module.AdminSystemSubscriptionPricingPage
+  }))
+);
 const CustomerWizardRoute = lazyRouteComponent(() =>
   import("~/routes/guest/start-param").then((module) => ({
     default: module.CustomerWizardRoute
@@ -270,6 +275,12 @@ const adminSystemStarsRoute = createRoute({
   component: AdminSystemStarsPage
 });
 
+const adminSystemSubscriptionPricingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/system/subscription-pricing",
+  component: AdminSystemSubscriptionPricingPage
+});
+
 const adminOrganizationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/admin/$organizationId",
@@ -355,6 +366,7 @@ const routeTree = rootRoute.addChildren([
   adminSystemUserRoute,
   adminSystemSubmissionsRoute,
   adminSystemStarsRoute,
+  adminSystemSubscriptionPricingRoute,
   adminOrganizationRoute,
   adminQrRoute,
   adminFeedRoute,

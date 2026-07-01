@@ -212,7 +212,8 @@
       "auditLog": "Amallar",
       "userInfo": "Profil",
       "userOrganizations": "Foydalanuvchi joylari",
-      "userSubmissions": "Foydalanuvchi murojaatlari"
+      "userSubmissions": "Foydalanuvchi murojaatlari",
+      "pricing": "Obuna narxlari"
     },
     "subscriptionUntil": "{{date}} gacha faol",
     "userMeta": "ID {{telegramId}} · {{locale}}",
@@ -247,7 +248,8 @@
     "audit": {
       "systemActor": "Tizim",
       "SUBSCRIPTION_GRANTED": "Obuna qo‘lda berildi",
-      "SUBSCRIPTION_CANCELED": "Obuna bekor qilindi"
+      "SUBSCRIPTION_CANCELED": "Obuna bekor qilindi",
+      "SUBSCRIPTION_PRICING_UPDATED": "Obuna narxlari yangilandi"
     },
     "grantPopup": {
       "title": "Obuna berish",
@@ -266,6 +268,19 @@
       "title": "Obuna bekor qilinsinmi?",
       "message": "Bu joy uchun kirish darhol to‘xtaydi. Keyin yana yangi obuna berish mumkin.",
       "confirm": "Bekor qilish"
+    },
+    "pricing": {
+      "title": "Obuna narxlari",
+      "heading": "Stars narxlari",
+      "hint": "Bu summalar egalar obuna sahifasida ko‘radigan narxlardir. Yangi invoice’lar shu narx bilan yaratiladi.",
+      "month": "Oy",
+      "year": "Yil",
+      "discount": "Yillik chegirma: {{value}}%",
+      "noDiscount": "Hozir yillik chegirma yo‘q.",
+      "save": "Saqlash",
+      "error": "Narxlarni saqlab bo‘lmadi. Qayta urinib ko‘ring.",
+      "current": "Hozir: oyiga {{month}} Stars va yiliga {{year}} Stars.",
+      "pageHint": "Oylik va yillik narxni Stars’da belgilang. Egalar bu summalarni obuna sahifasida ko‘radi."
     }
   },
   "faq": {
@@ -801,12 +816,17 @@
         "languages": {
           "title": "Tillar",
           "subtitle": "Forma va xabarlar mehmon hamda egasi tanlagan tilga moslashadi."
+        },
+        "publicReviews": {
+          "title": "Ommaviy sharhlar",
+          "subtitle": "Yuqori bahodan keyin mehmonni ommaviy sharh qoldirishga muloyim taklif qilish mumkin."
         }
       }
     },
     "plansHint": "Birinchi 7 kun allaqachon ochiq. To‘lov sinov davridan keyin forma to‘xtamasligi uchun kerak.",
     "payAction": "To‘lash {{amount}}",
-    "payError": "To‘lov ochilmadi. Qayta urinib ko‘ring."
+    "payError": "To‘lov ochilmadi. Qayta urinib ko‘ring.",
+    "fromPriceBadge": "{{amount}} Stars dan"
   },
   "sections": {
     "show": "Mehmonlarga ko‘rsatish",
