@@ -24,7 +24,7 @@ import {
 import * as React from "react";
 
 import { Avatar } from "~/common/components";
-import { Button, Input, List, ListIcon, PendingScreen, Tabs } from "~/common/ui";
+import { Button, Input, List, ListIcon, PendingScreen, StarCurrencyIcon, Tabs } from "~/common/ui";
 import { cn } from "~/common/utils";
 import { fetchApiJson } from "~/shared/api";
 import { useAdminOrganization } from "~/shared/admin";
@@ -33,7 +33,7 @@ import { useI18n } from "~/shared/i18n/react";
 import { queryKeys } from "~/shared/query";
 import { PageTransition } from "~/shared/router/page-transition";
 import type { SubscriptionPlanCode } from "~/shared/subscriptions";
-import type { SubmissionKindInput } from "~/shared/submissions";
+import { getSubmissionTopicIds, type SubmissionKindInput } from "~/shared/submissions";
 import {
   SYSTEM_PULSE_PERIODS,
   type SystemOrganizationDetailPayload,
@@ -49,7 +49,7 @@ import {
   type SystemUserItem,
   type SystemUsersPayload
 } from "~/shared/system";
-import { showTmaPopup, tmaHaptics, useTma, useTmaBackButton } from "~/shared/tma";
+import { showTmaPopup, tmaHaptics, useTma, useTmaBackButton, useTmaMainButton } from "~/shared/tma";
 
 type SystemMetricId =
   | "activeSubscriptions"
@@ -366,6 +366,19 @@ const getStarsDraftAmount = (value: string) => {
   return Number.isInteger(amount) && amount > 0 ? amount : null;
 };
 
+const SystemStarAmount = ({
+  amount,
+  number
+}: {
+  amount: number;
+  number: Intl.NumberFormat;
+}) => (
+  <span className="inline-flex items-center gap-1 tabular-nums">
+    {number.format(amount)}
+    <StarCurrencyIcon className="size-3.5 text-[#FFB000] dark:text-[#FFD60A]" />
+  </span>
+);
+
 const SubscriptionPricingForm = () => {
   const tma = useTma();
   const queryClient = useQueryClient();
@@ -440,94 +453,107 @@ const SubscriptionPricingForm = () => {
     monthlyAmount !== null &&
     annualAmount !== null &&
     !pricingMutation.isPending;
+  const savePricing = React.useCallback(() => {
+    if (!monthlyAmount || !annualAmount || !canSave) {
+      return;
+    }
+
+    pricingMutation.mutate({
+      annualAmountStars: annualAmount,
+      monthlyAmountStars: monthlyAmount
+    });
+  }, [annualAmount, canSave, monthlyAmount, pricingMutation]);
+  const mainButtonState = React.useMemo(
+    () =>
+      pricingQuery.isSuccess
+        ? {
+            enabled: canSave,
+            loading: pricingMutation.isPending,
+            shine: canSave,
+            text: t("admin.system.pricing.save"),
+            visible: true
+          }
+        : null,
+    [canSave, pricingMutation.isPending, pricingQuery.isSuccess, t]
+  );
+
+  useTmaMainButton(mainButtonState, savePricing);
 
   return (
-    <section className="grid gap-2.5">
-      <div className="iz-liquid-list grid gap-4 rounded-[28px] border px-4 py-4">
-        <div className="grid gap-1">
-          <h3 className="ios-headline font-semibold text-foreground">
-            {t("admin.system.pricing.heading")}
-          </h3>
-          <p className="ios-footnote text-muted">{t("admin.system.pricing.hint")}</p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <label className="grid gap-1.5">
-            <span className="ios-caption-1 px-1 font-semibold text-muted">
-              {t("admin.system.pricing.month")}
-            </span>
-            <Input
-              clearable={false}
-              inputMode="numeric"
-              pattern="[0-9]*"
-              placeholder="500"
-              size="sm"
-              value={monthlyDraft}
-              addon={{
-                after: <span className="ios-caption-1 font-semibold text-muted">Stars</span>
-              }}
-              onChange={(event) => setMonthlyDraft(normalizeStarsDraft(event.currentTarget.value))}
-            />
-          </label>
-
-          <label className="grid gap-1.5">
-            <span className="ios-caption-1 px-1 font-semibold text-muted">
-              {t("admin.system.pricing.year")}
-            </span>
-            <Input
-              clearable={false}
-              inputMode="numeric"
-              pattern="[0-9]*"
-              placeholder="5000"
-              size="sm"
-              value={annualDraft}
-              addon={{
-                after: <span className="ios-caption-1 font-semibold text-muted">Stars</span>
-              }}
-              onChange={(event) => setAnnualDraft(normalizeStarsDraft(event.currentTarget.value))}
-            />
-          </label>
-        </div>
-
-        <div className="flex items-center justify-between gap-3">
-          <p className="ios-footnote min-w-0 text-muted">
-            {discountPercent > 0
-              ? t("admin.system.pricing.discount", {
-                  value: discountPercent
-                })
-              : t("admin.system.pricing.noDiscount")}
-          </p>
-          <Button
-            disabled={!canSave}
-            size="sm"
-            state={pricingMutation.isPending ? "loading" : "idle"}
-            onClick={() => {
-              if (monthlyAmount && annualAmount) {
-                pricingMutation.mutate({
-                  annualAmountStars: annualAmount,
-                  monthlyAmountStars: monthlyAmount
-                });
-              }
+    <form
+      className="grid gap-4 px-1"
+      onSubmit={(event) => {
+        event.preventDefault();
+        savePricing();
+      }}
+    >
+      <section className="grid gap-3">
+        <label className="grid gap-1.5">
+          <span className="ios-caption-1 px-1 font-semibold text-muted">
+            {t("admin.system.pricing.month")}
+          </span>
+          <Input
+            clearable={false}
+            inputMode="numeric"
+            pattern="[0-9]*"
+            placeholder="500"
+            value={monthlyDraft}
+            wide
+            addon={{
+              after: <StarCurrencyIcon className="size-4 text-[#FFB000] dark:text-[#FFD60A]" />
             }}
-          >
-            {t("admin.system.pricing.save")}
-          </Button>
-        </div>
+            onChange={(event) => setMonthlyDraft(normalizeStarsDraft(event.currentTarget.value))}
+          />
+        </label>
+
+        <label className="grid gap-1.5">
+          <span className="ios-caption-1 px-1 font-semibold text-muted">
+            {t("admin.system.pricing.year")}
+          </span>
+          <Input
+            clearable={false}
+            inputMode="numeric"
+            pattern="[0-9]*"
+            placeholder="5000"
+            value={annualDraft}
+            wide
+            addon={{
+              after: <StarCurrencyIcon className="size-4 text-[#FFB000] dark:text-[#FFD60A]" />
+            }}
+            onChange={(event) => setAnnualDraft(normalizeStarsDraft(event.currentTarget.value))}
+          />
+        </label>
+      </section>
+
+      <section className="grid gap-2 px-1">
+        <p className="ios-footnote text-muted">
+          {discountPercent > 0
+            ? t("admin.system.pricing.discount", {
+                value: discountPercent
+              })
+            : t("admin.system.pricing.noDiscount")}
+        </p>
 
         {pricingMutation.isError ? (
           <p className="ios-footnote text-danger">{t("admin.system.pricing.error")}</p>
         ) : null}
 
         {pricingQuery.data ? (
-          <p className="ios-caption-1 text-muted">
-            {t("admin.system.pricing.current", {
-              month: number.format(pricingQuery.data.plans.MONTHLY.amountStars),
-              year: number.format(pricingQuery.data.plans.ANNUAL.amountStars)
-            })}
+          <p className="ios-caption-1 inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-muted">
+            <span>{t("admin.system.pricing.current")}</span>
+            <SystemStarAmount
+              amount={pricingQuery.data.plans.MONTHLY.amountStars}
+              number={number}
+            />
+            <span>·</span>
+            <SystemStarAmount
+              amount={pricingQuery.data.plans.ANNUAL.amountStars}
+              number={number}
+            />
           </p>
         ) : null}
-      </div>
-    </section>
+      </section>
+    </form>
   );
 };
 
@@ -583,6 +609,20 @@ const SystemSearch = ({
       onChange={(event) => setSearch(event.target.value)}
     />
   );
+};
+
+const useDebouncedValue = <T,>(value: T, delayMs = 250) => {
+  const [debouncedValue, setDebouncedValue] = React.useState(value);
+
+  React.useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedValue(value);
+    }, delayMs);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [delayMs, value]);
+
+  return debouncedValue;
 };
 
 const useLoadMoreRef = ({
@@ -935,9 +975,9 @@ const SystemFeedPill = ({
   children: React.ReactNode;
   icon?: LucideIcon;
 }) => (
-  <span className="ios-caption-1 inline-flex min-h-6 max-w-full items-center gap-1.5 rounded-[10px] border border-foreground/[0.06] bg-foreground/[0.045] px-2 font-medium text-muted dark:border-white/[0.06] dark:bg-white/[0.07]">
-    {Icon ? <Icon className="shrink-0" size={13} strokeWidth={2.35} /> : null}
-    <span className="min-w-0 truncate">{children}</span>
+  <span className="ios-caption-1 inline-flex min-h-6 max-w-full items-start gap-1.5 rounded-[10px] border border-foreground/[0.06] bg-foreground/[0.045] px-2 py-1 font-medium text-muted dark:border-white/[0.06] dark:bg-white/[0.07]">
+    {Icon ? <Icon className="mt-0.5 shrink-0" size={13} strokeWidth={2.35} /> : null}
+    <span className="min-w-0 whitespace-normal break-words leading-snug">{children}</span>
   </span>
 );
 
@@ -1169,6 +1209,10 @@ const SystemSubmissionBubble = ({
     : submission.customerContactPhone || t("admin.system.anonymousGuest");
   const bodyText = submission.bodyText.trim();
   const visibleText = bodyText || getSubmissionPreview(submission, t);
+  const topicNamespace = submission.kind === "COMPLAINT" ? "complaint" : "suggestion";
+  const topicLabel = getSubmissionTopicIds(submission)
+    .map((topicId) => t(`customer.topicOptions.${topicNamespace}.${topicId}`))
+    .join(" · ");
   const bubbleClassName = cn(
     "min-w-0 rounded-[22px] rounded-bl-[7px] border px-3 py-2.5 backdrop-blur-2xl",
     submission.kind === "COMPLAINT"
@@ -1265,6 +1309,9 @@ const SystemSubmissionBubble = ({
                   value: submission.rating
                 })}
               </SystemFeedPill>
+            ) : null}
+            {topicLabel ? (
+              <SystemFeedPill icon={MessageSquareText}>{topicLabel}</SystemFeedPill>
             ) : null}
             {submission.attachments.length > 0 ? (
               <SystemFeedPill icon={ImageIcon}>
@@ -1424,7 +1471,9 @@ export const AdminSystemPage = () => {
                     },
                     {
                       id: "pricing",
-                      suffix: "Stars",
+                      suffix: (
+                        <StarCurrencyIcon className="size-4 text-[#FFB000] dark:text-[#FFD60A]" />
+                      ),
                       to: "/admin/system/subscription-pricing"
                     }
                   ] as const
@@ -1448,17 +1497,7 @@ export const AdminSystemPage = () => {
                 </h2>
                 <SystemSubmissionFeed
                   emptyText={t("admin.system.emptySubmissions")}
-                  submissions={pulse.recentSubmissions.map((submission) => ({
-                    ...submission,
-                    attachments: [],
-                    bodyText: submission.preview,
-                    customerAllowsReply: false,
-                    customerContactPhone: null,
-                    customerDisplayName: null,
-                    locale: "ru",
-                    metadata: {},
-                    targetStaffMember: null
-                  }))}
+                  submissions={pulse.recentSubmissions}
                 />
               </section>
             </>
@@ -1503,7 +1542,7 @@ export const AdminSystemOrganizationsPage = () => {
   const tma = useTma();
   const { locale, t } = useI18n();
   const [search, setSearch] = React.useState("");
-  const deferredSearch = React.useDeferredValue(search.trim());
+  const deferredSearch = useDebouncedValue(search.trim());
   const number = React.useMemo(() => new Intl.NumberFormat(getIntlLocale(locale)), [locale]);
   const organizationsQuery = useInfiniteQuery({
     enabled: gate.isAllowed && tma.isReady && Boolean(tma.initDataRaw),
@@ -1795,7 +1834,7 @@ export const AdminSystemUsersPage = () => {
   const tma = useTma();
   const { locale, t } = useI18n();
   const [search, setSearch] = React.useState("");
-  const deferredSearch = React.useDeferredValue(search.trim());
+  const deferredSearch = useDebouncedValue(search.trim());
   const number = React.useMemo(() => new Intl.NumberFormat(getIntlLocale(locale)), [locale]);
   const usersQuery = useInfiniteQuery({
     enabled: gate.isAllowed && tma.isReady && Boolean(tma.initDataRaw),
@@ -2147,7 +2186,7 @@ export const AdminSystemSubmissionsPage = () => {
   const [period, setPeriod] = React.useState<SystemPulsePeriod>("7D");
   const [filter, setFilter] = React.useState<SubmissionFilter>("ALL");
   const [search, setSearch] = React.useState("");
-  const deferredSearch = React.useDeferredValue(search.trim());
+  const deferredSearch = useDebouncedValue(search.trim());
   const submissionsQuery = useInfiniteQuery({
     enabled: gate.isAllowed && tma.isReady && Boolean(tma.initDataRaw),
     getNextPageParam: (lastPage: SystemSubmissionsPayload) => lastPage.nextCursor,
@@ -2248,7 +2287,7 @@ export const AdminSystemStarsPage = () => {
   const { locale, t } = useI18n();
   const [period, setPeriod] = React.useState<SystemPulsePeriod>("7D");
   const [search, setSearch] = React.useState("");
-  const deferredSearch = React.useDeferredValue(search.trim());
+  const deferredSearch = useDebouncedValue(search.trim());
   const number = React.useMemo(() => new Intl.NumberFormat(getIntlLocale(locale)), [locale]);
   const starsQuery = useInfiniteQuery({
     enabled: gate.isAllowed && tma.isReady && Boolean(tma.initDataRaw),

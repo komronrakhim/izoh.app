@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight,
   BarChart3,
@@ -443,6 +443,7 @@ export const AdminOrganizationOverview = ({
   organization: AdminOrganization | null;
 }) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const tma = useTma();
   const { t } = useI18n();
   const { refreshOrganizations } = useAdminOrganization();
@@ -475,7 +476,7 @@ export const AdminOrganizationOverview = ({
     [guestMenuItems]
   );
   const guestLinkQuery = useQuery({
-    enabled: Boolean(organization) && tma.isReady,
+    enabled: false,
     queryFn: () =>
       fetchApiJson<{ startParam?: string; url?: string }>(
         `/api/organizations/${organization!.id}/qr-link`,
@@ -487,7 +488,13 @@ export const AdminOrganizationOverview = ({
       ? queryKeys.organizationQrLink(organization.id, "", tma.initDataRaw)
       : ["organization", "qr-link", "idle"]
   });
-  const guestFormUrl = guestLinkQuery.data?.url ?? null;
+  const guestLinkQueryKey = React.useMemo(
+    () =>
+      organization
+        ? queryKeys.organizationQrLink(organization.id, "", tma.initDataRaw)
+        : null,
+    [organization, tma.initDataRaw]
+  );
 
   React.useEffect(() => {
     return () => {
@@ -539,18 +546,35 @@ export const AdminOrganizationOverview = ({
           throw new Error("Logo asset was not returned.");
         }
 
-        await fetchApiJson<AdminOrganization>(`/api/admin/organizations/${organization.id}/logo`, {
-          body: JSON.stringify({
-            logoMediaAssetId: logoAsset.id
-          }),
-          headers: {
-            "Content-Type": "application/json"
-          },
-          initDataRaw: tma.initDataRaw,
-          method: "PATCH"
-        });
+        const updatedOrganization = await fetchApiJson<AdminOrganization>(
+          `/api/admin/organizations/${organization.id}/logo`,
+          {
+            body: JSON.stringify({
+              logoMediaAssetId: logoAsset.id
+            }),
+            headers: {
+              "Content-Type": "application/json"
+            },
+            initDataRaw: tma.initDataRaw,
+            method: "PATCH"
+          }
+        );
 
-        await refreshOrganizations();
+        queryClient.setQueryData<{
+          activeOrganizationId?: null | string;
+          organizations?: AdminOrganization[];
+        }>(queryKeys.adminOrganizations(tma.initDataRaw), (current) => {
+          if (!current?.organizations) {
+            return current;
+          }
+
+          return {
+            ...current,
+            organizations: current.organizations.map((item) =>
+              item.id === updatedOrganization.id ? updatedOrganization : item
+            )
+          };
+        });
         tma.haptics.notification("success");
       } catch {
         setLogoError(t("admin.organizations.logoUpdateError"));
@@ -560,7 +584,7 @@ export const AdminOrganizationOverview = ({
         setIsLogoSaving(false);
       }
     },
-    [isLogoSaving, logoPreviewUrl, organization, refreshOrganizations, t, tma]
+    [isLogoSaving, logoPreviewUrl, organization, queryClient, t, tma]
   );
 
   const handleDeleteOrganization = React.useCallback(async () => {
@@ -611,14 +635,49 @@ export const AdminOrganizationOverview = ({
     }
   }, [isDeleting, navigate, organization, refreshOrganizations, t, tma]);
 
-  const openGuestForm = React.useCallback(() => {
-    if (!guestFormUrl) {
-      return;
+  const ensureGuestFormUrl = React.useCallback(async () => {
+    if (!organization || !guestLinkQueryKey) {
+      return null;
     }
 
-    tma.haptics.selection();
-    openTmaTelegramLink(guestFormUrl);
-  }, [guestFormUrl, tma.haptics]);
+    const cachedUrl = queryClient.getQueryData<{ startParam?: string; url?: string }>(
+      guestLinkQueryKey
+    )?.url;
+
+    if (cachedUrl) {
+      return cachedUrl;
+    }
+
+    const payload = await queryClient.fetchQuery({
+      queryFn: () =>
+        fetchApiJson<{ startParam?: string; url?: string }>(
+          `/api/organizations/${organization.id}/qr-link`,
+          {
+            initDataRaw: tma.initDataRaw
+          }
+        ),
+      queryKey: guestLinkQueryKey,
+      staleTime: 10 * 60 * 1000
+    });
+
+    return payload.url ?? null;
+  }, [guestLinkQueryKey, organization, queryClient, tma.initDataRaw]);
+
+  const openGuestForm = React.useCallback(async () => {
+    try {
+      const url = await ensureGuestFormUrl();
+
+      if (!url) {
+        tma.haptics.notification("error");
+        return;
+      }
+
+      tma.haptics.selection();
+      openTmaTelegramLink(url);
+    } catch {
+      tma.haptics.notification("error");
+    }
+  }, [ensureGuestFormUrl, tma.haptics]);
 
   const goToQr = React.useCallback(() => {
     if (!organization) {
@@ -634,19 +693,30 @@ export const AdminOrganizationOverview = ({
     });
   }, [navigate, organization, tma.haptics]);
 
-  const shareGuestLink = React.useCallback(() => {
-    if (!guestFormUrl || !organization) {
+  const shareGuestLink = React.useCallback(async () => {
+    if (!organization) {
       return;
     }
 
-    tma.haptics.selection();
-    openTmaTelegramLink(
-      createTelegramShareUrl({
-        text: organization.name,
-        url: guestFormUrl
-      })
-    );
-  }, [guestFormUrl, organization, tma.haptics]);
+    try {
+      const url = await ensureGuestFormUrl();
+
+      if (!url) {
+        tma.haptics.notification("error");
+        return;
+      }
+
+      tma.haptics.selection();
+      openTmaTelegramLink(
+        createTelegramShareUrl({
+          text: organization.name,
+          url
+        })
+      );
+    } catch {
+      tma.haptics.notification("error");
+    }
+  }, [ensureGuestFormUrl, organization, tma.haptics]);
 
   const goToNotifications = React.useCallback(() => {
     if (!organization) {
@@ -730,14 +800,14 @@ export const AdminOrganizationOverview = ({
           </h2>
           <div className="grid w-full grid-cols-[repeat(4,minmax(0,1fr))] gap-2.5 pt-1">
             <QuickActionTile
-              disabled={!guestFormUrl || guestLinkQuery.isLoading}
+              disabled={guestLinkQuery.isFetching}
               icon={Eye}
               label={t("admin.quickActions.guestForm")}
               onClick={openGuestForm}
             />
             <QuickActionTile icon={QrCode} label={t("admin.quickActions.qr")} onClick={goToQr} />
             <QuickActionTile
-              disabled={!guestFormUrl || guestLinkQuery.isLoading}
+              disabled={guestLinkQuery.isFetching}
               icon={Share2}
               label={t("admin.quickActions.link")}
               onClick={shareGuestLink}

@@ -758,26 +758,7 @@ export const getSystemPulse = async (
           }
         },
     db.submission.findMany({
-      include: {
-        customer_user: {
-          select: {
-            first_name: true,
-            id: true,
-            last_name: true,
-            phone_number: true,
-            photo_url: true,
-            telegram_id: true,
-            username: true
-          }
-        },
-        organization: {
-          select: {
-            id: true,
-            name: true,
-            slug: true
-          }
-        }
-      },
+      include: includeSystemSubmission,
       orderBy: [
         {
           created_at: "desc"
@@ -795,24 +776,8 @@ export const getSystemPulse = async (
     })
   ]);
   const submissionItems = recentSubmissions.map<SystemPulseSubmissionItem>((submission) => ({
-    createdAt: submission.created_at.toISOString(),
-    customerUser: submission.customer_user
-      ? {
-          firstName: submission.customer_user.first_name,
-          id: submission.customer_user.id,
-          lastName: submission.customer_user.last_name,
-          phoneNumber: submission.customer_user.phone_number,
-          photoUrl: submission.customer_user.photo_url,
-          telegramId: submission.customer_user.telegram_id.toString(),
-          username: submission.customer_user.username
-        }
-      : null,
-    id: submission.id,
-    kind: submission.kind,
-    organization: submission.organization,
-    preview: getPreview(submission.body_text, submission.kind),
-    qrContext: submission.qr_context,
-    rating: submission.rating
+    ...toSystemSubmissionItem(submission),
+    preview: getPreview(submission.body_text, submission.kind)
   }));
 
   return {

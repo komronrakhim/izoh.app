@@ -28,10 +28,11 @@ import { queryKeys } from "~/shared/query";
 import { getRatingEmoji, getRatingLabelKey } from "~/shared/ratings";
 import { PageTransition } from "~/shared/router/page-transition";
 import { openTmaTelegramLink, tmaHaptics, useTma, useTmaBackButton } from "~/shared/tma";
-import type {
-  AdminSubmissionItem,
-  AdminSubmissionsPayload,
-  SubmissionKindInput
+import {
+  getSubmissionTopicIds,
+  type AdminSubmissionItem,
+  type AdminSubmissionsPayload,
+  type SubmissionKindInput
 } from "~/shared/submissions";
 
 type FeedFilter = "ALL" | SubmissionKindInput;
@@ -75,18 +76,6 @@ const emptyCounts = {
   REVIEW: 0,
   SUGGESTION: 0
 } satisfies AdminSubmissionsPayload["counts"];
-
-const getSubmissionTopicIds = (submission: AdminSubmissionItem) => {
-  if (submission.kind === "COMPLAINT") {
-    return submission.metadata.complaintCategoryIds ?? [];
-  }
-
-  if (submission.kind === "SUGGESTION") {
-    return submission.metadata.suggestionTopicIds ?? [];
-  }
-
-  return [];
-};
 
 const formatSubmissionDate = (value: string, locale: string) =>
   new Intl.DateTimeFormat(getIntlLocale(locale), {
@@ -273,14 +262,14 @@ const FeedPill = ({
 }) => {
   const isInteractive = Boolean(href || onClick);
   const className = cn(
-    "ios-caption-1 inline-flex min-h-6 max-w-full items-center gap-1.5 rounded-[10px] border px-2 font-medium",
+    "ios-caption-1 inline-flex min-h-6 max-w-full items-start gap-1.5 rounded-[10px] border px-2 py-1 font-medium",
     feedPillToneClassNames[tone],
     isInteractive && "cursor-pointer transition-opacity active:opacity-65"
   );
   const content = (
     <>
-      {Icon ? <Icon className="shrink-0" size={13} strokeWidth={2.35} /> : null}
-      <span className="min-w-0 truncate">{children}</span>
+      {Icon ? <Icon className="mt-0.5 shrink-0" size={13} strokeWidth={2.35} /> : null}
+      <span className="min-w-0 whitespace-normal break-words leading-snug">{children}</span>
     </>
   );
 
@@ -544,10 +533,7 @@ const SubmissionBubble = ({
   const topicLabels = topicIds.map((topicId) =>
     t(`customer.topicOptions.${topicNamespace}.${topicId}`)
   );
-  const visibleTopicLabels =
-    topicLabels.length > 3
-      ? [...topicLabels.slice(0, 3), `+${topicLabels.length - 3}`]
-      : topicLabels;
+  const topicLabel = topicLabels.join(" · ");
   const staffTargetMeta = getStaffTargetMeta(submission, t);
   const contactAction = submission.customerContactPhone
     ? getContactAction(submission.customerContactPhone)
@@ -575,12 +561,14 @@ const SubmissionBubble = ({
           }
         ]
       : []),
-    ...(visibleTopicLabels.length > 0
-      ? visibleTopicLabels.map((topicLabel) => ({
-          icon: MessageSquareText,
-          label: topicLabel,
-          tone: "primary" as const
-        }))
+    ...(topicLabel
+      ? [
+          {
+            icon: MessageSquareText,
+            label: topicLabel,
+            tone: "primary" as const
+          }
+        ]
       : [])
   ];
   const contextLineItems: MetaLineItem[] = [

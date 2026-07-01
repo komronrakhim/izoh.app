@@ -86,15 +86,17 @@ const resolveActiveOrganizationId = ({
 };
 
 export const AdminOrganizationProvider = ({ children }: { children: React.ReactNode }) => {
-  const { initDataRaw, isReady } = useTma();
+  const { initDataRaw, isReady, startParam } = useTma();
   const queryClient = useQueryClient();
   const organizationsQueryKey = queryKeys.adminOrganizations(initDataRaw);
+  const shouldLoadAdminOrganizations =
+    isReady && Boolean(initDataRaw) && !Boolean(startParam?.trim());
   const [activeOrganizationId, setActiveOrganizationIdState] = React.useState<string | null>(
     getStoredActiveOrganizationId()
   );
 
   const organizationsQuery = useQuery({
-    enabled: isReady && Boolean(initDataRaw),
+    enabled: shouldLoadAdminOrganizations,
     queryFn: () =>
       fetchApiJson<AdminOrganizationsPayload>("/api/admin/organizations", {
         initDataRaw
@@ -222,7 +224,7 @@ export const AdminOrganizationProvider = ({ children }: { children: React.ReactN
         organizationsQuery.error || createOrganizationMutation.error
           ? "Failed to load organizations."
           : null,
-      isLoading: !isReady || organizationsQuery.isLoading,
+      isLoading: shouldLoadAdminOrganizations && organizationsQuery.isLoading,
       organizations,
       refreshOrganizations,
       setActiveOrganizationId,
@@ -232,13 +234,13 @@ export const AdminOrganizationProvider = ({ children }: { children: React.ReactN
       activeOrganization,
       createOrganization,
       createOrganizationMutation.error,
-      isReady,
       organizations,
       organizationsQuery.data?.viewer,
       organizationsQuery.error,
       organizationsQuery.isLoading,
       refreshOrganizations,
-      setActiveOrganizationId
+      setActiveOrganizationId,
+      shouldLoadAdminOrganizations
     ]
   );
 

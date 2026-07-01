@@ -5,7 +5,7 @@ import type {
   SubscriptionPlans,
   SubscriptionPlanCode
 } from "~/shared/subscriptions";
-import type { AdminSubmissionItem, SubmissionKindInput } from "~/shared/submissions";
+import type { AdminSubmissionItem } from "~/shared/submissions";
 
 export const SYSTEM_PULSE_PERIODS = ["TODAY", "7D", "30D", "ALL"] as const;
 
@@ -18,19 +18,8 @@ export type SystemPulseMetric = {
   value: number;
 };
 
-export type SystemPulseSubmissionItem = {
-  createdAt: string;
-  customerUser: null | SystemSubmissionCustomerUser;
-  id: string;
-  kind: SubmissionKindInput;
-  organization: {
-    id: string;
-    name: string;
-    slug: string;
-  };
+export type SystemPulseSubmissionItem = SystemSubmissionItem & {
   preview: string;
-  qrContext: null | string;
-  rating: null | number;
 };
 
 export type SystemSubmissionCustomerUser = {

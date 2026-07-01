@@ -93,6 +93,20 @@ export type AdminSubmissionsPayload = {
   total: number;
 };
 
+export const getSubmissionTopicIds = (
+  submission: Pick<AdminSubmissionItem, "kind" | "metadata">
+) => {
+  if (submission.kind === "COMPLAINT") {
+    return submission.metadata.complaintCategoryIds ?? [];
+  }
+
+  if (submission.kind === "SUGGESTION") {
+    return submission.metadata.suggestionTopicIds ?? [];
+  }
+
+  return [];
+};
+
 export type CreateSubmissionResponsePayload = {
   submission: AdminSubmissionItem;
 };

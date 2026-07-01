@@ -271,7 +271,7 @@
     },
     "pricing": {
       "title": "Abonelik fiyatları",
-      "heading": "Stars fiyatı",
+      "heading": "Abonelik fiyatı",
       "hint": "Sahipler bu tutarları abonelik sayfasında görür. Yeni invoice’lar bu fiyatlarla oluşturulur.",
       "month": "Ay",
       "year": "Yıl",
@@ -279,8 +279,8 @@
       "noDiscount": "Şu anda yıllık indirim yok.",
       "save": "Kaydet",
       "error": "Fiyatlar kaydedilemedi. Tekrar deneyin.",
-      "current": "Şimdi: aylık {{month}} Stars ve yıllık {{year}} Stars.",
-      "pageHint": "Aylık ve yıllık fiyatı Stars ile ayarlayın. Sahipler bu tutarları abonelik sayfasında görür."
+      "current": "Şimdi",
+      "pageHint": "Aylık ve yıllık fiyatı ayarlayın. Sahipler bu tutarları abonelik sayfasında görür."
     }
   },
   "faq": {
@@ -826,7 +826,7 @@
     "plansHint": "İlk 7 gün zaten dahildir. Deneme süresi sonrasında formun durmaması için ödeme yapılması gerekmektedir.",
     "payAction": "{{amount}}'yi öde",
     "payError": "Ödeme açılamadı. Tekrar deneyin.",
-    "fromPriceBadge": "{{amount}} Stars’dan"
+    "fromPriceBadge": "{{amount}}’dan"
   },
   "sections": {
     "show": "Misafirlere göster",
