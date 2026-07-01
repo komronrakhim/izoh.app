@@ -275,6 +275,8 @@
       "hint": "Bu summalar egalar obuna sahifasida ko‘radigan narxlardir. Yangi invoice’lar shu narx bilan yaratiladi.",
       "month": "Oy",
       "year": "Yil",
+      "usdEstimate": "Mehmon taxminan {{userUsd}} to‘laydi, sizga taxminan {{ownerUsd}} keladi.",
+      "usdNote": "Bu Telegram Stars jadvali bo‘yicha taxmin. Yakuniy summa mamlakat, VAT va xarid usuliga qarab o‘zgarishi mumkin.",
       "discount": "Yillik chegirma: {{value}}%",
       "noDiscount": "Hozir yillik chegirma yo‘q.",
       "save": "Saqlash",

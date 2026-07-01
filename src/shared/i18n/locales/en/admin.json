@@ -275,6 +275,8 @@
       "hint": "Owners will see these amounts on the subscription page. New invoices use the updated prices.",
       "month": "Month",
       "year": "Year",
+      "usdEstimate": "Guest pays about {{userUsd}}, you receive about {{ownerUsd}}.",
+      "usdNote": "Based on Telegram Stars estimates. The final amount can vary by country, VAT, and purchase method.",
       "discount": "Yearly discount: {{value}}%",
       "noDiscount": "No yearly discount right now.",
       "save": "Save",

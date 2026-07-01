@@ -275,6 +275,8 @@
       "hint": "Sahipler bu tutarları abonelik sayfasında görür. Yeni invoice’lar bu fiyatlarla oluşturulur.",
       "month": "Ay",
       "year": "Yıl",
+      "usdEstimate": "Misafir yaklaşık {{userUsd}} öder, size yaklaşık {{ownerUsd}} gelir.",
+      "usdNote": "Telegram Stars tablosuna göre yaklaşık bir değerdir. Son tutar ülkeye, VAT'a ve satın alma yöntemine göre değişebilir.",
       "discount": "Yıllık indirim: {{value}}%",
       "noDiscount": "Şu anda yıllık indirim yok.",
       "save": "Kaydet",

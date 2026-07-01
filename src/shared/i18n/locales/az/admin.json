@@ -275,6 +275,8 @@
       "hint": "Bu məbləğləri sahiblər abunə səhifəsində görəcəklər. Yeni invoice-lar bu qiymətlərlə yaradılacaq.",
       "month": "Ay",
       "year": "İl",
+      "usdEstimate": "Qonaq təxminən {{userUsd}} ödəyir, sizə təxminən {{ownerUsd}} çatır.",
+      "usdNote": "Bu, Telegram Stars cədvəlinə görə təxmini hesabdır. Son məbləğ ölkə, VAT və alış üsuluna görə dəyişə bilər.",
       "discount": "İllik endirim: {{value}}%",
       "noDiscount": "Hazırda illik endirim yoxdur.",
       "save": "Yadda saxla",
