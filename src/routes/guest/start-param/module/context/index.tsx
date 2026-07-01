@@ -384,9 +384,9 @@ export const CustomerWizardProvider = ({ children }: { children: React.ReactNode
         ...(!guestEntryConfig.staff.settings.allowTeamReview && employeeTargets.length > 0
           ? [
               {
+                avatarUrl: guestEntryConfig.organization.logoUrl ?? null,
                 icon: UsersRound,
                 id: UNKNOWN_STAFF_TARGET_ID,
-                subtitle: t("customer.staffTarget.unknownSubtitle"),
                 targetType: "unknown" as const,
                 title: t("customer.staffTarget.unknownTitle"),
                 tone: "bg-[#8E8E93] text-white"

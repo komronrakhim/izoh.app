@@ -366,6 +366,44 @@ const getStarsDraftAmount = (value: string) => {
   return Number.isInteger(amount) && amount > 0 ? amount : null;
 };
 
+const TELEGRAM_STAR_USER_PRICE_BUNDLES = [
+  { stars: 2500, usd: 49.99 },
+  { stars: 1500, usd: 29.99 },
+  { stars: 1000, usd: 19.99 },
+  { stars: 750, usd: 14.99 },
+  { stars: 500, usd: 9.99 },
+  { stars: 350, usd: 6.99 },
+  { stars: 250, usd: 4.99 },
+  { stars: 150, usd: 2.99 },
+  { stars: 100, usd: 1.99 },
+  { stars: 75, usd: 1.49 },
+  { stars: 50, usd: 0.99 }
+] as const;
+const TELEGRAM_STAR_USER_USD_FALLBACK_RATE = 19.99 / 1000;
+const TELEGRAM_STAR_DEVELOPER_USD_RATE = 13 / 1000;
+
+const getTelegramStarsUserUsdEstimate = (amountStars: number) => {
+  let remainingStars = amountStars;
+  let usd = 0;
+
+  for (const bundle of TELEGRAM_STAR_USER_PRICE_BUNDLES) {
+    if (remainingStars < bundle.stars) {
+      continue;
+    }
+
+    const bundleCount = Math.floor(remainingStars / bundle.stars);
+
+    usd += bundleCount * bundle.usd;
+    remainingStars -= bundleCount * bundle.stars;
+  }
+
+  if (remainingStars > 0) {
+    usd += remainingStars * TELEGRAM_STAR_USER_USD_FALLBACK_RATE;
+  }
+
+  return usd;
+};
+
 const SystemStarAmount = ({
   amount,
   number
@@ -384,6 +422,16 @@ const SubscriptionPricingForm = () => {
   const queryClient = useQueryClient();
   const { locale, t } = useI18n();
   const number = React.useMemo(() => new Intl.NumberFormat(getIntlLocale(locale)), [locale]);
+  const usd = React.useMemo(
+    () =>
+      new Intl.NumberFormat(getIntlLocale(locale), {
+        currency: "USD",
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2,
+        style: "currency"
+      }),
+    [locale]
+  );
   const pricingQuery = useQuery({
     enabled: tma.isReady && Boolean(tma.initDataRaw),
     queryFn: () =>
@@ -408,6 +456,19 @@ const SubscriptionPricingForm = () => {
 
   const monthlyAmount = getStarsDraftAmount(monthlyDraft);
   const annualAmount = getStarsDraftAmount(annualDraft);
+  const getUsdEstimateText = React.useCallback(
+    (amountStars: null | number) => {
+      if (!amountStars) {
+        return undefined;
+      }
+
+      return t("admin.system.pricing.usdEstimate", {
+        ownerUsd: usd.format(amountStars * TELEGRAM_STAR_DEVELOPER_USD_RATE),
+        userUsd: usd.format(getTelegramStarsUserUsdEstimate(amountStars))
+      });
+    },
+    [t, usd]
+  );
   const currentMonthlyAmount = pricingQuery.data?.plans.MONTHLY.amountStars ?? null;
   const currentAnnualAmount = pricingQuery.data?.plans.ANNUAL.amountStars ?? null;
   const isDirty =
@@ -502,6 +563,7 @@ const SubscriptionPricingForm = () => {
             addon={{
               after: <StarCurrencyIcon className="size-4 text-[#FFB000] dark:text-[#FFD60A]" />
             }}
+            hint={getUsdEstimateText(monthlyAmount)}
             onChange={(event) => setMonthlyDraft(normalizeStarsDraft(event.currentTarget.value))}
           />
         </label>
@@ -520,6 +582,7 @@ const SubscriptionPricingForm = () => {
             addon={{
               after: <StarCurrencyIcon className="size-4 text-[#FFB000] dark:text-[#FFD60A]" />
             }}
+            hint={getUsdEstimateText(annualAmount)}
             onChange={(event) => setAnnualDraft(normalizeStarsDraft(event.currentTarget.value))}
           />
         </label>
@@ -533,6 +596,7 @@ const SubscriptionPricingForm = () => {
               })
             : t("admin.system.pricing.noDiscount")}
         </p>
+        <p className="ios-caption-1 text-muted">{t("admin.system.pricing.usdNote")}</p>
 
         {pricingMutation.isError ? (
           <p className="ios-footnote text-danger">{t("admin.system.pricing.error")}</p>
