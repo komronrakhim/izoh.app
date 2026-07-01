@@ -1,6 +1,10 @@
 {
   "start": {
-    "message": "Salom! Men Izohman ✨\n\nJoylarga mehmonlardan qisqa QR-forma orqali fikr, shikoyat va takliflarni yig‘ishga yordam beraman.\n\nIlovani ochib joyingizni sozlash uchun pastdagi menyu tugmasini bosing 👇"
+    "message": "Salom! Bu Izoh ✨\n\nMehmonlarni tinglashning oddiy yo‘li: izoh, shikoyat va takliflar to‘g‘ri Telegramga keladi.\n\nIlovani oching, joyingizni yarating va mehmonlar uchun QR-kod oling.",
+    "buttons": {
+      "open": "Ochish",
+      "howItWorks": "Qanday ishlaydi"
+    }
   },
   "groupConnect": {
     "success": "Tayyor, men aloqadaman ✨\n\n«{{organizationName}}» bildirishnomalari endi shu guruhga keladi.\nMehmon izoh, shikoyat yoki taklif qoldirsa, uni shu yerga yuboraman.",

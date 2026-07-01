@@ -40,6 +40,15 @@ export const isPermanentTelegramDeliveryError = (error: unknown) => {
 const getRetryDelayMs = (attemptCount: number) =>
   Math.min(15 * 60 * 1000, 30 * 1000 * 2 ** Math.max(0, attemptCount - 1));
 
+const getTelegramRetryAfterMs = (error: unknown) => {
+  const retryAfter = (error as { parameters?: { retry_after?: unknown } })?.parameters
+    ?.retry_after;
+
+  return typeof retryAfter === "number" && Number.isFinite(retryAfter) && retryAfter > 0
+    ? retryAfter * 1000
+    : null;
+};
+
 export const claimPendingTelegramNotificationDeliveries = async (
   db: DispatcherDb,
   { batchSize, lockMs }: ClaimOptions
@@ -172,12 +181,16 @@ const scheduleDeliveryRetry = async (
     }
   });
   const attemptCount = delivery?.attempt_count ?? 1;
+  const retryAfterMs = getTelegramRetryAfterMs(error);
+  const retryDelayMs = retryAfterMs
+    ? Math.max(retryAfterMs, getRetryDelayMs(attemptCount))
+    : getRetryDelayMs(attemptCount);
 
   await db.telegramNotificationDelivery.update({
     data: {
       error: getErrorMessage(error),
       locked_until: null,
-      next_attempt_at: new Date(Date.now() + getRetryDelayMs(attemptCount)),
+      next_attempt_at: new Date(Date.now() + retryDelayMs),
       status: "PENDING"
     },
     where: {

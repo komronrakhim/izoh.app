@@ -2,7 +2,7 @@ import type * as React from "react";
 
 import type { PublicReviewProviderId } from "~/shared/module-settings";
 
-export type BrandedPublicReviewProviderId = Exclude<PublicReviewProviderId, "custom">;
+export type BrandedPublicReviewProviderId = PublicReviewProviderId;
 export type PublicReviewProviderLogoProps = React.SVGProps<SVGSVGElement>;
 
 export const GoogleReviewLogo = (props: PublicReviewProviderLogoProps) => (

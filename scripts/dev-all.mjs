@@ -86,6 +86,7 @@ const main = async () => {
   console.log(`Starting Mini App on http://localhost:${appPort}`);
   console.log("Starting Notification Dispatcher");
   console.log("Starting Organization Deletion Worker");
+  console.log("Starting QR PDF Dispatcher");
 
   spawnProcess({
     args: ["run", "dev:api"],
@@ -110,6 +111,11 @@ const main = async () => {
     args: ["run", "dev:organization-deletion-worker"],
     env: {},
     name: "Organization Deletion Worker"
+  });
+  spawnProcess({
+    args: ["run", "dev:qr-pdf-dispatcher"],
+    env: {},
+    name: "QR PDF Dispatcher"
   });
 };
 

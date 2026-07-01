@@ -229,9 +229,9 @@ describe("module settings API", () => {
             links: [
               {
                 enabled: true,
-                id: "custom",
-                label: "Custom reviews",
-                provider: "custom",
+                id: "legacy-provider",
+                label: "Legacy provider",
+                provider: "legacy",
                 sortOrder: 0,
                 url: "https://example.com/reviews"
               }
@@ -249,11 +249,11 @@ describe("module settings API", () => {
             links: [
               {
                 enabled: true,
-                id: "custom",
+                id: "google",
                 label: "",
-                provider: "custom",
+                provider: "google",
                 sortOrder: 0,
-                url: "https://example.com/reviews"
+                url: "https://maps.google.com/?cid=123"
               }
             ]
           }
@@ -318,9 +318,9 @@ describe("module settings API", () => {
           links: [
             {
               enabled: true,
-              id: "legacy-custom",
-              label: "Legacy custom",
-              provider: "custom",
+              id: "legacy-provider",
+              label: "Legacy provider",
+              provider: "legacy",
               sortOrder: 0,
               url: "https://example.com/reviews"
             },

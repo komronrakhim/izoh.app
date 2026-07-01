@@ -181,9 +181,9 @@ describe("public review integrations", () => {
                   links: [
                     {
                       enabled: true,
-                      id: "custom",
-                      label: "Custom",
-                      provider: "custom",
+                      id: "legacy-provider",
+                      label: "Legacy provider",
+                      provider: "legacy",
                       sortOrder: 0,
                       url: "https://example.com/reviews"
                     }
@@ -200,7 +200,7 @@ describe("public review integrations", () => {
     await expect(
       createExternalReviewClick(
         {
-          linkId: "custom",
+          linkId: "legacy-provider",
           organizationId: "org_1",
           submissionId: "submission_1"
         },
@@ -225,8 +225,8 @@ describe("public review integrations", () => {
           provider: "yandex"
         },
         {
-          link_id: "custom",
-          provider: "custom"
+          link_id: "legacy-provider",
+          provider: "legacy"
         }
       ]
     });

@@ -17,9 +17,6 @@ export const sanitizeStorageSegment = (value: string) =>
     .replace(/^-+|-+$/g, "")
     .slice(0, 80) || "asset";
 
-export const buildTempStorageKey = (sessionId: string) =>
-  `tmp/upload/${sanitizeStorageSegment(sessionId)}/${randomSegment()}`;
-
 export const buildFinalStorageKey = ({
   extension,
   kind,

@@ -4,6 +4,9 @@ import sharp from "sharp";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
+import { LOCAL_MEDIA_BUCKET, getLocalMediaObjectBuffer } from "~/server/media/local-storage";
+import { getR2Object } from "~/server/media/r2-client";
+import { streamToBuffer } from "~/server/media/processing";
 import { IZOH_WORDMARK_PATHS, IZOH_WORDMARK_WIDTH } from "~/shared/brand";
 import type { AppLocale } from "~/shared/i18n";
 import {
@@ -41,8 +44,15 @@ export type OrganizationQrPdfTemplate = {
   showContext?: boolean;
 };
 
+export type OrganizationQrPdfLogoAsset = {
+  bucket: string;
+  publicUrl?: null | string;
+  storageKey: string;
+};
+
 type RenderOrganizationQrPdfInput = {
   locale: AppLocale;
+  organizationLogo?: null | OrganizationQrPdfLogoAsset;
   organizationLogoUrl?: null | string;
   organizationName: string;
   template?: OrganizationQrPdfTemplate;
@@ -141,33 +151,53 @@ const loadEmojiImage = (emoji: string) => {
   return image;
 };
 
-const loadOrganizationLogoImage = (url?: null | string) => {
-  const cleanUrl = url?.trim();
+const loadOrganizationLogoImage = (input?: null | string | OrganizationQrPdfLogoAsset) => {
+  const source = typeof input === "string" ? { publicUrl: input } : input;
+  const cleanUrl = source?.publicUrl?.trim();
+  const storageKey = source && "storageKey" in source ? source.storageKey.trim() : "";
+  const bucket = source && "bucket" in source ? source.bucket.trim() : "";
+  const cacheKey = storageKey && bucket ? `storage:${bucket}:${storageKey}` : `url:${cleanUrl}`;
 
-  if (!cleanUrl) {
+  if (!storageKey && !cleanUrl) {
     return Promise.resolve(null);
   }
 
-  const cached = organizationLogoImageCache.get(cleanUrl);
+  const cached = organizationLogoImageCache.get(cacheKey);
 
   if (cached) {
     return cached;
   }
 
   const image = (async () => {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 1200);
-
     try {
-      const response = await fetch(cleanUrl, {
-        signal: controller.signal
-      });
+      const buffer =
+        storageKey && bucket
+          ? bucket === LOCAL_MEDIA_BUCKET
+            ? await getLocalMediaObjectBuffer(storageKey)
+            : await getR2Object(storageKey).then((object) => streamToBuffer(object.Body))
+          : await (async () => {
+              const controller = new AbortController();
+              const timeout = setTimeout(() => controller.abort(), 2500);
 
-      if (!response.ok) {
+              try {
+                const response = await fetch(cleanUrl!, {
+                  signal: controller.signal
+                });
+
+                if (!response.ok) {
+                  return null;
+                }
+
+                return Buffer.from(await response.arrayBuffer());
+              } finally {
+                clearTimeout(timeout);
+              }
+            })();
+
+      if (!buffer) {
+        organizationLogoImageCache.delete(cacheKey);
         return null;
       }
-
-      const buffer = Buffer.from(await response.arrayBuffer());
 
       return sharp(buffer)
         .rotate()
@@ -179,13 +209,12 @@ const loadOrganizationLogoImage = (url?: null | string) => {
         .png()
         .toBuffer();
     } catch {
+      organizationLogoImageCache.delete(cacheKey);
       return null;
-    } finally {
-      clearTimeout(timeout);
     }
   })();
 
-  organizationLogoImageCache.set(cleanUrl, image);
+  organizationLogoImageCache.set(cacheKey, image);
 
   return image;
 };
@@ -484,6 +513,7 @@ const drawIzohWordmark = ({
 
 export const renderOrganizationQrPdf = async ({
   locale: _locale,
+  organizationLogo,
   organizationLogoUrl,
   organizationName,
   template = {},
@@ -537,22 +567,32 @@ export const renderOrganizationQrPdf = async ({
   const qrSize = layout.qrSize;
   const qrX = layout.qrX;
   const qrY = layout.qrY;
-  const logoImage = await loadOrganizationLogoImage(organizationLogoUrl);
+  const logoImagePromise = loadOrganizationLogoImage(organizationLogo ?? organizationLogoUrl);
+  const emojiImagePromises = showEmoji
+    ? emojiMarks.map((mark, index) =>
+        loadEmojiImage(
+          getQrEmojiForMark({
+            emojiTheme,
+            formatId: format.id,
+            index,
+            mark,
+            seed: emojiSeed
+          })
+        )
+      )
+    : [];
   const compactLogoPadding = Math.max(3, layout.logoSize * 0.16);
   const errorCorrectionLevel = getQrErrorCorrectionLevel(format.id);
+  const [logoImage, emojiImages] = await Promise.all([
+    logoImagePromise,
+    Promise.all(emojiImagePromises)
+  ]);
 
   doc.rect(0, 0, pageWidth, pageHeight).fill(background);
 
   if (showEmoji) {
     for (const [index, mark] of emojiMarks.entries()) {
-      const emoji = getQrEmojiForMark({
-        emojiTheme,
-        formatId: format.id,
-        index,
-        mark,
-        seed: emojiSeed
-      });
-      const image = await loadEmojiImage(emoji);
+      const image = emojiImages[index];
 
       if (!image) {
         continue;

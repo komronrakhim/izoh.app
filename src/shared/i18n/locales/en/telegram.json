@@ -1,6 +1,10 @@
 {
   "start": {
-    "message": "Hello! I'm Izoh ✨\n\nI help places collect reviews, complaints, and ideas from guests through a short QR form.\n\nOpen the menu below to set up your place 👇"
+    "message": "Hello! This is Izoh ✨\n\nA simple way to listen to guests: reviews, complaints, and suggestions come straight to Telegram.\n\nOpen the app, create your place, and get a QR code for guests.",
+    "buttons": {
+      "open": "Open",
+      "howItWorks": "How it works"
+    }
   },
   "groupConnect": {
     "success": "Done, I'm in touch ✨\n\nNotifications for \"{{organizationName}}\" will now be sent to this group.\nIf a guest leaves a review, complaint or suggestion, I will carefully post it here.",

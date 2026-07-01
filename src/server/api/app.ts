@@ -1,9 +1,10 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
-import { GrammyError, HttpError, InputFile } from "grammy";
+import { InputFile } from "grammy";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
+import type { Prisma } from "../../../prisma/generated/prisma/client";
 
 import { getPrisma } from "~/server/db";
 import { getOrganizationAnalytics } from "~/server/domain/analytics";
@@ -35,11 +36,7 @@ import {
   getOrCreateOrganizationGuestContext,
   getOrganizationGuestContextByCode
 } from "~/server/domain/guest-contexts";
-import {
-  createQrPdfDeliveryAttempt,
-  markQrPdfDeliveryFailed,
-  markQrPdfDeliverySent
-} from "~/server/domain/qr-pdf-deliveries";
+import { createQrPdfDeliveryAttempt } from "~/server/domain/qr-pdf-deliveries";
 import { createExternalReviewClick, getPublicReviewMetrics } from "~/server/domain/public-reviews";
 import {
   createOrganizationStaffMember,
@@ -80,17 +77,16 @@ import {
   parseGuestEntryStartParam
 } from "~/server/domain/guest-entry-payload";
 import {
-  LOCAL_MEDIA_BUCKET,
-  createMediaUploadSession,
-  finalizeMediaUploadSession,
+  createDirectMediaUpload,
   getLocalMediaObjectBuffer,
-  headLocalMediaObject,
-  putLocalMediaObject
+  headLocalMediaObject
 } from "~/server/media";
 import { getMediaPublicUrl } from "~/server/media/public-url";
 import { renderOrganizationQrPdf } from "~/server/pdf";
 import {
   getTelegramBot,
+  getTelegramMiniAppBaseUrl,
+  getTelegramMiniAppUrl,
   validateTelegramContactData,
   validateTelegramInitData
 } from "~/server/telegram";
@@ -314,70 +310,6 @@ const enforceRateLimit = (
   return c.json({ error: "Too many requests. Please try again later." }, 429);
 };
 
-const redactSensitiveTelegramText = (value: string) =>
-  value.replace(/https:\/\/api\.telegram\.org\/bot[^\s)]+/gi, "[telegram-bot-api-url]");
-
-const getSafeErrorText = (error: unknown) => {
-  if (error instanceof GrammyError) {
-    return redactSensitiveTelegramText(
-      `GrammyError ${error.error_code}: ${error.description || "Telegram request failed."}`
-    );
-  }
-
-  if (error instanceof HttpError) {
-    return redactSensitiveTelegramText(`HttpError: ${error.message}`);
-  }
-
-  if (error instanceof Error) {
-    return redactSensitiveTelegramText(error.message);
-  }
-
-  return redactSensitiveTelegramText(String(error));
-};
-
-const getTelegramDocumentDeliveryFailure = (error: unknown) => {
-  const safeError = getSafeErrorText(error);
-
-  if (error instanceof GrammyError) {
-    if (error.error_code === 403) {
-      return {
-        error: safeError,
-        message: "Telegram bot is blocked by the user.",
-        status: 403 as const
-      };
-    }
-
-    if (error.error_code === 429) {
-      return {
-        error: safeError,
-        message: "Telegram is rate limiting file delivery. Please try again later.",
-        status: 429 as const
-      };
-    }
-  }
-
-  return {
-    error: safeError,
-    message: "Telegram could not deliver the PDF.",
-    status: 502 as const
-  };
-};
-
-const respondWithTelegramDocumentDeliveryFailure = (
-  c: Context,
-  failure: ReturnType<typeof getTelegramDocumentDeliveryFailure>
-) => {
-  if (failure.status === 403) {
-    return c.json({ error: failure.message }, 403);
-  }
-
-  if (failure.status === 429) {
-    return c.json({ error: failure.message }, 429);
-  }
-
-  return c.json({ error: failure.message }, 502);
-};
-
 const respondWithExistingQrPdfDelivery = (
   c: Context,
   delivery: Awaited<ReturnType<typeof createQrPdfDeliveryAttempt>>["delivery"]
@@ -409,31 +341,6 @@ const respondWithExistingQrPdfDelivery = (
     },
     409
   );
-};
-
-const markQrPdfDeliveryFailedBestEffort = async ({
-  db,
-  deliveryId,
-  error
-}: {
-  db: NonNullable<ReturnType<typeof getPrisma>>;
-  deliveryId: string;
-  error: string;
-}) => {
-  try {
-    await markQrPdfDeliveryFailed(
-      {
-        deliveryId,
-        error
-      },
-      db
-    );
-  } catch (markError) {
-    console.warn("QR PDF delivery status update failed", {
-      deliveryId,
-      error: getSafeErrorText(markError)
-    });
-  }
 };
 
 const getCachedGuestEntryConfig = ({
@@ -511,12 +418,6 @@ const getValidatedTelegramUser = (initData: string) => {
     ...validated,
     user: validated.user
   };
-};
-
-const getTelegramMiniAppUrl = (startParam: string) => {
-  const botUsername = getOptionalEnv("TELEGRAM_BOT_USERNAME") ?? "izohappbot";
-
-  return `https://t.me/${botUsername}/app?startapp=${encodeURIComponent(startParam)}`;
 };
 
 const requireOrganizationOwner = async ({
@@ -703,9 +604,44 @@ const parseTelegramStartCommand = (text: string | undefined) => {
   };
 };
 
-const sendTelegramWebhookMessage = async ({ chatId, text }: { chatId: bigint; text: string }) => {
+const IZOH_WEBSITE_URL = "https://izoh.app";
+
+const getTelegramStartReplyMarkup = ({
+  howItWorksLabel,
+  openLabel
+}: {
+  howItWorksLabel: string;
+  openLabel: string;
+}) => ({
+  inline_keyboard: [
+    [
+      {
+        text: openLabel,
+        url: getTelegramMiniAppBaseUrl()
+      }
+    ],
+    [
+      {
+        text: howItWorksLabel,
+        url: IZOH_WEBSITE_URL
+      }
+    ]
+  ]
+});
+
+const sendTelegramWebhookMessage = async ({
+  chatId,
+  replyMarkup,
+  text
+}: {
+  chatId: bigint;
+  replyMarkup?: ReturnType<typeof getTelegramStartReplyMarkup>;
+  text: string;
+}) => {
   try {
-    await getTelegramBot().api.sendMessage(chatId.toString(), text);
+    await getTelegramBot().api.sendMessage(chatId.toString(), text, {
+      reply_markup: replyMarkup
+    });
   } catch (error) {
     console.warn("Telegram webhook confirmation message failed", {
       chatId: chatId.toString(),
@@ -715,15 +651,31 @@ const sendTelegramWebhookMessage = async ({ chatId, text }: { chatId: bigint; te
   }
 };
 
-const sendTelegramStartMessage = async ({ chatId, text }: { chatId: bigint; text: string }) => {
+const sendTelegramStartMessage = async ({
+  chatId,
+  howItWorksLabel,
+  openLabel,
+  text
+}: {
+  chatId: bigint;
+  howItWorksLabel: string;
+  openLabel: string;
+  text: string;
+}) => {
+  const replyMarkup = getTelegramStartReplyMarkup({
+    howItWorksLabel,
+    openLabel
+  });
+
   if (!existsSync(telegramStartCoverPath)) {
-    await sendTelegramWebhookMessage({ chatId, text });
+    await sendTelegramWebhookMessage({ chatId, replyMarkup, text });
     return;
   }
 
   try {
     await getTelegramBot().api.sendPhoto(chatId.toString(), new InputFile(telegramStartCoverPath), {
-      caption: text
+      caption: text,
+      reply_markup: replyMarkup
     });
   } catch (error) {
     console.warn("Telegram start photo failed, sending text instead", {
@@ -731,7 +683,7 @@ const sendTelegramStartMessage = async ({ chatId, text }: { chatId: bigint; text
       error: error instanceof Error ? error.message : String(error)
     });
 
-    await sendTelegramWebhookMessage({ chatId, text });
+    await sendTelegramWebhookMessage({ chatId, replyMarkup, text });
   }
 };
 
@@ -828,6 +780,8 @@ const handleTelegramWebhookUpdate = async (
 
       await sendTelegramStartMessage({
         chatId,
+        howItWorksLabel: t("telegram.start.buttons.howItWorks"),
+        openLabel: t("telegram.start.buttons.open"),
         text: t("telegram.start.message")
       });
     }
@@ -1601,22 +1555,6 @@ export const createApiApp = () => {
         contextCode = guestContext?.code;
       }
 
-      const logoAsset = organization.logo_media_asset_id
-        ? await db.mediaAsset.findFirst({
-            select: {
-              bucket: true,
-              public_url: true,
-              storage_key: true
-            },
-            where: {
-              id: organization.logo_media_asset_id,
-              kind: "ORGANIZATION_LOGO",
-              owner_id: organization.id,
-              owner_type: "ORGANIZATION",
-              status: "READY"
-            }
-          })
-        : null;
       const startParam = createGuestEntryStartParam({
         contextCode,
         organizationRef: organization.slug
@@ -1636,11 +1574,35 @@ export const createApiApp = () => {
               return c.json({ error: "QR PDF request id is required." }, 400);
             }
 
+            const rateLimitResponse = enforceRateLimit(c, {
+              key: `qr-pdf:${organization.id}:${user.id}`,
+              limit: 3,
+              windowMs: 60_000
+            });
+
+            if (rateLimitResponse) {
+              return rateLimitResponse;
+            }
+
             const deliveryAttempt = await createQrPdfDeliveryAttempt(
               {
                 clientRequestId: input.clientRequestId,
                 fileName,
                 organizationId: organization.id,
+                startParam,
+                template: JSON.parse(
+                  JSON.stringify({
+                    caption: input.caption,
+                    context: qrContext,
+                    customColors: input.customColors,
+                    emojiOpacity: input.emojiOpacity,
+                    emojiThemeId: input.emojiThemeId,
+                    formatId: input.formatId,
+                    headline: input.headline,
+                    qrStyle: input.qrStyle,
+                    showContext: input.showContext
+                  })
+                ) as Prisma.InputJsonObject,
                 userId: user.id
               },
               db
@@ -1650,23 +1612,13 @@ export const createApiApp = () => {
               return respondWithExistingQrPdfDelivery(c, deliveryAttempt.delivery);
             }
 
-            const rateLimitResponse = enforceRateLimit(c, {
-              key: `qr-pdf:${organization.id}:${user.id}`,
-              limit: 3,
-              windowMs: 60_000
-            });
-
-            if (rateLimitResponse) {
-              await markQrPdfDeliveryFailedBestEffort({
-                db,
-                deliveryId: deliveryAttempt.delivery.id,
-                error: "Rate limited before Telegram delivery."
-              });
-
-              return rateLimitResponse;
-            }
-
-            return deliveryAttempt;
+            return c.json(
+              {
+                ok: true,
+                status: deliveryAttempt.delivery.status
+              },
+              202
+            );
           })()
         : null;
 
@@ -1674,69 +1626,38 @@ export const createApiApp = () => {
         return chatDelivery;
       }
 
-      let pdf: Buffer;
-
-      try {
-        pdf = await renderOrganizationQrPdf({
-          locale: fromPrismaLocale(organization.locale),
-          organizationLogoUrl: logoAsset ? getMediaPublicUrl(logoAsset) : null,
-          organizationName: organization.name,
-          template: {
-            ...input,
-            context: qrContext
-          },
-          url: getTelegramMiniAppUrl(startParam)
-        });
-      } catch (error) {
-        if (chatDelivery?.created) {
-          await markQrPdfDeliveryFailedBestEffort({
-            db,
-            deliveryId: chatDelivery.delivery.id,
-            error: getSafeErrorText(error)
-          });
-        }
-
-        throw error;
-      }
-
-      if (shouldSendToChat) {
-        if (!chatDelivery?.created) {
-          return c.json({ error: "QR PDF delivery was not created." }, 409);
-        }
-
-        const chatUser = user;
-
-        if (!chatUser) {
-          return c.json({ error: "Telegram user is required." }, 401);
-        }
-
-        try {
-          const message = await getTelegramBot().api.sendDocument(
-            chatUser.telegram_id.toString(),
-            new InputFile(pdf, fileName)
-          );
-
-          await markQrPdfDeliverySent(
-            {
-              deliveryId: chatDelivery.delivery.id,
-              telegramMessageId: message.message_id
+      const logoAsset = organization.logo_media_asset_id
+        ? await db.mediaAsset.findFirst({
+            select: {
+              bucket: true,
+              public_url: true,
+              storage_key: true
             },
-            db
-          );
-        } catch (error) {
-          const failure = getTelegramDocumentDeliveryFailure(error);
-
-          await markQrPdfDeliveryFailedBestEffort({
-            db,
-            deliveryId: chatDelivery.delivery.id,
-            error: failure.error
-          });
-
-          return respondWithTelegramDocumentDeliveryFailure(c, failure);
-        }
-
-        return c.json({ ok: true });
-      }
+            where: {
+              id: organization.logo_media_asset_id,
+              kind: "ORGANIZATION_LOGO",
+              owner_id: organization.id,
+              owner_type: "ORGANIZATION",
+              status: "READY"
+            }
+          })
+        : null;
+      const pdf = await renderOrganizationQrPdf({
+        locale: fromPrismaLocale(organization.locale),
+        organizationLogo: logoAsset
+          ? {
+              bucket: logoAsset.bucket,
+              publicUrl: getMediaPublicUrl(logoAsset),
+              storageKey: logoAsset.storage_key
+            }
+          : null,
+        organizationName: organization.name,
+        template: {
+          ...input,
+          context: qrContext
+        },
+        url: getTelegramMiniAppUrl(startParam)
+      });
 
       return new Response(new Uint8Array(pdf), {
         headers: {
@@ -2656,10 +2577,17 @@ export const createApiApp = () => {
     });
   });
 
-  app.post("/api/media/upload-sessions", async (c) => {
-    const input = mediaUploadSchema.parse(await c.req.json());
+  app.post("/api/media/uploads/direct", async (c) => {
+    const contentType = c.req.header("Content-Type")?.split(";")[0]?.trim() ?? "";
+    const input = mediaUploadSchema.parse({
+      contentType,
+      fileName: c.req.query("fileName"),
+      kind: c.req.query("kind"),
+      ownerId: c.req.query("ownerId"),
+      ownerType: c.req.query("ownerType")
+    });
     const rateLimitResponse = enforceRateLimit(c, {
-      key: `media-upload:${getClientAddress(c)}:${input.ownerType}:${input.ownerId}:${input.kind}`,
+      key: `media-upload-direct:${getClientAddress(c)}:${input.ownerType}:${input.ownerId}:${input.kind}`,
       limit: 40,
       windowMs: 10 * 60 * 1000
     });
@@ -2692,69 +2620,19 @@ export const createApiApp = () => {
       return c.json({ error: "Telegram init data is required." }, 401);
     }
 
-    const session = await createMediaUploadSession(
+    const body = Buffer.from(await c.req.arrayBuffer());
+    const assets = await createDirectMediaUpload(
       {
         ...input,
+        body,
         userId
       },
       db
     );
 
-    return c.json(session);
-  });
-
-  app.put("/api/media/local-upload/:sessionId", async (c) => {
-    if (!isNonProduction()) {
-      return c.json({ error: "Local media upload is unavailable." }, 404);
-    }
-
-    const db = getPrisma();
-
-    if (!db) {
-      return c.json({ error: "Database is required for media upload." }, 503);
-    }
-
-    const session = await db.mediaUploadSession.findUnique({
-      where: {
-        id: c.req.param("sessionId")
-      }
+    return c.json({
+      assets
     });
-
-    if (!session || session.bucket !== LOCAL_MEDIA_BUCKET) {
-      return c.json({ error: "Upload session was not found." }, 404);
-    }
-
-    const contentType = c.req.header("Content-Type") ?? "";
-
-    if (contentType !== session.content_type) {
-      return c.json(
-        { error: "Uploaded file content type does not match the upload session." },
-        400
-      );
-    }
-
-    const body = Buffer.from(await c.req.arrayBuffer());
-
-    if (!body.byteLength || body.byteLength > session.size_limit_bytes) {
-      return c.json({ error: "Uploaded file is empty or too large." }, 400);
-    }
-
-    await putLocalMediaObject({
-      body,
-      contentType,
-      key: session.temp_storage_key
-    });
-    await db.mediaUploadSession.update({
-      data: {
-        status: "UPLOADED",
-        uploaded_at: new Date()
-      },
-      where: {
-        id: session.id
-      }
-    });
-
-    return c.json({ ok: true });
   });
 
   app.get("/api/media/local-assets", async (c) => {
@@ -2783,16 +2661,6 @@ export const createApiApp = () => {
     } catch {
       return c.json({ error: "Media asset was not found." }, 404);
     }
-  });
-
-  app.post("/api/media/upload-sessions/:sessionId/finalize", async (c) => {
-    const assets = await finalizeMediaUploadSession({
-      sessionId: c.req.param("sessionId")
-    });
-
-    return c.json({
-      assets
-    });
   });
 
   app.post("/api/external-review-clicks", async (c) => {

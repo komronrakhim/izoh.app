@@ -1,7 +1,12 @@
 import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 
-import { processLogoImage, processSubmissionPhoto } from "~/server/media";
+import {
+  createDirectMediaUpload,
+  deleteLocalMediaObject,
+  processLogoImage,
+  processSubmissionPhoto
+} from "~/server/media";
 
 describe("media processing", () => {
   it("compresses submission photos without returning the original", async () => {
@@ -41,5 +46,75 @@ describe("media processing", () => {
 
     expect(result.contentType).toBe("image/webp");
     expect(result.extension).toBe("webp");
+  });
+
+  it("creates final media assets directly without an upload session", async () => {
+    const input = await sharp({
+      create: {
+        background: "#6817ff",
+        channels: 3,
+        height: 900,
+        width: 1200
+      }
+    })
+      .jpeg()
+      .toBuffer();
+    const records: Array<Record<string, unknown>> = [];
+    const db = {
+      $transaction: async (
+        callback: (tx: {
+          mediaAsset: {
+            createMany: (input: { data: Array<Record<string, unknown>> }) => Promise<void>;
+            findMany: (input: {
+              where: { storage_key: { in: unknown[] } };
+            }) => Promise<Array<Record<string, unknown>>>;
+          };
+        }) => Promise<Array<Record<string, unknown>>>
+      ) =>
+        callback({
+          mediaAsset: {
+            createMany: async ({ data }) => {
+              records.push(
+                ...data.map((item, index) => ({
+                  ...item,
+                  created_at: new Date(index),
+                  id: `media-${index}`
+                }))
+              );
+            },
+            findMany: async ({ where }) =>
+              records.filter((record) => where.storage_key.in.includes(record.storage_key))
+          }
+        })
+    };
+
+    try {
+      const assets = await createDirectMediaUpload(
+        {
+          body: input,
+          contentType: "image/jpeg",
+          fileName: "guest-photo.jpg",
+          kind: "SUBMISSION_PHOTO",
+          ownerId: "submission-direct-test",
+          ownerType: "SUBMISSION"
+        },
+        db as never
+      );
+
+      expect(assets).toHaveLength(2);
+      expect(assets.map((asset) => asset.kind).sort()).toEqual([
+        "SUBMISSION_PHOTO",
+        "SUBMISSION_THUMBNAIL"
+      ]);
+      expect(assets.every((asset) => asset.status === "READY")).toBe(true);
+    } finally {
+      await Promise.all(
+        records.map((record) =>
+          typeof record.storage_key === "string"
+            ? deleteLocalMediaObject(record.storage_key)
+            : Promise.resolve()
+        )
+      );
+    }
   });
 });

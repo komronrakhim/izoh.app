@@ -15,40 +15,41 @@ const sha256 = (body: Uint8Array) => createHash("sha256").update(body).digest("b
 export const getMediaChecksum = sha256;
 
 export const processSubmissionPhoto = async (input: Uint8Array) => {
-  const main = await sharp(input, {
+  const source = sharp(input, {
     limitInputPixels: 24_000_000
-  })
-    .rotate()
-    .resize({
-      fit: "inside",
-      height: 1600,
-      withoutEnlargement: true,
-      width: 1600
-    })
-    .jpeg({
-      mozjpeg: true,
-      quality: 82
-    })
-    .toBuffer({
-      resolveWithObject: true
-    });
+  }).rotate();
 
-  const thumbnail = await sharp(input, {
-    limitInputPixels: 24_000_000
-  })
-    .rotate()
-    .resize({
-      fit: "cover",
-      height: 360,
-      width: 360
-    })
-    .jpeg({
-      mozjpeg: true,
-      quality: 76
-    })
-    .toBuffer({
-      resolveWithObject: true
-    });
+  const [main, thumbnail] = await Promise.all([
+    source
+      .clone()
+      .resize({
+        fit: "inside",
+        height: 1600,
+        withoutEnlargement: true,
+        width: 1600
+      })
+      .jpeg({
+        mozjpeg: true,
+        quality: 82
+      })
+      .toBuffer({
+        resolveWithObject: true
+      }),
+    source
+      .clone()
+      .resize({
+        fit: "cover",
+        height: 360,
+        width: 360
+      })
+      .jpeg({
+        mozjpeg: true,
+        quality: 76
+      })
+      .toBuffer({
+        resolveWithObject: true
+      })
+  ]);
 
   return {
     main: {

@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import sharp from "sharp";
 
+import { LOCAL_MEDIA_BUCKET, deleteLocalMediaObject, putLocalMediaObject } from "~/server/media";
 import { renderOrganizationQrPdf } from "~/server/pdf";
 import {
   QR_EMOJI_THEMES,
@@ -90,6 +92,50 @@ describe("organization QR PDF", () => {
 
     expect(pdf.subarray(0, 4).toString()).toBe("%PDF");
     expect(pdf.length).toBeGreaterThan(20_000);
+  });
+
+  it("embeds an organization logo from local media storage", async () => {
+    const storageKey = `tests/qr-logo-${Date.now()}.png`;
+    const logo = await sharp({
+      create: {
+        background: "#6817ff",
+        channels: 3,
+        height: 256,
+        width: 256
+      }
+    })
+      .png()
+      .toBuffer();
+
+    await putLocalMediaObject({
+      body: logo,
+      contentType: "image/png",
+      key: storageKey
+    });
+
+    try {
+      const pdf = await renderOrganizationQrPdf({
+        locale: "ru",
+        organizationLogo: {
+          bucket: LOCAL_MEDIA_BUCKET,
+          publicUrl: `/api/media/local-assets?key=${encodeURIComponent(storageKey)}`,
+          storageKey
+        },
+        organizationName: "Izoh Test",
+        template: {
+          caption: "Гости могут быстро оставить обращение.",
+          emojiThemeId: "none",
+          formatId: "table",
+          qrStyle: "rounded"
+        },
+        url: "https://t.me/izohappbot/app?startapp=izoh-test.logo"
+      });
+
+      expect(pdf.subarray(0, 4).toString()).toBe("%PDF");
+      expect(pdf.toString("latin1")).toContain("/Subtype /Image");
+    } finally {
+      await deleteLocalMediaObject(storageKey);
+    }
   });
 
   it("renders every QR print format", async () => {

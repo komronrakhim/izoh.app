@@ -846,7 +846,7 @@
       "rows": ["Xodimlar", "Formalarda"]
     }
   },
-  "sectionShellHint": "Bo‘lim tayyor bo‘lganda sozlamalar shu yerda chiqadi.",
+  "sectionShellHint": "Bu yerda bo‘limning asosiy punktlari jamlangan.",
   "publicReviews": {
     "title": "Ommaviy izohlar",
     "subtitle": "Mehmonlarga joyingiz haqida boshqalarga aytish imkonini bering: ular qulay platformani tanlab, ommaviy izohga o‘tadi.",

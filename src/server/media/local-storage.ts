@@ -34,8 +34,6 @@ const readMeta = async (key: string): Promise<{ contentType?: string }> => {
 export const shouldUseLocalMediaStorage = () =>
   process.env.NODE_ENV !== "production" && requiredR2Keys.some((key) => !getOptionalEnv(key));
 
-export const getLocalUploadUrl = (sessionId: string) => `/api/media/local-upload/${sessionId}`;
-
 export const getLocalPublicUrl = (key: string) =>
   `/api/media/local-assets?key=${encodeURIComponent(key)}`;
 
