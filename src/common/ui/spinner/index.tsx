@@ -1,29 +1,23 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "motion/react";
+import { cn } from "~/common/utils";
 
-interface SpinnerProps extends React.ComponentPropsWithoutRef<typeof motion.svg> {
+interface SpinnerProps extends React.ComponentPropsWithoutRef<"svg"> {
   size?: number;
   className?: string;
 }
 
 export const Spinner: React.FC<SpinnerProps> = ({ size = 21, className, ...props }) => {
   return (
-    <motion.svg
+    <svg
       viewBox="0 0 16 16"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       width={size}
       height={size}
       stroke="currentColor"
-      className={className}
-      animate={{ rotate: 360 }}
-      transition={{
-        repeat: Infinity,
-        duration: 0.5,
-        ease: "easeInOut"
-      }}
+      className={cn("iz-spinner", className)}
       {...props}
     >
       <circle cx="8" cy="8" r="7" stroke="currentColor" strokeOpacity="0.25" strokeWidth="2.25" />
@@ -65,6 +59,6 @@ export const Spinner: React.FC<SpinnerProps> = ({ size = 21, className, ...props
         strokeDashoffset="30"
         transform="rotate(180 8 8)"
       />
-    </motion.svg>
+    </svg>
   );
 };

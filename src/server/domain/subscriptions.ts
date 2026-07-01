@@ -6,22 +6,23 @@ import type {
 } from "../../../prisma/generated/prisma/client";
 
 import { getTelegramBot } from "~/server/telegram";
+import { getSubscriptionPlans } from "~/server/domain/subscription-pricing";
 import { type DomainDb, getDomainDb } from "~/server/domain/shared";
 import {
   ANNUAL_SUBSCRIPTION_PERIOD_DAYS,
   MONTHLY_SUBSCRIPTION_PERIOD_SECONDS,
   SUBSCRIPTION_PLANS,
   SUBSCRIPTION_TRIAL_DAYS,
-  getSubscriptionPlan,
-  getSubscriptionPlanAmountStars,
   type OrganizationSubscriptionPayload,
   type SubscriptionInvoicePayload
 } from "~/shared/subscriptions";
-import { createTranslator, type AppLocale } from "~/shared/i18n";
+import { type AppLocale } from "~/shared/i18n";
+import { createTranslator } from "~/shared/i18n/server";
 
 const STARS_CURRENCY = "XTR";
 const INVOICE_PAYLOAD_PREFIX = "izoh_sub";
-const INVOICE_PAYLOAD_VERSION = "1";
+const LEGACY_INVOICE_PAYLOAD_VERSION = "1";
+const INVOICE_PAYLOAD_VERSION = "2";
 
 type SubscriptionLike = Pick<
   OrganizationSubscription,
@@ -100,15 +101,15 @@ export const isOrganizationSubscriptionActive = (
 
 export const toOrganizationSubscriptionPayload = (
   subscription: SubscriptionLike,
-  now = new Date()
+  now = new Date(),
+  options: {
+    amountStars?: number;
+  } = {}
 ): OrganizationSubscriptionPayload => {
   const status = resolveOrganizationSubscriptionStatus(subscription, now);
-  const amountStars = subscription.plan_code
-    ? getSubscriptionPlanAmountStars(subscription.plan_code)
-    : undefined;
 
   return {
-    amountStars,
+    amountStars: options.amountStars,
     cancelAtPeriodEnd: subscription.cancel_at_period_end,
     currentPeriodEndsAt: toIso(subscription.current_period_ends_at),
     currentPeriodStartedAt: toIso(subscription.current_period_started_at),
@@ -168,8 +169,28 @@ export const getOrCreateOrganizationSubscription = async (
 export const getOrganizationSubscriptionPayload = async (
   organizationId: string,
   db: DomainDb = getDomainDb()
-) =>
-  toOrganizationSubscriptionPayload(await getOrCreateOrganizationSubscription(organizationId, db));
+) => {
+  const subscription = await getOrCreateOrganizationSubscription(organizationId, db);
+  const latestPaidPayment =
+    subscription.source === "TELEGRAM_STARS"
+      ? await db.organizationSubscriptionPayment.findFirst({
+          orderBy: {
+            paid_at: "desc"
+          },
+          select: {
+            amount_stars: true
+          },
+          where: {
+            subscription_id: subscription.id,
+            status: "PAID"
+          }
+        })
+      : null;
+
+  return toOrganizationSubscriptionPayload(subscription, new Date(), {
+    amountStars: latestPaidPayment?.amount_stars
+  });
+};
 
 const invoicePayloadPlanCode = {
   ANNUAL: "a",
@@ -182,10 +203,12 @@ const invoicePayloadPlanCodeByValue: Record<string, SubscriptionPlanCode> = {
 };
 
 const createInvoicePayload = ({
+  amountStars,
   organizationId,
   payerUserId,
   planCode
 }: {
+  amountStars: number;
   organizationId: string;
   payerUserId?: string;
   planCode: SubscriptionPlanCode;
@@ -194,30 +217,55 @@ const createInvoicePayload = ({
     INVOICE_PAYLOAD_PREFIX,
     INVOICE_PAYLOAD_VERSION,
     invoicePayloadPlanCode[planCode],
+    String(amountStars),
     organizationId,
     payerUserId || "-"
   ].join(":");
 
 const parseInvoicePayload = (invoicePayload: string) => {
-  const [prefix, version, planCodeValue, organizationId, payerUserId, ...rest] =
+  const [prefix, version, planCodeValue, fourthValue, fifthValue, sixthValue, ...rest] =
     invoicePayload.split(":");
 
-  if (
-    rest.length > 0 ||
-    prefix !== INVOICE_PAYLOAD_PREFIX ||
-    version !== INVOICE_PAYLOAD_VERSION ||
-    !organizationId
-  ) {
+  if (rest.length > 0 || prefix !== INVOICE_PAYLOAD_PREFIX) {
     return null;
   }
 
   const planCode = invoicePayloadPlanCodeByValue[planCodeValue ?? ""];
 
-  if (!planCode) {
+  if (!planCode || !version) {
+    return null;
+  }
+
+  if (version === LEGACY_INVOICE_PAYLOAD_VERSION) {
+    const organizationId = fourthValue;
+    const payerUserId = fifthValue;
+
+    if (!organizationId || sixthValue !== undefined) {
+      return null;
+    }
+
+    return {
+      amountStars: undefined,
+      organizationId,
+      payerUserId: payerUserId && payerUserId !== "-" ? payerUserId : undefined,
+      planCode
+    };
+  }
+
+  if (version !== INVOICE_PAYLOAD_VERSION) {
+    return null;
+  }
+
+  const amountStars = Number(fourthValue);
+  const organizationId = fifthValue;
+  const payerUserId = sixthValue;
+
+  if (!Number.isInteger(amountStars) || amountStars <= 0 || !organizationId) {
     return null;
   }
 
   return {
+    amountStars,
     organizationId,
     payerUserId: payerUserId && payerUserId !== "-" ? payerUserId : undefined,
     planCode
@@ -272,8 +320,10 @@ export const createOrganizationSubscriptionInvoice = async (
   db: DomainDb = getDomainDb()
 ): Promise<SubscriptionInvoicePayload> => {
   const subscription = await getOrCreateOrganizationSubscription(organizationId, db);
-  const plan = getSubscriptionPlan(planCode);
+  const plans = await getSubscriptionPlans(db);
+  const plan = plans[planCode];
   const invoicePayload = createInvoicePayload({
+    amountStars: plan.amountStars,
     organizationId,
     payerUserId,
     planCode
@@ -322,7 +372,9 @@ export const answerSubscriptionPreCheckoutQuery = async (
   db: DomainDb = getDomainDb()
 ) => {
   const payload = parseInvoicePayload(invoicePayload);
-  const plan = payload ? getSubscriptionPlan(payload.planCode) : null;
+  const plans = payload ? await getSubscriptionPlans(db) : null;
+  const plan = plans && payload ? plans[payload.planCode] : null;
+  const expectedAmountStars = payload?.amountStars ?? plan?.amountStars;
   const organization = payload
     ? await db.organization.findFirst({
         select: {
@@ -339,7 +391,7 @@ export const answerSubscriptionPreCheckoutQuery = async (
     Boolean(plan) &&
     Boolean(organization) &&
     currency === STARS_CURRENCY &&
-    plan?.amountStars === totalAmount;
+    expectedAmountStars === totalAmount;
 
   await getTelegramBot().api.answerPreCheckoutQuery(
     id,
@@ -390,7 +442,13 @@ export const applySuccessfulSubscriptionPayment = async (
     throw new Error("Subscription payment is not available.");
   }
 
-  const plan = getSubscriptionPlan(payload.planCode);
+  const plans = await getSubscriptionPlans(db);
+  const currentPlan = plans[payload.planCode];
+  const amountStars = payload.amountStars ?? currentPlan.amountStars;
+  const plan = {
+    ...currentPlan,
+    amountStars
+  };
 
   if (plan.amountStars !== totalAmount) {
     throw new Error("Subscription payment amount does not match.");

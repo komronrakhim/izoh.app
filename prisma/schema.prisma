@@ -433,6 +433,17 @@ model SystemAuditLog {
   @@index([created_at])
 }
 
+model SystemSetting {
+  key                String  @id
+  value              Json
+  updated_by_user_id String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([updated_at])
+}
+
 model QrPdfDelivery {
   id                  String              @id @default(cuid())
   organization_id     String

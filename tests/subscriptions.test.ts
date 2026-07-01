@@ -1,6 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { createApiApp } from "~/server/api/app";
+import {
+  getSubscriptionPricingPayload,
+  updateSubscriptionPricing
+} from "~/server/domain/subscription-pricing";
 import {
   createInitialOrganizationSubscriptionData,
   isOrganizationSubscriptionActive,
@@ -9,6 +13,7 @@ import {
 import {
   SUBSCRIPTION_PLANS,
   SUBSCRIPTION_TRIAL_DAYS,
+  createSubscriptionPlans,
   getAnnualSubscriptionDiscountPercent
 } from "~/shared/subscriptions";
 
@@ -37,6 +42,86 @@ describe("subscriptions", () => {
     expect(SUBSCRIPTION_PLANS.ANNUAL.amountStars).toBe(5000);
     expect(SUBSCRIPTION_PLANS.ANNUAL.recurring).toBe(false);
     expect(getAnnualSubscriptionDiscountPercent()).toBe(expectedAnnualDiscount);
+    expect(
+      getAnnualSubscriptionDiscountPercent(
+        createSubscriptionPlans({
+          ANNUAL: 6000,
+          MONTHLY: 500
+        })
+      )
+    ).toBe(0);
+  });
+
+  it("uses default subscription pricing when no system setting exists", async () => {
+    const db = {
+      systemSetting: {
+        findUnique: vi.fn(async () => null)
+      }
+    } as never;
+
+    await expect(getSubscriptionPricingPayload(db)).resolves.toMatchObject({
+      annualDiscountPercent: 17,
+      plans: {
+        ANNUAL: {
+          amountStars: 5000
+        },
+        MONTHLY: {
+          amountStars: 500
+        }
+      }
+    });
+  });
+
+  it("updates subscription pricing dynamically", async () => {
+    let value: unknown = null;
+    const systemSetting = {
+      findUnique: vi.fn(async () => (value ? { value } : null)),
+      upsert: vi.fn(async ({ create, update }) => {
+        value = update.value ?? create.value;
+        return {
+          key: "subscription.pricing",
+          value
+        };
+      })
+    };
+    const db = {
+      systemSetting: {
+        findUnique: systemSetting.findUnique,
+        upsert: systemSetting.upsert
+      }
+    } as never;
+
+    await expect(
+      updateSubscriptionPricing(
+        {
+          annualAmountStars: 6200,
+          monthlyAmountStars: 500,
+          updatedByUserId: "user_1"
+        },
+        db
+      )
+    ).resolves.toMatchObject({
+      annualDiscountPercent: 0,
+      plans: {
+        ANNUAL: {
+          amountStars: 6200
+        },
+        MONTHLY: {
+          amountStars: 500
+        }
+      }
+    });
+
+    expect(systemSetting.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        create: expect.objectContaining({
+          updated_by_user_id: "user_1"
+        }),
+        update: expect.objectContaining({
+          updated_by_user_id: "user_1"
+        })
+      })
+    );
   });
 
   it("starts every organization with a seven day trial", () => {

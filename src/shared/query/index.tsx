@@ -4,10 +4,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      gcTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 60 * 1000
+      staleTime: 3 * 60 * 1000
     }
   }
 });
@@ -32,6 +32,8 @@ export const queryKeys = {
     ["system", "users", userId, initDataRaw] as const,
   systemStars: (period: string, search: string, initDataRaw: string) =>
     ["system", "stars", period, search, initDataRaw] as const,
+  systemSubscriptionPricing: (initDataRaw: string) =>
+    ["system", "subscription-pricing", initDataRaw] as const,
   guestMenu: (organizationId: string, initDataRaw: string) =>
     ["organization", organizationId, "guest-menu", initDataRaw] as const,
   guestMenuItem: (organizationId: string, itemId: string, initDataRaw: string) =>

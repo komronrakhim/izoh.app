@@ -10,7 +10,7 @@ import {
   normalizeAppLocale,
   type AppLocale
 } from "./config";
-import { i18nResources } from "./resources";
+import { loadClientI18nMessages } from "./client-resources";
 import { getTmaLaunchContext, getTmaUserLanguageCode } from "~/shared/tma";
 
 type TranslateFn = (key: string, options?: TOptions) => string;
@@ -25,22 +25,86 @@ type I18nContextValue = {
 const I18nContext = React.createContext<I18nContextValue | null>(null);
 
 let didInitClientI18n = false;
+let clientI18nInitPromise: Promise<typeof i18next> | null = null;
+const loadedLocales = new Set<AppLocale>();
 
-const ensureClientI18n = (locale: AppLocale) => {
-  if (!didInitClientI18n) {
-    didInitClientI18n = true;
+const loadLocaleIntoI18n = async (locale: AppLocale) => {
+  if (loadedLocales.has(locale)) {
+    return;
+  }
 
-    void i18next.use(initReactI18next).init({
-      fallbackLng: DEFAULT_LOCALE,
-      initAsync: false,
-      interpolation: {
-        escapeValue: false
-      },
-      lng: locale,
-      resources: i18nResources,
-      returnNull: false
+  const messages = await loadClientI18nMessages(locale);
+
+  i18next.addResourceBundle(locale, "translation", messages, true, true);
+  loadedLocales.add(locale);
+};
+
+const initializeClientI18n = (locale: AppLocale) => {
+  if (!clientI18nInitPromise) {
+    clientI18nInitPromise = (async () => {
+      const fallbackMessages = await loadClientI18nMessages(DEFAULT_LOCALE);
+      const localeMessages =
+        locale === DEFAULT_LOCALE ? fallbackMessages : await loadClientI18nMessages(locale);
+
+      await i18next.use(initReactI18next).init({
+        fallbackLng: DEFAULT_LOCALE,
+        initAsync: false,
+        interpolation: {
+          escapeValue: false
+        },
+        lng: locale,
+        resources: {
+          [DEFAULT_LOCALE]: {
+            translation: fallbackMessages
+          },
+          ...(locale === DEFAULT_LOCALE
+            ? {}
+            : {
+                [locale]: {
+                  translation: localeMessages
+                }
+              })
+        },
+        returnNull: false
+      });
+
+      didInitClientI18n = true;
+      loadedLocales.add(DEFAULT_LOCALE);
+      loadedLocales.add(locale);
+
+      return i18next;
+    })().catch((error: unknown) => {
+      clientI18nInitPromise = null;
+      throw error;
     });
   }
+
+  return clientI18nInitPromise;
+};
+
+const ensureClientI18n = async (locale: AppLocale) => {
+  if (!didInitClientI18n) {
+    const instance = await initializeClientI18n(locale);
+
+    if (instance.language !== locale) {
+      await loadLocaleIntoI18n(locale);
+      await instance.changeLanguage(locale);
+    }
+
+    return instance;
+  }
+
+  if (!clientI18nInitPromise) {
+    clientI18nInitPromise = Promise.resolve(i18next);
+  }
+
+  if (i18next.language === locale && loadedLocales.has(locale)) {
+    return i18next;
+  }
+
+  await clientI18nInitPromise;
+  await loadLocaleIntoI18n(locale);
+  await i18next.changeLanguage(locale);
 
   return i18next;
 };
@@ -83,21 +147,53 @@ const syncManualUserLocale = (locale: AppLocale) => {
 
 export const I18nProvider = ({ children }: { children: React.ReactNode }) => {
   const [locale, setLocaleState] = React.useState<AppLocale>(getInitialLocale);
-  const i18n = React.useMemo(() => ensureClientI18n(locale), [locale]);
+  const [i18n, setI18n] = React.useState<typeof i18next | null>(
+    didInitClientI18n ? i18next : null
+  );
+
+  React.useEffect(() => {
+    let isCurrent = true;
+
+    void ensureClientI18n(locale).then((instance) => {
+      if (!isCurrent) {
+        return;
+      }
+
+      document.documentElement.lang = locale;
+      setI18n(instance);
+    });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
 
   const setLocale = React.useCallback((nextLocale: AppLocale) => {
-    void i18next.changeLanguage(nextLocale);
-    setLocaleState(nextLocale);
     window.localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);
     window.localStorage.setItem(LOCALE_SOURCE_STORAGE_KEY, MANUAL_LOCALE_SOURCE);
     document.documentElement.lang = nextLocale;
-    syncManualUserLocale(nextLocale);
+
+    void ensureClientI18n(nextLocale).then(() => {
+      setLocaleState(nextLocale);
+      syncManualUserLocale(nextLocale);
+    });
   }, []);
 
   React.useEffect(() => {
-    void i18n.changeLanguage(locale);
     document.documentElement.lang = locale;
-  }, [i18n, locale]);
+  }, [locale]);
+
+  if (!i18n) {
+    return (
+      <div
+        aria-busy="true"
+        className="tma-page grid place-items-center bg-surface text-[var(--iz-fallback-primary)]"
+        role="status"
+      >
+        <span className="iz-spinner block size-5 rounded-full border-2 border-current border-b-transparent opacity-80" />
+      </div>
+    );
+  }
 
   const value = React.useMemo<I18nContextValue>(
     () => ({

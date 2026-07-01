@@ -9,6 +9,7 @@ import {
   Inbox,
   Languages,
   QrCode,
+  Star,
   UsersRound,
   type LucideIcon
 } from "lucide-react";
@@ -33,13 +34,14 @@ import {
   type OrganizationSubscriptionPayload,
   type SubscriptionInvoicePayload,
   type SubscriptionPlan,
-  type SubscriptionPlanCode
+  type SubscriptionPlanCode,
+  type SubscriptionPlans
 } from "~/shared/subscriptions";
 import { openTmaInvoice, useTma, useTmaBackButton, useTmaMainButton } from "~/shared/tma";
 
 type SubscriptionPagePayload = {
   annualDiscountPercent: number;
-  plans: typeof SUBSCRIPTION_PLANS;
+  plans: SubscriptionPlans;
   subscription: OrganizationSubscriptionPayload;
 };
 
@@ -71,6 +73,11 @@ const SUBSCRIPTION_BENEFITS = [
     icon: UsersRound,
     key: "staff",
     tone: "bg-[#34C759]"
+  },
+  {
+    icon: Star,
+    key: "publicReviews",
+    tone: "bg-[#30B0C7]"
   },
   {
     icon: Languages,
@@ -537,12 +544,9 @@ export const AdminSubscriptionPage = () => {
                     {t("admin.subscription.trialBadge")}
                   </span>
                   <span className="ios-caption-1 inline-flex items-center gap-1.5 rounded-full bg-white/18 px-2.5 py-1 font-semibold text-white">
-                    {t("admin.subscription.from")}
-                    <StarAmount
-                      amount={monthlyPlan.amountStars}
-                      className="text-white"
-                      iconClassName="text-white"
-                    />
+                    {t("admin.subscription.fromPriceBadge", {
+                      amount: monthlyPlan.amountStars
+                    })}
                   </span>
                 </div>
                 <div className="grid gap-2">
@@ -594,7 +598,7 @@ export const AdminSubscriptionPage = () => {
                     const plan =
                       subscriptionQuery.data?.plans[planCode] ?? SUBSCRIPTION_PLANS[planCode];
                     const selected = selectedPlanCode === planCode;
-                    const discountPercent = subscriptionQuery.data?.annualDiscountPercent ?? 17;
+                    const discountPercent = subscriptionQuery.data?.annualDiscountPercent ?? 0;
                     const hasAnnualDiscount = planCode === "ANNUAL" && discountPercent > 0;
 
                     return (

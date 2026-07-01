@@ -255,6 +255,31 @@
     }
   }
 
+  @keyframes iz-spinner-rotate {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes iz-page-fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  .iz-page-transition {
+    animation: iz-page-fade-in 0.18s ease-out both;
+  }
+
+  .iz-spinner {
+    animation: iz-spinner-rotate 0.5s ease-in-out infinite;
+    transform-origin: center;
+  }
+
   .landing-emoji-float {
     animation: landingEmojiFloat var(--landing-emoji-duration, 8s) ease-in-out
       var(--landing-emoji-delay, 0s) infinite;
@@ -263,6 +288,14 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .iz-spinner {
+      animation-duration: 0.9s;
+    }
+
+    .iz-page-transition {
+      animation: none;
+    }
+
     .landing-emoji-float {
       animation: none;
       will-change: auto;

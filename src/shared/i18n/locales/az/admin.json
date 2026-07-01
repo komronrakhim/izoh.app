@@ -212,7 +212,8 @@
       "auditLog": "Əməliyyatlar",
       "userInfo": "Profil",
       "userOrganizations": "İstifadəçinin məkanları",
-      "userSubmissions": "İstifadəçinin müraciətləri"
+      "userSubmissions": "İstifadəçinin müraciətləri",
+      "pricing": "Abunə qiymətləri"
     },
     "subscriptionUntil": "{{date}} tarixinə qədər aktivdir",
     "userMeta": "ID {{telegramId}} · {{locale}}",
@@ -247,7 +248,8 @@
     "audit": {
       "systemActor": "Sistem",
       "SUBSCRIPTION_GRANTED": "Abunəlik əl ilə verildi",
-      "SUBSCRIPTION_CANCELED": "Abunəlik ləğv edildi"
+      "SUBSCRIPTION_CANCELED": "Abunəlik ləğv edildi",
+      "SUBSCRIPTION_PRICING_UPDATED": "Abunə qiymətləri yeniləndi"
     },
     "grantPopup": {
       "title": "Abunəlik ver",
@@ -266,6 +268,19 @@
       "title": "Abunəlik ləğv edilsin?",
       "message": "Bu məkan üçün giriş dərhal dayanacaq. Sonra yenidən abunəlik verə bilərsiniz.",
       "confirm": "Ləğv et"
+    },
+    "pricing": {
+      "title": "Abunə qiymətləri",
+      "heading": "Stars qiyməti",
+      "hint": "Bu məbləğləri sahiblər abunə səhifəsində görəcəklər. Yeni invoice-lar bu qiymətlərlə yaradılacaq.",
+      "month": "Ay",
+      "year": "İl",
+      "discount": "İllik endirim: {{value}}%",
+      "noDiscount": "Hazırda illik endirim yoxdur.",
+      "save": "Yadda saxla",
+      "error": "Qiymətləri saxlamaq alınmadı. Yenidən cəhd edin.",
+      "current": "Hazırda: ayda {{month}} Stars və ildə {{year}} Stars.",
+      "pageHint": "Aylıq və illik qiyməti Stars ilə təyin edin. Sahiblər bu məbləğləri abunə səhifəsində görəcək."
     }
   },
   "faq": {
@@ -801,12 +816,17 @@
         "languages": {
           "title": "Dillər",
           "subtitle": "Forma və bildirişlər qonağın və sahibin dilinə uyğunlaşdırılacaq."
+        },
+        "publicReviews": {
+          "title": "İctimai rəylər",
+          "subtitle": "Yüksək qiymətdən sonra qonağı yumşaq şəkildə ictimai rəy yazmağa dəvət etmək olar."
         }
       }
     },
     "plansHint": "İlk 7 gün artıq daxil edilib. Formanın sınaq müddətindən sonra dayanmaması üçün ödəniş tələb olunur.",
     "payAction": "{{amount}} ödəyin",
-    "payError": "Ödənişi açmaq alınmadı. Yenidən cəhd edin."
+    "payError": "Ödənişi açmaq alınmadı. Yenidən cəhd edin.",
+    "fromPriceBadge": "{{amount}} Stars-dan"
   },
   "sections": {
     "show": "Qonaqlara göstərin",

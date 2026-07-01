@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { APP_LOCALES, createTranslator, i18nMessages, normalizeAppLocale } from "~/shared/i18n";
+import { APP_LOCALES, normalizeAppLocale } from "~/shared/i18n";
+import { i18nMessages } from "~/shared/i18n/resources";
+import { createTranslator } from "~/shared/i18n/server";
 
 const collectMessagePaths = (value: unknown, prefix = ""): string[] => {
   if (typeof value === "string") {

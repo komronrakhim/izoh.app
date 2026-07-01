@@ -213,7 +213,15 @@ export const TmaProvider = ({ children }: { children: React.ReactNode }) => {
 export const useTma = () => React.useContext(TmaContext);
 
 export const useTmaBackButton = (visible: boolean, onClick: () => void) => {
-  React.useEffect(() => configureTmaBackButton(visible, onClick), [onClick, visible]);
+  const onClickRef = React.useRef(onClick);
+
+  React.useEffect(() => {
+    onClickRef.current = onClick;
+  }, [onClick]);
+
+  useBrowserLayoutEffect(() => {
+    return configureTmaBackButton(visible, () => onClickRef.current());
+  }, [visible]);
 };
 
 export const useTmaMainButton = (state: TmaButtonState | null, onClick: () => void) => {

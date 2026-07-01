@@ -212,7 +212,8 @@
       "auditLog": "İşlemler",
       "userInfo": "Profil",
       "userOrganizations": "Kullanıcının yerleri",
-      "userSubmissions": "Kullanıcının mesajları"
+      "userSubmissions": "Kullanıcının mesajları",
+      "pricing": "Abonelik fiyatları"
     },
     "subscriptionUntil": "{{date}} tarihine kadar aktif",
     "userMeta": "ID {{telegramId}} · {{locale}}",
@@ -247,7 +248,8 @@
     "audit": {
       "systemActor": "Sistem",
       "SUBSCRIPTION_GRANTED": "Abonelik manuel verildi",
-      "SUBSCRIPTION_CANCELED": "Abonelik iptal edildi"
+      "SUBSCRIPTION_CANCELED": "Abonelik iptal edildi",
+      "SUBSCRIPTION_PRICING_UPDATED": "Abonelik fiyatları güncellendi"
     },
     "grantPopup": {
       "title": "Abonelik ver",
@@ -266,6 +268,19 @@
       "title": "Abonelik iptal edilsin mi?",
       "message": "Bu yerin erişimi hemen durur. Daha sonra yeni abonelik verebilirsiniz.",
       "confirm": "İptal et"
+    },
+    "pricing": {
+      "title": "Abonelik fiyatları",
+      "heading": "Stars fiyatı",
+      "hint": "Sahipler bu tutarları abonelik sayfasında görür. Yeni invoice’lar bu fiyatlarla oluşturulur.",
+      "month": "Ay",
+      "year": "Yıl",
+      "discount": "Yıllık indirim: {{value}}%",
+      "noDiscount": "Şu anda yıllık indirim yok.",
+      "save": "Kaydet",
+      "error": "Fiyatlar kaydedilemedi. Tekrar deneyin.",
+      "current": "Şimdi: aylık {{month}} Stars ve yıllık {{year}} Stars.",
+      "pageHint": "Aylık ve yıllık fiyatı Stars ile ayarlayın. Sahipler bu tutarları abonelik sayfasında görür."
     }
   },
   "faq": {
@@ -801,12 +816,17 @@
         "languages": {
           "title": "Diller",
           "subtitle": "Form ve bildirimler konuğun ve sahibinin diline göre düzenlenecektir."
+        },
+        "publicReviews": {
+          "title": "Herkese açık yorumlar",
+          "subtitle": "Yüksek puandan sonra misafiri nazikçe herkese açık yorum bırakmaya davet edebilirsiniz."
         }
       }
     },
     "plansHint": "İlk 7 gün zaten dahildir. Deneme süresi sonrasında formun durmaması için ödeme yapılması gerekmektedir.",
     "payAction": "{{amount}}'yi öde",
-    "payError": "Ödeme açılamadı. Tekrar deneyin."
+    "payError": "Ödeme açılamadı. Tekrar deneyin.",
+    "fromPriceBadge": "{{amount}} Stars’dan"
   },
   "sections": {
     "show": "Misafirlere göster",

@@ -212,7 +212,8 @@
       "auditLog": "Actions",
       "userInfo": "Profile",
       "userOrganizations": "User places",
-      "userSubmissions": "User messages"
+      "userSubmissions": "User messages",
+      "pricing": "Subscription prices"
     },
     "subscriptionUntil": "Active until {{date}}",
     "userMeta": "ID {{telegramId}} · {{locale}}",
@@ -247,7 +248,8 @@
     "audit": {
       "systemActor": "System",
       "SUBSCRIPTION_GRANTED": "Subscription granted manually",
-      "SUBSCRIPTION_CANCELED": "Subscription canceled"
+      "SUBSCRIPTION_CANCELED": "Subscription canceled",
+      "SUBSCRIPTION_PRICING_UPDATED": "Subscription prices updated"
     },
     "grantPopup": {
       "title": "Grant subscription",
@@ -266,6 +268,19 @@
       "title": "Cancel subscription?",
       "message": "Access for this place will stop right away. You can grant a new subscription later.",
       "confirm": "Cancel subscription"
+    },
+    "pricing": {
+      "title": "Subscription prices",
+      "heading": "Stars pricing",
+      "hint": "Owners will see these amounts on the subscription page. New invoices use the updated prices.",
+      "month": "Month",
+      "year": "Year",
+      "discount": "Yearly discount: {{value}}%",
+      "noDiscount": "No yearly discount right now.",
+      "save": "Save",
+      "error": "Could not save prices. Try again.",
+      "current": "Current: {{month}} Stars monthly and {{year}} Stars yearly.",
+      "pageHint": "Set monthly and yearly prices in Stars. Owners will see these amounts on the subscription page."
     }
   },
   "faq": {
@@ -801,12 +816,17 @@
         "languages": {
           "title": "Languages",
           "subtitle": "The form and notifications will be tailored to the guest and owner's language."
+        },
+        "publicReviews": {
+          "title": "Public reviews",
+          "subtitle": "After a high rating, guests can be gently invited to leave a public review."
         }
       }
     },
     "plansHint": "The first 7 days are already included. Payment is required so that the form does not stop after the trial period.",
     "payAction": "Pay {{amount}}",
-    "payError": "Failed to open payment. Try again."
+    "payError": "Failed to open payment. Try again.",
+    "fromPriceBadge": "From {{amount}} Stars"
   },
   "sections": {
     "show": "Show to guests",

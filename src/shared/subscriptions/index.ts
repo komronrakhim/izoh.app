@@ -23,20 +23,33 @@ export type SubscriptionPlan = {
   recurring: boolean;
 };
 
-export const SUBSCRIPTION_PLANS = {
+export type SubscriptionPlans = Record<SubscriptionPlanCode, SubscriptionPlan>;
+
+export type SubscriptionPlanAmounts = Record<SubscriptionPlanCode, number>;
+
+export const DEFAULT_SUBSCRIPTION_PLAN_AMOUNTS = {
+  ANNUAL: 5000,
+  MONTHLY: 500
+} as const satisfies SubscriptionPlanAmounts;
+
+export const createSubscriptionPlans = (amounts: SubscriptionPlanAmounts): SubscriptionPlans => ({
   MONTHLY: {
-    amountStars: 500,
+    amountStars: amounts.MONTHLY,
     code: "MONTHLY",
     period: "month",
     recurring: true
   },
   ANNUAL: {
-    amountStars: 5000,
+    amountStars: amounts.ANNUAL,
     code: "ANNUAL",
     period: "year",
     recurring: false
   }
-} as const satisfies Record<SubscriptionPlanCode, SubscriptionPlan>;
+});
+
+export const DEFAULT_SUBSCRIPTION_PLANS = createSubscriptionPlans(DEFAULT_SUBSCRIPTION_PLAN_AMOUNTS);
+
+export const SUBSCRIPTION_PLANS = DEFAULT_SUBSCRIPTION_PLANS;
 
 export type OrganizationSubscriptionPayload = {
   amountStars?: number;
@@ -66,9 +79,11 @@ export const isSubscriptionPlanCode = (value: unknown): value is SubscriptionPla
 export const getSubscriptionPlanAmountStars = (planCode: SubscriptionPlanCode) =>
   getSubscriptionPlan(planCode).amountStars;
 
-export const getAnnualSubscriptionDiscountPercent = () => {
-  const monthlyYearAmount = SUBSCRIPTION_PLANS.MONTHLY.amountStars * 12;
-  const annualAmount = SUBSCRIPTION_PLANS.ANNUAL.amountStars;
+export const getAnnualSubscriptionDiscountPercent = (
+  plans: SubscriptionPlans = DEFAULT_SUBSCRIPTION_PLANS
+) => {
+  const monthlyYearAmount = plans.MONTHLY.amountStars * 12;
+  const annualAmount = plans.ANNUAL.amountStars;
 
   return Math.max(0, Math.round(((monthlyYearAmount - annualAmount) / monthlyYearAmount) * 100));
 };
