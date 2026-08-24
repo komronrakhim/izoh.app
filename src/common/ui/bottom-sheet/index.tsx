@@ -28,6 +28,31 @@ const sheetTransition: Transition = {
   type: "spring"
 };
 
+const focusableElementSelector = [
+  "a[href]",
+  "area[href]",
+  "button:not([disabled])",
+  "input:not([disabled]):not([type='hidden'])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  "iframe",
+  "object",
+  "embed",
+  "[contenteditable='true']",
+  "[tabindex]:not([tabindex='-1'])",
+  "audio[controls]",
+  "video[controls]"
+].join(",");
+
+const getFocusableElements = (container: HTMLElement) =>
+  Array.from(container.querySelectorAll<HTMLElement>(focusableElementSelector)).filter(
+    (element) =>
+      element.tabIndex >= 0 &&
+      !element.hidden &&
+      element.getAttribute("aria-hidden") !== "true" &&
+      (element.offsetWidth > 0 || element.offsetHeight > 0 || element.getClientRects().length > 0)
+  );
+
 export const BottomSheet = ({
   children,
   className,
@@ -43,9 +68,14 @@ export const BottomSheet = ({
   const [mounted, setMounted] = React.useState(false);
   const titleId = React.useId();
   const descriptionId = React.useId();
+  const closeButtonRef = React.useRef<HTMLButtonElement>(null);
+  const dialogRef = React.useRef<HTMLElement>(null);
+  const previouslyFocusedElementRef = React.useRef<HTMLElement | null>(null);
   const close = React.useCallback(() => {
     onOpenChange(false);
   }, [onOpenChange]);
+  const closeRef = React.useRef(close);
+  closeRef.current = close;
   const closeWithHaptic = React.useCallback(() => {
     tmaHaptics.impact("light");
     close();
@@ -56,12 +86,18 @@ export const BottomSheet = ({
   }, []);
 
   React.useEffect(() => {
-    if (!open) {
+    if (!mounted || !open) {
       return;
     }
 
     const scrollY = window.scrollY;
     const { body, documentElement } = document;
+    const activeElement = document.activeElement;
+    const appRoot = document.getElementById("root");
+    const canInertAppRoot = Boolean(
+      appRoot && dialogRef.current && !appRoot.contains(dialogRef.current)
+    );
+    const previousAppRootInert = appRoot?.inert ?? false;
     const previousHtmlOverflow = documentElement.style.overflow;
     const previousHtmlOverscrollBehavior = documentElement.style.overscrollBehavior;
     const previousBodyOverflow = body.style.overflow;
@@ -70,9 +106,59 @@ export const BottomSheet = ({
     const previousBodyLeft = body.style.left;
     const previousBodyRight = body.style.right;
     const previousBodyWidth = body.style.width;
+    previouslyFocusedElementRef.current =
+      activeElement instanceof HTMLElement ? activeElement : null;
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        close();
+        closeRef.current();
+        return;
+      }
+
+      if (event.key !== "Tab" || event.altKey || event.ctrlKey || event.metaKey) {
+        return;
+      }
+
+      const dialog = dialogRef.current;
+
+      if (!dialog) {
+        return;
+      }
+
+      const focusableElements = getFocusableElements(dialog);
+
+      if (focusableElements.length === 0) {
+        event.preventDefault();
+        dialog.focus({ preventScroll: true });
+        return;
+      }
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const focusedElement = document.activeElement;
+      const focusIsOutsideDialog =
+        !(focusedElement instanceof Node) || !dialog.contains(focusedElement);
+
+      if (
+        event.shiftKey &&
+        (focusedElement === firstElement || focusedElement === dialog || focusIsOutsideDialog)
+      ) {
+        event.preventDefault();
+        lastElement.focus({ preventScroll: true });
+      } else if (
+        !event.shiftKey &&
+        (focusedElement === lastElement || focusedElement === dialog || focusIsOutsideDialog)
+      ) {
+        event.preventDefault();
+        firstElement.focus({ preventScroll: true });
+      }
+    };
+    const onFocusIn = (event: FocusEvent) => {
+      const dialog = dialogRef.current;
+      const focusTarget = event.target;
+
+      if (dialog && (!(focusTarget instanceof Node) || !dialog.contains(focusTarget))) {
+        (closeButtonRef.current ?? dialog).focus({ preventScroll: true });
       }
     };
 
@@ -84,9 +170,20 @@ export const BottomSheet = ({
     body.style.left = "0";
     body.style.right = "0";
     body.style.width = "100%";
-    window.addEventListener("keydown", onKeyDown);
+    if (canInertAppRoot && appRoot) {
+      appRoot.inert = true;
+    }
+
+    document.addEventListener("keydown", onKeyDown, true);
+    document.addEventListener("focusin", onFocusIn);
+    const focusFrame = window.requestAnimationFrame(() => {
+      (closeButtonRef.current ?? dialogRef.current)?.focus({ preventScroll: true });
+    });
 
     return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.removeEventListener("keydown", onKeyDown, true);
+      document.removeEventListener("focusin", onFocusIn);
       documentElement.style.overflow = previousHtmlOverflow;
       documentElement.style.overscrollBehavior = previousHtmlOverscrollBehavior;
       body.style.overflow = previousBodyOverflow;
@@ -95,10 +192,19 @@ export const BottomSheet = ({
       body.style.left = previousBodyLeft;
       body.style.right = previousBodyRight;
       body.style.width = previousBodyWidth;
-      window.removeEventListener("keydown", onKeyDown);
+      if (canInertAppRoot && appRoot) {
+        appRoot.inert = previousAppRootInert;
+      }
+
+      const previouslyFocusedElement = previouslyFocusedElementRef.current;
+      previouslyFocusedElementRef.current = null;
+      if (previouslyFocusedElement?.isConnected) {
+        previouslyFocusedElement.focus({ preventScroll: true });
+      }
+
       window.scrollTo(0, scrollY);
     };
-  }, [close, open]);
+  }, [mounted, open]);
 
   if (!mounted) {
     return null;
@@ -140,7 +246,9 @@ export const BottomSheet = ({
                 scale: 0.994,
                 y: 28
               }}
+              ref={dialogRef}
               role="dialog"
+              tabIndex={-1}
               transition={sheetTransition}
             >
               <div className="grid gap-6 px-5 pb-6 pt-5">
@@ -150,6 +258,7 @@ export const BottomSheet = ({
                       <button
                         aria-label={closeLabel}
                         className="grid size-11 place-items-center rounded-full bg-foreground/[0.075] text-foreground transition-colors active:bg-foreground/[0.12] dark:bg-white/[0.1] dark:active:bg-white/[0.16]"
+                        ref={closeButtonRef}
                         type="button"
                         onClick={closeWithHaptic}
                       >

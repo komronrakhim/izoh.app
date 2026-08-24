@@ -61,6 +61,7 @@ describe("guest entry config API", () => {
         id: "staff"
       })
     );
+    expect(payload.menu).toEqual({ available: false });
     expect(payload.staff.enabled).toBe(false);
   });
 

@@ -73,12 +73,10 @@ export const putR2Object = async ({
   };
 };
 
-export const deleteR2Object = async (key: string) => {
-  const config = getR2Config();
-
+export const deleteR2Object = async (key: string, bucket = getR2Config().bucket) => {
   await getR2Client().send(
     new DeleteObjectCommand({
-      Bucket: config.bucket,
+      Bucket: bucket,
       Key: key
     })
   );

@@ -104,7 +104,7 @@ const deleteStoredMediaObject = async ({ bucket, storageKey }: StoredMediaObject
     return;
   }
 
-  await deleteR2Object(storageKey);
+  await deleteR2Object(storageKey, bucket);
 };
 
 const runWithConcurrency = async <T>(

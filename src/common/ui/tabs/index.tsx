@@ -37,6 +37,7 @@ export const Tabs = ({ value, onValueChange, items, className, compact = false }
         return (
           <button
             key={item.value}
+            aria-pressed={isActive}
             type="button"
             onClick={() => selectValue(item.value)}
             className={cn(

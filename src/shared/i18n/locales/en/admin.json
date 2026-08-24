@@ -156,6 +156,146 @@
     "link": "Link",
     "notifications": "Chat"
   },
+  "menu": {
+    "title": "Menu",
+    "hint": "Add categories, items, prices, and details guests need.",
+    "dashboardHint": "Manage the menu and team guests can see.",
+    "module": {
+      "toggle": "Show menu to guests",
+      "hint": "When enabled, a Menu button appears in the guest experience.",
+      "subscriptionInactiveHint": "Your subscription is inactive. Guests will see the menu after the subscription is renewed.",
+      "notGuestAvailableHint": "The module is enabled, but guests will see the menu only after you choose a currency and add visible content."
+    },
+    "currency": {
+      "title": "Currency",
+      "hint": "Choose the currency before adding items.",
+      "select": "Choose",
+      "searchPlaceholder": "Currency code",
+      "empty": "No currencies found.",
+      "lockedHint": "Currency cannot be changed while the menu contains items."
+    },
+    "categories": {
+      "title": "Categories",
+      "hint": "Categories appear in this order in the guest menu.",
+      "add": "Add category",
+      "emptyHint": "Add the first category, such as Breakfast, Mains, or Drinks.",
+      "currencyRequiredHint": "Choose a menu currency before adding categories.",
+      "itemCount": "Items: {{count}}",
+      "createTitle": "New category",
+      "createHint": "Use a short name guests can scan quickly.",
+      "createAction": "Create category",
+      "editTitle": "Category",
+      "editHint": "Saved changes become visible immediately while the menu is enabled.",
+      "saveAction": "Save category",
+      "fields": {
+        "namePlaceholder": "Category name",
+        "visible": "Show to guests",
+        "visibilityHint": "Hidden categories and their items do not appear in the guest menu."
+      },
+      "deleteAction": "Delete category",
+      "deleteTitle": "Delete category?",
+      "deleteMessage": "The category and all its items will be deleted. This cannot be undone.",
+      "deleteConfirm": "Delete",
+      "notFoundTitle": "Category not found",
+      "notFoundHint": "It may have been deleted or moved. Return to the menu."
+    },
+    "items": {
+      "title": "Items",
+      "hint": "Items appear in this order inside the category.",
+      "add": "Add item",
+      "emptyHint": "Add the first item to this category.",
+      "createTitle": "New item",
+      "createHint": "Add the name and price first; everything else is optional.",
+      "createAction": "Create item",
+      "editTitle": "Item",
+      "editHint": "Saving updates the live menu immediately.",
+      "saveAction": "Save item",
+      "fields": {
+        "photoAction": "Choose item photo",
+        "photoAlt": "Item photo",
+        "removePhoto": "Remove photo",
+        "namePlaceholder": "Item name",
+        "descriptionPlaceholder": "Description and ingredients",
+        "portionPlaceholder": "Portion, for example 350 g",
+        "pricePlaceholder": "Price",
+        "priceError": "Enter a valid price.",
+        "visible": "Show to guests",
+        "available": "In stock",
+        "spice": "Spice level"
+      },
+      "photoErrors": {
+        "type": "Choose a JPEG, PNG, or WebP image.",
+        "size": "The image is too large. Choose a smaller one."
+      },
+      "visibilityHint": "Hidden items do not appear. Unavailable items remain visible as sold out.",
+      "spiceHint": "Set a spice level only when it helps guests choose.",
+      "deleteAction": "Delete item",
+      "deleteTitle": "Delete item?",
+      "deleteMessage": "This item will be permanently removed from the menu.",
+      "deleteConfirm": "Delete",
+      "notFoundTitle": "Item not found",
+      "notFoundHint": "It may have been deleted or moved. Return to the category."
+    },
+    "status": {
+      "hidden": "Hidden",
+      "soldOut": "Sold out"
+    },
+    "actions": {
+      "back": "Back",
+      "retry": "Try again",
+      "duplicate": "Duplicate item",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
+    },
+    "spice": {
+      "0": "Not spicy",
+      "1": "Mild",
+      "2": "Spicy",
+      "3": "Very spicy"
+    },
+    "tags": {
+      "dietaryTitle": "Dietary tags",
+      "dietaryHint": "Select only tags that accurately describe the item.",
+      "dietary": {
+        "vegetarian": "Vegetarian",
+        "vegan": "Vegan",
+        "halal": "Halal",
+        "gluten_free": "Gluten-free",
+        "lactose_free": "Lactose-free"
+      },
+      "marketingTitle": "Highlights",
+      "marketingHint": "Use highlights sparingly so they remain useful.",
+      "marketing": {
+        "new": "New",
+        "popular": "Popular",
+        "chef_choice": "Chef's choice",
+        "seasonal": "Seasonal"
+      }
+    },
+    "allergens": {
+      "title": "Allergens",
+      "hint": "Mark known allergens. This does not replace advice from your staff.",
+      "gluten": "Gluten",
+      "crustaceans": "Crustaceans",
+      "eggs": "Eggs",
+      "fish": "Fish",
+      "peanuts": "Peanuts",
+      "soy": "Soy",
+      "milk": "Milk",
+      "tree_nuts": "Tree nuts",
+      "celery": "Celery",
+      "mustard": "Mustard",
+      "sesame": "Sesame",
+      "sulphites": "Sulphites",
+      "lupin": "Lupin",
+      "molluscs": "Molluscs"
+    },
+    "errors": {
+      "load": "The menu could not be loaded. Check your connection and try again.",
+      "save": "The changes could not be saved. Try again.",
+      "delete": "The item could not be deleted. Try again."
+    }
+  },
   "system": {
     "badge": "System",
     "title": "Pulse",

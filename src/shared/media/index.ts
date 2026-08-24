@@ -7,6 +7,7 @@ export const LOGO_MAX_BYTES = MEDIA_IMAGE_MAX_BYTES;
 export type MediaImageContentType = (typeof MEDIA_IMAGE_CONTENT_TYPES)[number];
 
 export type BrowserMediaAssetKind =
+  | "MENU_ITEM_PHOTO"
   | "ORGANIZATION_LOGO"
   | "STAFF_AVATAR"
   | "SUBMISSION_PHOTO"
@@ -46,6 +47,12 @@ const uploadImageOptimizationByKind = {
     mimeType: "image/webp",
     quality: 0.9,
     skipBelowBytes: 180 * 1024
+  },
+  MENU_ITEM_PHOTO: {
+    maxDimension: 1200,
+    mimeType: "image/jpeg",
+    quality: 0.84,
+    skipBelowBytes: 320 * 1024
   },
   STAFF_AVATAR: {
     maxDimension: 800,
