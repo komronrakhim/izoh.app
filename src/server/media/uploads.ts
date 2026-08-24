@@ -8,14 +8,16 @@ import { getDomainDb, type DomainDb } from "~/server/domain/shared";
 import { MEDIA_IMAGE_MAX_BYTES, isSupportedImageContentType } from "./constants";
 import { buildFinalStorageKey } from "./keys";
 import {
+  deleteLocalMediaObject,
   LOCAL_MEDIA_BUCKET,
   putLocalMediaObject,
   shouldUseLocalMediaStorage
 } from "./local-storage";
-import { getR2Config, putR2Object } from "./r2-client";
+import { deleteR2Object, getR2Config, putR2Object } from "./r2-client";
 import {
   getMediaChecksum,
   processLogoImage,
+  processMenuItemPhoto,
   processSubmissionPhoto,
   type ProcessedImage
 } from "./processing";
@@ -33,7 +35,12 @@ type CreateDirectMediaUploadInput = {
 const getSizeLimitBytes = () => MEDIA_IMAGE_MAX_BYTES;
 
 const assertUploadKindIsImage = (kind: MediaAssetKind) => {
-  if (kind !== "ORGANIZATION_LOGO" && kind !== "STAFF_AVATAR" && kind !== "SUBMISSION_PHOTO") {
+  if (
+    kind !== "MENU_ITEM_PHOTO" &&
+    kind !== "ORGANIZATION_LOGO" &&
+    kind !== "STAFF_AVATAR" &&
+    kind !== "SUBMISSION_PHOTO"
+  ) {
     throw new Error("This media kind cannot be uploaded through the image upload flow.");
   }
 };
@@ -151,7 +158,8 @@ const createFinalMediaAssetInputs = async ({
     return finalAssets;
   }
 
-  const processed = await processLogoImage(body);
+  const processed =
+    kind === "MENU_ITEM_PHOTO" ? await processMenuItemPhoto(body) : await processLogoImage(body);
   const finalKey = buildFinalStorageKey({
     extension: processed.extension,
     kind,
@@ -211,20 +219,41 @@ export const createDirectMediaUpload = async (
   });
   const storageKeys = finalAssets.map((asset) => asset.storage_key);
 
-  return db.$transaction(async (tx) => {
-    await tx.mediaAsset.createMany({
-      data: finalAssets
-    });
+  try {
+    return await db.$transaction(async (tx) => {
+      await tx.mediaAsset.createMany({
+        data: finalAssets
+      });
 
-    return tx.mediaAsset.findMany({
-      orderBy: {
-        created_at: "asc"
-      },
-      where: {
-        storage_key: {
-          in: storageKeys
+      return tx.mediaAsset.findMany({
+        orderBy: {
+          created_at: "asc"
+        },
+        where: {
+          storage_key: {
+            in: storageKeys
+          }
         }
+      });
+    });
+  } catch (error) {
+    const cleanupResults = await Promise.allSettled(
+      finalAssets.map((asset) =>
+        asset.bucket === LOCAL_MEDIA_BUCKET
+          ? deleteLocalMediaObject(asset.storage_key)
+          : deleteR2Object(asset.storage_key, asset.bucket)
+      )
+    );
+
+    cleanupResults.forEach((result, index) => {
+      if (result.status === "rejected") {
+        console.warn("Failed direct upload storage rollback cleanup", {
+          error: result.reason instanceof Error ? result.reason.message : String(result.reason),
+          storageKey: finalAssets[index]?.storage_key
+        });
       }
     });
-  });
+
+    throw error;
+  }
 };

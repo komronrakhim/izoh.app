@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ImgHTMLAttributes, ReactNode } from "react";
 
 import { cn, getCoverFallbackStyle, hasImageUrl } from "~/common/utils";
 
@@ -7,6 +7,7 @@ type CoverSurfaceProps = {
   children?: ReactNode;
   className?: string;
   imageClassName?: string;
+  loading?: ImgHTMLAttributes<HTMLImageElement>["loading"];
   seed: string;
   src?: string | null;
 };
@@ -16,6 +17,7 @@ export const CoverSurface = ({
   children,
   className,
   imageClassName,
+  loading = "lazy",
   seed,
   src
 }: CoverSurfaceProps) => {
@@ -34,6 +36,8 @@ export const CoverSurface = ({
           src={src}
           alt={alt}
           className={cn("h-full w-full object-cover object-center", imageClassName)}
+          decoding="async"
+          loading={loading}
         />
       ) : null}
 

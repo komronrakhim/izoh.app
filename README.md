@@ -51,6 +51,7 @@ R2_ACCESS_KEY_ID=""
 R2_SECRET_ACCESS_KEY=""
 R2_BUCKET="izoh-media"
 R2_PUBLIC_BASE_URL="https://media.example.com"
+MENU_MODULE_ROLLOUT_ENABLED="false"
 ```
 
 Required for the web service when API is deployed on another domain:
@@ -68,6 +69,11 @@ VITE_TG_ANALYTICS_TOKEN=""
 `R2_PUBLIC_BASE_URL` must be a public HTTPS URL because Telegram needs reachable media URLs for submission attachments.
 `VITE_TG_ANALYTICS_TOKEN` is issued in TON Builders for the Mini App domain and bot URL.
 
+`MENU_MODULE_ROLLOUT_ENABLED` is fail-closed in production. Keep it `false` while deploying the
+menu migration and the new revision to every API and worker service. After all older Prisma clients
+have been drained, set it to `true` on the API service to expose Menu to every organization. This
+two-phase rollout prevents older instances from reading enum values they do not know.
+
 ## Scripts
 
 ```bash
@@ -76,6 +82,7 @@ npm run dev:web                         # Vite only
 npm run dev:api                         # API only
 npm run dev:notification-dispatcher     # Telegram delivery worker
 npm run dev:organization-deletion-worker # deletion worker
+npm run dev:qr-pdf-dispatcher           # QR PDF delivery worker
 
 npm run verify                          # typecheck + tests
 npm run typecheck
@@ -85,11 +92,13 @@ npm run build:web
 npm run build:api
 npm run build:notification-dispatcher
 npm run build:organization-deletion-worker
+npm run build:qr-pdf-dispatcher
 
 npm run start:web
 npm run start:api
 npm run start:notification-dispatcher
 npm run start:organization-deletion-worker
+npm run start:qr-pdf-dispatcher
 
 npm run db:generate
 npm run db:migrate
@@ -109,6 +118,7 @@ The recommended Railway layout is:
 - API service.
 - Notification Dispatcher service.
 - Organization Deletion Worker service.
+- QR PDF Dispatcher service.
 
 API service:
 
@@ -137,6 +147,13 @@ Organization Deletion Worker:
 ```bash
 Build: npm run build:organization-deletion-worker
 Start: npm run start:organization-deletion-worker
+```
+
+QR PDF Dispatcher:
+
+```bash
+Build: npm run build:qr-pdf-dispatcher
+Start: npm run start:qr-pdf-dispatcher
 ```
 
 After the API is deployed, set the Telegram webhook:

@@ -260,6 +260,68 @@
       }
     }
   },
+  "menu": {
+    "title": "Menyu",
+    "subtitle": "Toifani tanlang va mavjud taomlarni ko‘ring.",
+    "banner": {
+      "title": "Menyu",
+      "subtitle": "Taomlar, ichimliklar va narxlar"
+    },
+    "item": {
+      "unavailable": "Hozir mavjud emas"
+    },
+    "spiceLevels": {
+      "1": "Biroz achchiq",
+      "2": "Achchiq",
+      "3": "Juda achchiq"
+    },
+    "dietaryTags": {
+      "vegetarian": "Vegetarian",
+      "vegan": "Vegan",
+      "halal": "Halol",
+      "gluten_free": "Glyutensiz",
+      "lactose_free": "Laktozasiz"
+    },
+    "marketingTags": {
+      "new": "Yangi",
+      "popular": "Ommabop",
+      "chef_choice": "Oshpaz tavsiyasi",
+      "seasonal": "Mavsumiy"
+    },
+    "details": {
+      "tagsTitle": "Xususiyatlar",
+      "allergensTitle": "Allergenlar"
+    },
+    "allergens": {
+      "gluten": "Glyuten",
+      "crustaceans": "Qisqichbaqasimonlar",
+      "eggs": "Tuxum",
+      "fish": "Baliq",
+      "peanuts": "Yeryong‘oq",
+      "soy": "Soya",
+      "milk": "Sut",
+      "tree_nuts": "Daraxt yong‘oqlari",
+      "celery": "Selderey",
+      "mustard": "Xantal",
+      "sesame": "Kunjut",
+      "sulphites": "Sulfitlar",
+      "lupin": "Lyupin",
+      "molluscs": "Mollyuskalar"
+    },
+    "empty": {
+      "title": "Menyu hozircha bo‘sh",
+      "subtitle": "Hozir mavjud taomlar yo‘q."
+    },
+    "error": {
+      "title": "Menyu ochilmadi",
+      "subtitle": "Qayta urinib ko‘ring.",
+      "action": "Qayta urinish"
+    },
+    "footer": {
+      "title": "Taassurotingizni ulashmoqchimisiz?",
+      "action": "Joy haqida fikr qoldirish"
+    }
+  },
   "photos": {
     "add": "Rasm",
     "hints": {

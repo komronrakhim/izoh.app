@@ -35,6 +35,7 @@ enum OrganizationModule {
   COMPLAINT
   SUGGESTION
   STAFF
+  MENU
 }
 
 enum SubmissionKind {
@@ -55,6 +56,7 @@ enum MediaAssetKind {
   STAFF_AVATAR
   SUBMISSION_PHOTO
   SUBMISSION_THUMBNAIL
+  MENU_ITEM_PHOTO
 }
 
 enum MediaAssetStatus {
@@ -193,6 +195,7 @@ model Organization {
   external_review_clicks            ExternalReviewClick[]
   deletion_jobs                     OrganizationDeletionJob[]
   qr_pdf_deliveries                 QrPdfDelivery[]
+  menu                              Menu?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -491,6 +494,64 @@ model StaffMember {
   @@index([organization_id, is_active, sort_order])
 }
 
+model Menu {
+  id              String @id @default(cuid())
+  organization_id String @unique
+  currency_code   String @db.VarChar(3)
+  content_locale  String
+  revision        Int    @default(1)
+
+  organization Organization   @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  categories   MenuCategory[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model MenuCategory {
+  id                         String  @id @default(cuid())
+  menu_id                    String
+  creation_client_request_id String? @unique
+  name                       String
+  is_visible                 Boolean @default(true)
+  sort_order                 Int     @default(0)
+
+  menu  Menu       @relation(fields: [menu_id], references: [id], onDelete: Cascade)
+  items MenuItem[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([menu_id, is_visible, sort_order])
+}
+
+model MenuItem {
+  id                         String   @id @default(cuid())
+  category_id                String
+  creation_client_request_id String?  @unique
+  name                       String
+  description                String   @default("")
+  portion_label              String   @default("")
+  price_minor                Int
+  photo_media_asset_id       String?  @unique
+  is_visible                 Boolean  @default(true)
+  is_available               Boolean  @default(true)
+  spice_level                Int      @default(0)
+  dietary_tag_codes          String[] @default([])
+  marketing_tag_codes        String[] @default([])
+  allergen_codes             String[] @default([])
+  sort_order                 Int      @default(0)
+
+  category          MenuCategory @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  photo_media_asset MediaAsset?  @relation("MenuItemPhoto", fields: [photo_media_asset_id], references: [id], onDelete: SetNull)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([category_id, is_visible, sort_order])
+  @@index([photo_media_asset_id])
+}
+
 model Submission {
   id                     String         @id @default(cuid())
   organization_id        String
@@ -582,6 +643,7 @@ model MediaAsset {
   metadata     Json?
 
   submission_attachments SubmissionAttachment[]
+  menu_item_photo         MenuItem?               @relation("MenuItemPhoto")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

@@ -260,6 +260,68 @@
       }
     }
   },
+  "menu": {
+    "title": "Menu",
+    "subtitle": "Choose a category and see what is available.",
+    "banner": {
+      "title": "Menu",
+      "subtitle": "Dishes, drinks and prices"
+    },
+    "item": {
+      "unavailable": "Unavailable"
+    },
+    "spiceLevels": {
+      "1": "Mildly spicy",
+      "2": "Spicy",
+      "3": "Very spicy"
+    },
+    "dietaryTags": {
+      "vegetarian": "Vegetarian",
+      "vegan": "Vegan",
+      "halal": "Halal",
+      "gluten_free": "Gluten-free",
+      "lactose_free": "Lactose-free"
+    },
+    "marketingTags": {
+      "new": "New",
+      "popular": "Popular",
+      "chef_choice": "Chef's choice",
+      "seasonal": "Seasonal"
+    },
+    "details": {
+      "tagsTitle": "Features",
+      "allergensTitle": "Allergens"
+    },
+    "allergens": {
+      "gluten": "Gluten",
+      "crustaceans": "Crustaceans",
+      "eggs": "Eggs",
+      "fish": "Fish",
+      "peanuts": "Peanuts",
+      "soy": "Soy",
+      "milk": "Milk",
+      "tree_nuts": "Tree nuts",
+      "celery": "Celery",
+      "mustard": "Mustard",
+      "sesame": "Sesame",
+      "sulphites": "Sulphites",
+      "lupin": "Lupin",
+      "molluscs": "Molluscs"
+    },
+    "empty": {
+      "title": "The menu is empty",
+      "subtitle": "No items are available right now."
+    },
+    "error": {
+      "title": "Could not open the menu",
+      "subtitle": "Please try again.",
+      "action": "Try again"
+    },
+    "footer": {
+      "title": "Want to share your experience?",
+      "action": "Leave feedback about this place"
+    }
+  },
   "photos": {
     "add": "Photo",
     "hints": {
