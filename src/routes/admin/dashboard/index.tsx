@@ -490,9 +490,7 @@ export const AdminOrganizationOverview = ({
   });
   const guestLinkQueryKey = React.useMemo(
     () =>
-      organization
-        ? queryKeys.organizationQrLink(organization.id, "", tma.initDataRaw)
-        : null,
+      organization ? queryKeys.organizationQrLink(organization.id, "", tma.initDataRaw) : null,
     [organization, tma.initDataRaw]
   );
 

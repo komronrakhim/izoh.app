@@ -77,8 +77,11 @@ const sectionIconMap = {
 
 type AdminSectionKey = keyof typeof sectionIconMap;
 
+const isAdminSectionKey = (section: string): section is AdminSectionKey =>
+  section in sectionIconMap;
+
 const resolveSection = (section: string): AdminSectionKey =>
-  section in sectionIconMap ? (section as AdminSectionKey) : "feed";
+  isAdminSectionKey(section) ? section : "feed";
 
 const notificationModes = ["ALL", "IMPORTANT_ONLY", "OFF"] as const satisfies Readonly<
   OrganizationNotificationMode[]
@@ -299,6 +302,7 @@ export const AdminSection = () => {
     organizations.find((item) => item.id === params.organizationId) ??
     organizations.find((item) => item.slug === params.organizationId) ??
     null;
+  const isKnownSection = isAdminSectionKey(params.section);
   const section = resolveSection(params.section);
   const guestMenuItemId = isGuestMenuItemId(section) ? section : null;
   const FallbackSectionIcon = sectionIconMap[section];
@@ -462,6 +466,16 @@ export const AdminSection = () => {
   }, [navigate, params.organizationId]);
 
   useTmaBackButton(true, backToOrganization);
+
+  React.useEffect(() => {
+    if (isKnownSection) return;
+
+    void navigate({
+      params: { organizationId: params.organizationId },
+      replace: true,
+      to: "/admin/$organizationId"
+    });
+  }, [isKnownSection, navigate, params.organizationId]);
 
   React.useEffect(() => {
     if (organization) {
@@ -1474,6 +1488,14 @@ export const AdminSection = () => {
     (section === "suggestion" && suggestionSettingsQuery.isLoading) ||
     (section === "staff" && (staffSettingsQuery.isLoading || staffMembersQuery.isLoading)) ||
     (section === "notifications" && notificationSettingsQuery.isLoading);
+
+  if (!isKnownSection) {
+    return (
+      <PageTransition>
+        <PendingScreen label={t("common.loading")} />
+      </PageTransition>
+    );
+  }
 
   if (isGuestMenuLoading || (showModuleSettings && isCurrentSettingsLoading)) {
     return (

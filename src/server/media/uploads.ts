@@ -8,11 +8,12 @@ import { getDomainDb, type DomainDb } from "~/server/domain/shared";
 import { MEDIA_IMAGE_MAX_BYTES, isSupportedImageContentType } from "./constants";
 import { buildFinalStorageKey } from "./keys";
 import {
+  deleteLocalMediaObject,
   LOCAL_MEDIA_BUCKET,
   putLocalMediaObject,
   shouldUseLocalMediaStorage
 } from "./local-storage";
-import { getR2Config, putR2Object } from "./r2-client";
+import { deleteR2Object, getR2Config, putR2Object } from "./r2-client";
 import {
   getMediaChecksum,
   processLogoImage,
@@ -211,20 +212,41 @@ export const createDirectMediaUpload = async (
   });
   const storageKeys = finalAssets.map((asset) => asset.storage_key);
 
-  return db.$transaction(async (tx) => {
-    await tx.mediaAsset.createMany({
-      data: finalAssets
-    });
+  try {
+    return await db.$transaction(async (tx) => {
+      await tx.mediaAsset.createMany({
+        data: finalAssets
+      });
 
-    return tx.mediaAsset.findMany({
-      orderBy: {
-        created_at: "asc"
-      },
-      where: {
-        storage_key: {
-          in: storageKeys
+      return tx.mediaAsset.findMany({
+        orderBy: {
+          created_at: "asc"
+        },
+        where: {
+          storage_key: {
+            in: storageKeys
+          }
         }
+      });
+    });
+  } catch (error) {
+    const cleanupResults = await Promise.allSettled(
+      finalAssets.map((asset) =>
+        asset.bucket === LOCAL_MEDIA_BUCKET
+          ? deleteLocalMediaObject(asset.storage_key)
+          : deleteR2Object(asset.storage_key, asset.bucket)
+      )
+    );
+
+    cleanupResults.forEach((result, index) => {
+      if (result.status === "rejected") {
+        console.warn("Failed direct upload storage rollback cleanup", {
+          error: result.reason instanceof Error ? result.reason.message : String(result.reason),
+          storageKey: finalAssets[index]?.storage_key
+        });
       }
     });
-  });
+
+    throw error;
+  }
 };

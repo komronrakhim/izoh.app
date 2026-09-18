@@ -262,6 +262,7 @@ const isNonProduction = () => process.env.NODE_ENV !== "production";
 const databaseRequired = (c: Context) => c.json({ error: "Database is required." }, 503);
 
 const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
+const rateLimitBucketsMaxEntries = 5000;
 const guestEntryConfigCache = new Map<
   string,
   {
@@ -274,8 +275,9 @@ const guestEntryConfigCacheMaxEntries = 500;
 
 const getClientAddress = (c: Context) => {
   const forwardedFor = c.req.header("x-forwarded-for")?.split(",")[0]?.trim();
+  const address = c.req.header("cf-connecting-ip")?.trim() || forwardedFor || "unknown";
 
-  return c.req.header("cf-connecting-ip") ?? forwardedFor ?? "unknown";
+  return address.toLowerCase().slice(0, 64);
 };
 
 const enforceRateLimit = (
@@ -293,15 +295,18 @@ const enforceRateLimit = (
   const now = Date.now();
   const current = rateLimitBuckets.get(key);
 
-  if (rateLimitBuckets.size > 5000) {
-    for (const [bucketKey, bucket] of rateLimitBuckets.entries()) {
-      if (bucket.resetAt <= now) {
-        rateLimitBuckets.delete(bucketKey);
-      }
-    }
-  }
-
   if (!current || current.resetAt <= now) {
+    if (current) {
+      rateLimitBuckets.delete(key);
+    }
+
+    while (rateLimitBuckets.size >= rateLimitBucketsMaxEntries) {
+      const leastRecentlyUsedKey = rateLimitBuckets.keys().next().value;
+
+      if (leastRecentlyUsedKey === undefined) break;
+      rateLimitBuckets.delete(leastRecentlyUsedKey);
+    }
+
     rateLimitBuckets.set(key, {
       count: 1,
       resetAt: now + windowMs
@@ -310,6 +315,9 @@ const enforceRateLimit = (
   }
 
   current.count += 1;
+  // Refresh insertion order so capacity eviction stays O(1) and removes the least recently used.
+  rateLimitBuckets.delete(key);
+  rateLimitBuckets.set(key, current);
 
   if (current.count <= limit) {
     return null;
@@ -2659,13 +2667,25 @@ export const createApiApp = () => {
 
   app.post("/api/media/uploads/direct", async (c) => {
     const contentType = c.req.header("Content-Type")?.split(";")[0]?.trim() ?? "";
-    const input = mediaUploadSchema.parse({
+    const parsedInput = mediaUploadSchema.safeParse({
       contentType,
       fileName: c.req.query("fileName"),
       kind: c.req.query("kind"),
       ownerId: c.req.query("ownerId"),
       ownerType: c.req.query("ownerType")
     });
+
+    if (!parsedInput.success) {
+      return c.json(
+        {
+          error: "Media upload request is invalid.",
+          issues: parsedInput.error.issues
+        },
+        400
+      );
+    }
+
+    const input = parsedInput.data;
     const rateLimitResponse = enforceRateLimit(c, {
       key: `media-upload-direct:${getClientAddress(c)}:${input.ownerType}:${input.ownerId}:${input.kind}`,
       limit: 40,
@@ -2701,18 +2721,32 @@ export const createApiApp = () => {
     }
 
     const body = Buffer.from(await c.req.arrayBuffer());
-    const assets = await createDirectMediaUpload(
-      {
-        ...input,
-        body,
-        userId
-      },
-      db
-    );
 
-    return c.json({
-      assets
-    });
+    try {
+      const assets = await createDirectMediaUpload(
+        {
+          ...input,
+          body,
+          userId
+        },
+        db
+      );
+
+      return c.json({
+        assets
+      });
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        (error.message.includes("image") ||
+          error.message.includes("Uploaded file") ||
+          error.message.includes("media kind"))
+      ) {
+        return c.json({ error: error.message }, 400);
+      }
+
+      throw error;
+    }
   });
 
   app.get("/api/media/local-assets", async (c) => {
