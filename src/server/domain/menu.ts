@@ -49,16 +49,10 @@ export class MenuDomainError extends Error {
   }
 }
 
-// New menu writes use enum values that older Prisma clients cannot decode. Keep production
-// fail-closed until every API and worker instance is running the migration-aware client.
+// The QR Menu feature is being retired. Keep every production entry point fail-closed while
+// its stored data and schema are removed in the following deployment.
 export const isMenuModuleRolloutEnabled = () => {
-  if (process.env.NODE_ENV === "test") return true;
-
-  const configuredValue = process.env.MENU_MODULE_ROLLOUT_ENABLED?.trim().toLowerCase();
-
-  if (configuredValue !== undefined) return configuredValue === "true";
-
-  return process.env.NODE_ENV === "development";
+  return process.env.NODE_ENV === "test";
 };
 
 const assertMenuModuleRolloutEnabled = () => {
