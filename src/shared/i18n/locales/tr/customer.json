@@ -260,68 +260,6 @@
       }
     }
   },
-  "menu": {
-    "title": "Menü",
-    "subtitle": "Bir kategori seçin ve mevcut ürünlere göz atın.",
-    "banner": {
-      "title": "Menü",
-      "subtitle": "Yemekler, içecekler ve fiyatlar"
-    },
-    "item": {
-      "unavailable": "Mevcut değil"
-    },
-    "spiceLevels": {
-      "1": "Az acılı",
-      "2": "Acılı",
-      "3": "Çok acılı"
-    },
-    "dietaryTags": {
-      "vegetarian": "Vejetaryen",
-      "vegan": "Vegan",
-      "halal": "Helal",
-      "gluten_free": "Glütensiz",
-      "lactose_free": "Laktozsuz"
-    },
-    "marketingTags": {
-      "new": "Yeni",
-      "popular": "Popüler",
-      "chef_choice": "Şefin seçimi",
-      "seasonal": "Mevsimlik"
-    },
-    "details": {
-      "tagsTitle": "Özellikler",
-      "allergensTitle": "Alerjenler"
-    },
-    "allergens": {
-      "gluten": "Gluten",
-      "crustaceans": "Kabuklular",
-      "eggs": "Yumurta",
-      "fish": "Balık",
-      "peanuts": "Yer fıstığı",
-      "soy": "Soya",
-      "milk": "Süt",
-      "tree_nuts": "Sert kabuklu yemişler",
-      "celery": "Kereviz",
-      "mustard": "Hardal",
-      "sesame": "Susam",
-      "sulphites": "Sülfitler",
-      "lupin": "Acı bakla",
-      "molluscs": "Yumuşakçalar"
-    },
-    "empty": {
-      "title": "Menü henüz boş",
-      "subtitle": "Şu anda mevcut ürün yok."
-    },
-    "error": {
-      "title": "Menü açılamadı",
-      "subtitle": "Lütfen tekrar deneyin.",
-      "action": "Tekrar dene"
-    },
-    "footer": {
-      "title": "Deneyiminizi paylaşmak ister misiniz?",
-      "action": "Mekân hakkında geri bildirim bırakın"
-    }
-  },
   "photos": {
     "add": "Fotoğraf",
     "hints": {

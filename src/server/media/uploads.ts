@@ -17,7 +17,6 @@ import { deleteR2Object, getR2Config, putR2Object } from "./r2-client";
 import {
   getMediaChecksum,
   processLogoImage,
-  processMenuItemPhoto,
   processSubmissionPhoto,
   type ProcessedImage
 } from "./processing";
@@ -35,12 +34,7 @@ type CreateDirectMediaUploadInput = {
 const getSizeLimitBytes = () => MEDIA_IMAGE_MAX_BYTES;
 
 const assertUploadKindIsImage = (kind: MediaAssetKind) => {
-  if (
-    kind !== "MENU_ITEM_PHOTO" &&
-    kind !== "ORGANIZATION_LOGO" &&
-    kind !== "STAFF_AVATAR" &&
-    kind !== "SUBMISSION_PHOTO"
-  ) {
+  if (kind !== "ORGANIZATION_LOGO" && kind !== "STAFF_AVATAR" && kind !== "SUBMISSION_PHOTO") {
     throw new Error("This media kind cannot be uploaded through the image upload flow.");
   }
 };
@@ -158,8 +152,7 @@ const createFinalMediaAssetInputs = async ({
     return finalAssets;
   }
 
-  const processed =
-    kind === "MENU_ITEM_PHOTO" ? await processMenuItemPhoto(body) : await processLogoImage(body);
+  const processed = await processLogoImage(body);
   const finalKey = buildFinalStorageKey({
     extension: processed.extension,
     kind,

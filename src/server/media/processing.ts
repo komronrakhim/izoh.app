@@ -113,38 +113,6 @@ export const processLogoImage = async (input: Uint8Array) => {
   } satisfies ProcessedImage;
 };
 
-export const processMenuItemPhoto = async (input: Uint8Array) => {
-  const output = await sharp(input, {
-    limitInputPixels: 24_000_000
-  })
-    .rotate()
-    .resize({
-      fit: "inside",
-      height: 1200,
-      withoutEnlargement: true,
-      width: 1200
-    })
-    .flatten({
-      background: "#ffffff"
-    })
-    .jpeg({
-      mozjpeg: true,
-      quality: 84
-    })
-    .toBuffer({
-      resolveWithObject: true
-    });
-
-  return {
-    body: output.data,
-    contentType: "image/jpeg",
-    extension: "jpg",
-    height: output.info.height,
-    sizeBytes: output.data.byteLength,
-    width: output.info.width
-  } satisfies ProcessedImage;
-};
-
 export const streamToBuffer = async (stream: unknown) => {
   if (
     !stream ||
