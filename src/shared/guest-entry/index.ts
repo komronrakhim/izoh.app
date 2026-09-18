@@ -11,7 +11,6 @@ import type {
 } from "~/shared/module-settings";
 import type { StaffMemberItem } from "~/shared/staff";
 import type { AppLocale } from "~/shared/i18n";
-import type { GuestMenuSummary } from "~/shared/menu";
 
 export const GUEST_ENTRY_CHANNEL_IDS = ["review", "complaint", "suggestion"] as const;
 
@@ -33,7 +32,6 @@ export type GuestEntryChannel = {
 
 export type GuestEntryConfigPayload = {
   channels: GuestEntryChannel[];
-  menu: GuestMenuSummary;
   organization: {
     description: string;
     id: string;

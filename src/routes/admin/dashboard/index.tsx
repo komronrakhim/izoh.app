@@ -5,7 +5,6 @@ import {
   BarChart3,
   BadgeCheck,
   Bell,
-  BookOpen,
   ChevronRight,
   ExternalLink,
   Eye,
@@ -32,7 +31,7 @@ import * as React from "react";
 import { Avatar } from "~/common/components";
 import { List, ListIcon, LogoWordmark, PendingScreen, Spinner } from "~/common/ui";
 import { cn } from "~/common/utils";
-import { ApiError, fetchApiJson } from "~/shared/api";
+import { fetchApiJson } from "~/shared/api";
 import {
   MAX_ADMIN_ORGANIZATIONS,
   useAdminOrganization,
@@ -48,7 +47,6 @@ import { useI18n } from "~/shared/i18n/react";
 import { LOGO_MAX_BYTES, isSupportedImageContentType, uploadImageAsset } from "~/shared/media";
 import { queryKeys } from "~/shared/query";
 import { PageTransition } from "~/shared/router/page-transition";
-import { useAdminMenuSummaryQuery } from "~/routes/admin/menu/api";
 import {
   openTmaTelegramLink,
   showTmaPopup,
@@ -66,7 +64,6 @@ type IconTone =
   | "guestLink"
   | "integrations"
   | "locale"
-  | "menu"
   | "notifications"
   | "qr"
   | "review"
@@ -85,7 +82,6 @@ const iconToneClassNames: Record<IconTone, string> = {
   guestLink: "bg-[#32ADE6] text-white",
   integrations: "bg-[#5856D6] text-white",
   locale: "bg-[#BF5AF2] text-white",
-  menu: "bg-[#FF9500] text-white",
   notifications: "bg-[#FF3B30] text-white",
   qr: "bg-[#FF9500] text-white",
   review: "bg-[#FFB000] text-white",
@@ -113,7 +109,7 @@ const IntroPointIcon = ({ icon: Icon, tone }: { icon: LucideIcon; tone: IconTone
   </span>
 );
 
-const RowSuffix = ({ children, muted = true }: { children?: React.ReactNode; muted?: boolean }) => (
+const RowSuffix = ({ children, muted = true }: { children?: string; muted?: boolean }) => (
   <span className="flex min-w-0 items-center gap-2 text-muted">
     {children ? (
       <span
@@ -475,10 +471,6 @@ export const AdminOrganizationOverview = ({
     [guestMenuQuery.data?.items]
   );
   const isGuestMenuLoading = Boolean(organization) && guestMenuQuery.isLoading;
-  const menuSummaryQuery = useAdminMenuSummaryQuery(organization?.id, tma.initDataRaw, tma.isReady);
-  const menuEnabled = menuSummaryQuery.data?.moduleEnabled ?? false;
-  const menuRolloutUnavailable =
-    menuSummaryQuery.error instanceof ApiError && menuSummaryQuery.error.status === 404;
   const guestMenuById = React.useMemo(
     () => new Map(guestMenuItems.map((item) => [item.id, item])),
     [guestMenuItems]
@@ -498,7 +490,9 @@ export const AdminOrganizationOverview = ({
   });
   const guestLinkQueryKey = React.useMemo(
     () =>
-      organization ? queryKeys.organizationQrLink(organization.id, "", tma.initDataRaw) : null,
+      organization
+        ? queryKeys.organizationQrLink(organization.id, "", tma.initDataRaw)
+        : null,
     [organization, tma.initDataRaw]
   );
 
@@ -908,32 +902,8 @@ export const AdminOrganizationOverview = ({
         />
 
         <List
-          hint={
-            menuRolloutUnavailable ? t("admin.blocks.staff.hint") : t("admin.menu.dashboardHint")
-          }
+          hint={t("admin.blocks.staff.hint")}
           items={[
-            ...(!menuRolloutUnavailable
-              ? [
-                  {
-                    addon: {
-                      after: (
-                        <RowSuffix muted={!menuEnabled}>
-                          {menuSummaryQuery.isLoading ? (
-                            <Spinner size={16} />
-                          ) : menuSummaryQuery.data ? (
-                            t(`admin.values.${menuEnabled ? "enabled" : "disabled"}`)
-                          ) : (
-                            "—"
-                          )}
-                        </RowSuffix>
-                      ),
-                      before: <SettingsIcon icon={BookOpen} tone="menu" />
-                    },
-                    href: `/admin/${organization.id}/menu`,
-                    title: t("admin.menu.title")
-                  }
-                ]
-              : []),
             {
               addon: {
                 after: (

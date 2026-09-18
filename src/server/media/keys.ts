@@ -3,7 +3,6 @@ import { randomBytes } from "node:crypto";
 type MediaOwnerType = "ORGANIZATION" | "STAFF_MEMBER" | "SUBMISSION" | "USER";
 
 type MediaAssetKind =
-  | "MENU_ITEM_PHOTO"
   | "ORGANIZATION_LOGO"
   | "STAFF_AVATAR"
   | "SUBMISSION_PHOTO"
@@ -36,10 +35,6 @@ export const buildFinalStorageKey = ({
 
   if (kind === "ORGANIZATION_LOGO") {
     return `org/${safeOwnerId}/logo/${suffix}`;
-  }
-
-  if (kind === "MENU_ITEM_PHOTO") {
-    return `org/${safeOwnerId}/menu/${suffix}`;
   }
 
   if (kind === "STAFF_AVATAR") {

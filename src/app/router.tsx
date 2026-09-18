@@ -72,31 +72,6 @@ const AdminLanguagePage = lazyRouteComponent(() =>
     default: module.AdminLanguagePage
   }))
 );
-const AdminMenuPage = lazyRouteComponent(() =>
-  import("~/routes/admin/menu").then((module) => ({
-    default: module.AdminMenuPage
-  }))
-);
-const AdminMenuCategoryCreatePage = lazyRouteComponent(() =>
-  import("~/routes/admin/menu").then((module) => ({
-    default: module.AdminMenuCategoryCreatePage
-  }))
-);
-const AdminMenuCategoryPage = lazyRouteComponent(() =>
-  import("~/routes/admin/menu").then((module) => ({
-    default: module.AdminMenuCategoryPage
-  }))
-);
-const AdminMenuItemCreatePage = lazyRouteComponent(() =>
-  import("~/routes/admin/menu").then((module) => ({
-    default: module.AdminMenuItemCreatePage
-  }))
-);
-const AdminMenuItemPage = lazyRouteComponent(() =>
-  import("~/routes/admin/menu").then((module) => ({
-    default: module.AdminMenuItemPage
-  }))
-);
 const AdminQrConstructor = lazyRouteComponent(() =>
   import("~/routes/admin/qr").then((module) => ({
     default: module.AdminQrConstructor
@@ -170,11 +145,6 @@ const CustomerWizardRoute = lazyRouteComponent(() =>
 const CustomerWizardChoicePage = lazyRouteComponent(() =>
   import("~/routes/guest/start-param/choice").then((module) => ({
     default: module.CustomerWizardChoicePage
-  }))
-);
-const CustomerMenuPage = lazyRouteComponent(() =>
-  import("~/routes/guest/start-param/menu").then((module) => ({
-    default: module.CustomerMenuPage
   }))
 );
 const CustomerWizardStepPage = lazyRouteComponent(() =>
@@ -341,36 +311,6 @@ const adminIntegrationsRoute = createRoute({
   component: AdminIntegrationsPage
 });
 
-const adminMenuRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/admin/$organizationId/menu",
-  component: AdminMenuPage
-});
-
-const adminMenuCategoryCreateRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/admin/$organizationId/menu/categories/new",
-  component: AdminMenuCategoryCreatePage
-});
-
-const adminMenuCategoryRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/admin/$organizationId/menu/categories/$categoryId",
-  component: AdminMenuCategoryPage
-});
-
-const adminMenuItemCreateRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/admin/$organizationId/menu/categories/$categoryId/items/new",
-  component: AdminMenuItemCreatePage
-});
-
-const adminMenuItemRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/admin/$organizationId/menu/categories/$categoryId/items/$itemId",
-  component: AdminMenuItemPage
-});
-
 const adminStaffCreateRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/admin/$organizationId/staff/new",
@@ -407,12 +347,6 @@ const guestChoiceRoute = createRoute({
   component: CustomerWizardChoicePage
 });
 
-const guestMenuRoute = createRoute({
-  getParentRoute: () => guestRoute,
-  path: "menu",
-  component: CustomerMenuPage
-});
-
 const guestStepRoute = createRoute({
   getParentRoute: () => guestRoute,
   path: "$wizardStep",
@@ -438,16 +372,11 @@ const routeTree = rootRoute.addChildren([
   adminFeedRoute,
   adminAnalyticsRoute,
   adminIntegrationsRoute,
-  adminMenuRoute,
-  adminMenuCategoryCreateRoute,
-  adminMenuCategoryRoute,
-  adminMenuItemCreateRoute,
-  adminMenuItemRoute,
   adminStaffCreateRoute,
   adminStaffMemberRoute,
   adminSubscriptionRoute,
   adminSectionRoute,
-  guestRoute.addChildren([guestChoiceRoute, guestMenuRoute, guestStepRoute])
+  guestRoute.addChildren([guestChoiceRoute, guestStepRoute])
 ]);
 
 export const router = createRouter({

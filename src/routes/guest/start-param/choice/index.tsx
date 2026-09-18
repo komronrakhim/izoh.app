@@ -13,7 +13,6 @@ import {
 } from "../module/components";
 import { stepTransition } from "../module/constants";
 import { useCustomerWizard } from "../module/context";
-import { MenuUtilityBanner } from "../menu/menu-utility-banner";
 
 export const CustomerWizardChoicePage = () => {
   const wizard = useCustomerWizard();
@@ -27,10 +26,7 @@ export const CustomerWizardChoicePage = () => {
   useTmaBackButton(false, () => undefined);
   useTmaMainButton(null, () => undefined);
 
-  const menuAvailable = Boolean(wizard.guestEntryConfig?.menu?.available);
-  const hasFeedbackChoices = wizard.choices.length > 0;
-
-  if (!wizard.guestEntryConfig || (!hasFeedbackChoices && !menuAvailable)) {
+  if (!wizard.guestEntryConfig || wizard.choices.length === 0) {
     return (
       <WizardEmptyState title={t("customer.emptyTitle")} subtitle={t("customer.emptySubtitle")} />
     );
@@ -53,40 +49,28 @@ export const CustomerWizardChoicePage = () => {
         />
       ) : null}
 
-      {menuAvailable ? (
-        <div className="pb-5 pt-1">
-          <MenuUtilityBanner
-            href={`/guest/${encodeURIComponent(wizard.guestEntryConfig.startParam)}/menu`}
-            subtitle={t("customer.menu.banner.subtitle")}
-            title={t("customer.menu.banner.title")}
+      <div className="flex flex-1 flex-col pt-1">
+        <motion.section
+          key={wizard.getStepContentKey("choice")}
+          className="grid content-start gap-5"
+          initial={stepTransition.initial}
+          animate={stepTransition.animate}
+          exit={stepTransition.exit}
+          transition={stepTransition.transition}
+        >
+          <WizardStepHeading
+            align="center"
+            title={wizard.getStepTitle("choice")}
+            subtitle={wizard.getStepSubtitle("choice")}
           />
-        </div>
-      ) : null}
 
-      <div className={`flex flex-1 flex-col${menuAvailable ? "" : " pt-1"}`}>
-        {hasFeedbackChoices ? (
-          <motion.section
-            key={wizard.getStepContentKey("choice")}
-            className="grid content-start gap-5"
-            initial={stepTransition.initial}
-            animate={stepTransition.animate}
-            exit={stepTransition.exit}
-            transition={stepTransition.transition}
-          >
-            <WizardStepHeading
-              align="center"
-              title={wizard.getStepTitle("choice")}
-              subtitle={wizard.getStepSubtitle("choice")}
-            />
-
-            <WizardChoiceStep
-              choices={wizard.choices}
-              onChoose={wizard.choose}
-              selectedChoiceId={wizard.selectedChoiceId}
-              t={t}
-            />
-          </motion.section>
-        ) : null}
+          <WizardChoiceStep
+            choices={wizard.choices}
+            onChoose={wizard.choose}
+            selectedChoiceId={wizard.selectedChoiceId}
+            t={t}
+          />
+        </motion.section>
       </div>
 
       <WizardPoweredBy label={t("common.poweredBy")} />

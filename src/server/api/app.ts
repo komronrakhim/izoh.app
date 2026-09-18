@@ -37,27 +37,6 @@ import {
 } from "~/server/domain/notification-settings";
 import { getGuestEntryConfig } from "~/server/domain/guest-entry-config";
 import {
-  MenuDomainError,
-  cleanupStaleDetachedOrganizationMenuPhotos,
-  createOrganizationMenu,
-  createOrganizationMenuCategory,
-  createOrganizationMenuItem,
-  deleteOrganizationMenuCategory,
-  deleteOrganizationMenuItem,
-  deleteDetachedOrganizationMenuPhoto,
-  getGuestMenuByStartParam,
-  getOrganizationGuestMenuSummary,
-  getOrganizationMenuAdmin,
-  getOrganizationMenuAdminSummary,
-  isMenuModuleRolloutEnabled,
-  reorderOrganizationMenuCategories,
-  reorderOrganizationMenuItems,
-  updateOrganizationMenu,
-  updateOrganizationMenuCategory,
-  updateOrganizationMenuEnabled,
-  updateOrganizationMenuItem
-} from "~/server/domain/menu";
-import {
   getOrCreateOrganizationGuestContext,
   getOrganizationGuestContextByCode
 } from "~/server/domain/guest-contexts";
@@ -143,16 +122,6 @@ import {
   type QrFormatId
 } from "~/shared/qr";
 import { TIME_ZONE_MAX_LENGTH } from "~/shared/time-zone";
-import {
-  createMenuCategorySchema,
-  createMenuItemSchema,
-  createMenuSchema,
-  menuModuleEnabledSchema,
-  reorderMenuEntitiesSchema,
-  updateMenuCategorySchema,
-  updateMenuItemSchema,
-  updateMenuSchema
-} from "~/shared/menu";
 
 const telegramInitDataHeader = "X-Telegram-Init-Data";
 const telegramWebhookSecretHeader = "X-Telegram-Bot-Api-Secret-Token";
@@ -195,7 +164,7 @@ const getCorsOrigin = (origin: string) => {
 const mediaUploadSchema = z.object({
   contentType: z.string(),
   fileName: z.string().min(1).max(180),
-  kind: z.enum(["MENU_ITEM_PHOTO", "ORGANIZATION_LOGO", "STAFF_AVATAR", "SUBMISSION_PHOTO"]),
+  kind: z.enum(["ORGANIZATION_LOGO", "STAFF_AVATAR", "SUBMISSION_PHOTO"]),
   ownerId: z.string().min(1),
   ownerType: z.enum(["ORGANIZATION", "STAFF_MEMBER", "SUBMISSION", "USER"])
 });
@@ -293,7 +262,6 @@ const isNonProduction = () => process.env.NODE_ENV !== "production";
 const databaseRequired = (c: Context) => c.json({ error: "Database is required." }, 503);
 
 const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
-const rateLimitBucketsMaxEntries = 5000;
 const guestEntryConfigCache = new Map<
   string,
   {
@@ -306,17 +274,8 @@ const guestEntryConfigCacheMaxEntries = 500;
 
 const getClientAddress = (c: Context) => {
   const forwardedFor = c.req.header("x-forwarded-for")?.split(",")[0]?.trim();
-  const address = c.req.header("cf-connecting-ip")?.trim() || forwardedFor || "unknown";
 
-  return address.toLowerCase().slice(0, 64);
-};
-
-const getGuestMenuRateLimitOrganizationRef = (startParam: string) => {
-  try {
-    return parseGuestEntryStartParam(startParam).organizationRef.toLowerCase().slice(0, 120);
-  } catch {
-    return "invalid";
-  }
+  return c.req.header("cf-connecting-ip") ?? forwardedFor ?? "unknown";
 };
 
 const enforceRateLimit = (
@@ -334,18 +293,15 @@ const enforceRateLimit = (
   const now = Date.now();
   const current = rateLimitBuckets.get(key);
 
+  if (rateLimitBuckets.size > 5000) {
+    for (const [bucketKey, bucket] of rateLimitBuckets.entries()) {
+      if (bucket.resetAt <= now) {
+        rateLimitBuckets.delete(bucketKey);
+      }
+    }
+  }
+
   if (!current || current.resetAt <= now) {
-    if (current) {
-      rateLimitBuckets.delete(key);
-    }
-
-    while (rateLimitBuckets.size >= rateLimitBucketsMaxEntries) {
-      const leastRecentlyUsedKey = rateLimitBuckets.keys().next().value;
-
-      if (leastRecentlyUsedKey === undefined) break;
-      rateLimitBuckets.delete(leastRecentlyUsedKey);
-    }
-
     rateLimitBuckets.set(key, {
       count: 1,
       resetAt: now + windowMs
@@ -354,9 +310,6 @@ const enforceRateLimit = (
   }
 
   current.count += 1;
-  // Refresh insertion order so capacity eviction stays O(1) and removes the least recently used.
-  rateLimitBuckets.delete(key);
-  rateLimitBuckets.set(key, current);
 
   if (current.count <= limit) {
     return null;
@@ -422,7 +375,6 @@ const getCachedGuestEntryConfig = ({
 
   const value = getGuestEntryConfig(
     {
-      includeMenuSummary: false,
       startParam
     },
     db
@@ -547,34 +499,6 @@ const getAdminAccessStatus = (error: Error) => {
   }
 
   if (error.message.includes("Organization is not available")) return 404;
-
-  return null;
-};
-
-const respondToMenuError = (c: Context, error: unknown) => {
-  if (error instanceof z.ZodError) {
-    return c.json(
-      {
-        error: "Menu request is invalid.",
-        issues: error.issues
-      },
-      400
-    );
-  }
-
-  if (error instanceof SyntaxError) {
-    return c.json({ error: "Menu request body must be valid JSON." }, 400);
-  }
-
-  if (error instanceof MenuDomainError) {
-    return c.json({ error: error.message }, error.status);
-  }
-
-  if (error instanceof Error) {
-    const status = getAdminAccessStatus(error);
-
-    if (status) return c.json({ error: error.message }, status);
-  }
 
   return null;
 };
@@ -1850,7 +1774,6 @@ export const createApiApp = () => {
         db,
         startParam
       });
-      const menu = await getOrganizationGuestMenuSummary(guestEntryConfig.organization.id, db);
       let scanId: null | string = null;
       let userId: string | undefined;
       let userLocale: string | undefined;
@@ -1890,7 +1813,6 @@ export const createApiApp = () => {
 
       return c.json({
         ...guestEntryConfig,
-        menu,
         scanId
       });
     } catch (error) {
@@ -1909,364 +1831,6 @@ export const createApiApp = () => {
       throw error;
     }
   };
-
-  app.get("/api/organizations/:organizationId/menu/summary", async (c) => {
-    const organizationId = c.req.param("organizationId");
-    const db = getPrisma();
-
-    if (!db) return databaseRequired(c);
-
-    try {
-      await requireOrganizationOwner({ c, db, organizationId });
-      return c.json(await getOrganizationMenuAdminSummary(organizationId, db));
-    } catch (error) {
-      const response = respondToMenuError(c, error);
-
-      if (response) return response;
-      throw error;
-    }
-  });
-
-  app.get("/api/organizations/:organizationId/menu", async (c) => {
-    const organizationId = c.req.param("organizationId");
-    const db = getPrisma();
-
-    if (!db) return databaseRequired(c);
-
-    try {
-      await requireOrganizationOwner({ c, db, organizationId });
-      return c.json(await getOrganizationMenuAdmin(organizationId, db));
-    } catch (error) {
-      const response = respondToMenuError(c, error);
-
-      if (response) return response;
-      throw error;
-    }
-  });
-
-  app.post("/api/organizations/:organizationId/menu", async (c) => {
-    const organizationId = c.req.param("organizationId");
-    const db = getPrisma();
-
-    if (!db) return databaseRequired(c);
-
-    try {
-      const input = createMenuSchema.parse(await c.req.json());
-
-      await requireOrganizationOwner({ c, db, organizationId });
-      const payload = await createOrganizationMenu({ input, organizationId }, db);
-
-      guestEntryConfigCache.clear();
-      return c.json(payload);
-    } catch (error) {
-      const response = respondToMenuError(c, error);
-
-      if (response) return response;
-      throw error;
-    }
-  });
-
-  app.patch("/api/organizations/:organizationId/menu", async (c) => {
-    const organizationId = c.req.param("organizationId");
-    const db = getPrisma();
-
-    if (!db) return databaseRequired(c);
-
-    try {
-      const input = updateMenuSchema.parse(await c.req.json());
-
-      await requireOrganizationOwner({ c, db, organizationId });
-      const payload = await updateOrganizationMenu({ input, organizationId }, db);
-
-      guestEntryConfigCache.clear();
-      return c.json(payload);
-    } catch (error) {
-      const response = respondToMenuError(c, error);
-
-      if (response) return response;
-      throw error;
-    }
-  });
-
-  app.patch("/api/organizations/:organizationId/menu/enabled", async (c) => {
-    const organizationId = c.req.param("organizationId");
-    const db = getPrisma();
-
-    if (!db) return databaseRequired(c);
-
-    try {
-      const input = menuModuleEnabledSchema.parse(await c.req.json());
-
-      await requireOrganizationOwner({ c, db, organizationId });
-      const payload = await updateOrganizationMenuEnabled(
-        {
-          enabled: input.enabled,
-          organizationId
-        },
-        db
-      );
-
-      guestEntryConfigCache.clear();
-      return c.json(payload);
-    } catch (error) {
-      const response = respondToMenuError(c, error);
-
-      if (response) return response;
-      throw error;
-    }
-  });
-
-  app.patch("/api/organizations/:organizationId/menu/categories/reorder", async (c) => {
-    const organizationId = c.req.param("organizationId");
-    const db = getPrisma();
-
-    if (!db) return databaseRequired(c);
-
-    try {
-      const input = reorderMenuEntitiesSchema.parse(await c.req.json());
-
-      await requireOrganizationOwner({ c, db, organizationId });
-      const payload = await reorderOrganizationMenuCategories({ input, organizationId }, db);
-
-      guestEntryConfigCache.clear();
-      return c.json(payload);
-    } catch (error) {
-      const response = respondToMenuError(c, error);
-
-      if (response) return response;
-      throw error;
-    }
-  });
-
-  app.post("/api/organizations/:organizationId/menu/categories", async (c) => {
-    const organizationId = c.req.param("organizationId");
-    const db = getPrisma();
-
-    if (!db) return databaseRequired(c);
-
-    try {
-      const input = createMenuCategorySchema.parse(await c.req.json());
-
-      await requireOrganizationOwner({ c, db, organizationId });
-      const payload = await createOrganizationMenuCategory({ input, organizationId }, db);
-
-      guestEntryConfigCache.clear();
-      return c.json(payload);
-    } catch (error) {
-      const response = respondToMenuError(c, error);
-
-      if (response) return response;
-      throw error;
-    }
-  });
-
-  app.patch("/api/organizations/:organizationId/menu/categories/:categoryId", async (c) => {
-    const organizationId = c.req.param("organizationId");
-    const categoryId = c.req.param("categoryId");
-    const db = getPrisma();
-
-    if (!db) return databaseRequired(c);
-
-    try {
-      const input = updateMenuCategorySchema.parse(await c.req.json());
-
-      await requireOrganizationOwner({ c, db, organizationId });
-      const payload = await updateOrganizationMenuCategory(
-        { categoryId, input, organizationId },
-        db
-      );
-
-      guestEntryConfigCache.clear();
-      return c.json(payload);
-    } catch (error) {
-      const response = respondToMenuError(c, error);
-
-      if (response) return response;
-      throw error;
-    }
-  });
-
-  app.delete("/api/organizations/:organizationId/menu/categories/:categoryId", async (c) => {
-    const organizationId = c.req.param("organizationId");
-    const categoryId = c.req.param("categoryId");
-    const db = getPrisma();
-
-    if (!db) return databaseRequired(c);
-
-    try {
-      await requireOrganizationOwner({ c, db, organizationId });
-      const payload = await deleteOrganizationMenuCategory({ categoryId, organizationId }, db);
-
-      guestEntryConfigCache.clear();
-      return c.json(payload);
-    } catch (error) {
-      const response = respondToMenuError(c, error);
-
-      if (response) return response;
-      throw error;
-    }
-  });
-
-  app.patch(
-    "/api/organizations/:organizationId/menu/categories/:categoryId/items/reorder",
-    async (c) => {
-      const organizationId = c.req.param("organizationId");
-      const categoryId = c.req.param("categoryId");
-      const db = getPrisma();
-
-      if (!db) return databaseRequired(c);
-
-      try {
-        const input = reorderMenuEntitiesSchema.parse(await c.req.json());
-
-        await requireOrganizationOwner({ c, db, organizationId });
-        const payload = await reorderOrganizationMenuItems(
-          { categoryId, input, organizationId },
-          db
-        );
-
-        guestEntryConfigCache.clear();
-        return c.json(payload);
-      } catch (error) {
-        const response = respondToMenuError(c, error);
-
-        if (response) return response;
-        throw error;
-      }
-    }
-  );
-
-  app.post("/api/organizations/:organizationId/menu/categories/:categoryId/items", async (c) => {
-    const organizationId = c.req.param("organizationId");
-    const categoryId = c.req.param("categoryId");
-    const db = getPrisma();
-
-    if (!db) return databaseRequired(c);
-
-    try {
-      const input = createMenuItemSchema.parse(await c.req.json());
-
-      await requireOrganizationOwner({ c, db, organizationId });
-      const payload = await createOrganizationMenuItem({ categoryId, input, organizationId }, db);
-
-      guestEntryConfigCache.clear();
-      return c.json(payload);
-    } catch (error) {
-      const response = respondToMenuError(c, error);
-
-      if (response) return response;
-      throw error;
-    }
-  });
-
-  app.patch("/api/organizations/:organizationId/menu/items/:itemId", async (c) => {
-    const organizationId = c.req.param("organizationId");
-    const itemId = c.req.param("itemId");
-    const db = getPrisma();
-
-    if (!db) return databaseRequired(c);
-
-    try {
-      const input = updateMenuItemSchema.parse(await c.req.json());
-
-      await requireOrganizationOwner({ c, db, organizationId });
-      const payload = await updateOrganizationMenuItem({ input, itemId, organizationId }, db);
-
-      guestEntryConfigCache.clear();
-      return c.json(payload);
-    } catch (error) {
-      const response = respondToMenuError(c, error);
-
-      if (response) return response;
-      throw error;
-    }
-  });
-
-  app.delete("/api/organizations/:organizationId/menu/items/:itemId", async (c) => {
-    const organizationId = c.req.param("organizationId");
-    const itemId = c.req.param("itemId");
-    const db = getPrisma();
-
-    if (!db) return databaseRequired(c);
-
-    try {
-      await requireOrganizationOwner({ c, db, organizationId });
-      const payload = await deleteOrganizationMenuItem({ itemId, organizationId }, db);
-
-      guestEntryConfigCache.clear();
-      return c.json(payload);
-    } catch (error) {
-      const response = respondToMenuError(c, error);
-
-      if (response) return response;
-      throw error;
-    }
-  });
-
-  app.delete("/api/organizations/:organizationId/menu/photos/:mediaAssetId", async (c) => {
-    const organizationId = c.req.param("organizationId");
-    const mediaAssetId = c.req.param("mediaAssetId");
-    const db = getPrisma();
-
-    if (!db) return databaseRequired(c);
-
-    try {
-      await requireOrganizationOwner({ c, db, organizationId });
-      return c.json(
-        await deleteDetachedOrganizationMenuPhoto(
-          {
-            mediaAssetId,
-            organizationId
-          },
-          db
-        )
-      );
-    } catch (error) {
-      const response = respondToMenuError(c, error);
-
-      if (response) return response;
-      throw error;
-    }
-  });
-
-  app.get("/api/guest-entry/:startParam/menu", async (c) => {
-    const startParam = c.req.param("startParam");
-    const db = getPrisma();
-    const clientAddress = getClientAddress(c);
-    const clientRateLimitResponse = enforceRateLimit(c, {
-      key: `guest-menu-client:${clientAddress}`,
-      limit: 300,
-      windowMs: 10 * 60 * 1000
-    });
-
-    if (clientRateLimitResponse) return clientRateLimitResponse;
-
-    const rateLimitOrganizationRef = getGuestMenuRateLimitOrganizationRef(startParam);
-    const rateLimitResponse = enforceRateLimit(c, {
-      key: `guest-menu:${clientAddress}:${rateLimitOrganizationRef}`,
-      limit: 180,
-      windowMs: 10 * 60 * 1000
-    });
-
-    if (rateLimitResponse) return rateLimitResponse;
-    if (!db) return databaseRequired(c);
-
-    try {
-      const payload = await getGuestMenuByStartParam({ startParam }, db);
-
-      c.header("Cache-Control", "no-store");
-      return c.json(payload);
-    } catch (error) {
-      const response = respondToMenuError(c, error);
-
-      if (response) return response;
-      if (error instanceof Error && error.message.includes("Guest entry payload")) {
-        return c.json({ error: error.message }, 404);
-      }
-
-      throw error;
-    }
-  });
 
   app.get("/api/guest-entry/:startParam", handleGuestEntryConfigRequest);
 
@@ -3136,65 +2700,19 @@ export const createApiApp = () => {
       return c.json({ error: "Telegram init data is required." }, 401);
     }
 
-    if (input.kind === "MENU_ITEM_PHOTO") {
-      if (!isMenuModuleRolloutEnabled()) {
-        return c.json({ error: "Menu module is not available." }, 404);
-      }
-
-      if (input.ownerType !== "ORGANIZATION") {
-        return c.json({ error: "Menu item photos must be owned by an organization." }, 400);
-      }
-
-      const organization = await db.organization.findFirst({
-        select: { id: true },
-        where: {
-          id: input.ownerId,
-          ...(userId ? { owner_user_id: userId } : {}),
-          status: "ACTIVE"
-        }
-      });
-
-      if (!organization) {
-        return c.json({ error: "Organization is not available." }, 404);
-      }
-
-      try {
-        await cleanupStaleDetachedOrganizationMenuPhotos({ organizationId: input.ownerId }, db);
-      } catch (error) {
-        console.warn("Stale detached menu photo sweep failed", {
-          error: error instanceof Error ? error.message : String(error),
-          organizationId: input.ownerId
-        });
-      }
-    }
-
     const body = Buffer.from(await c.req.arrayBuffer());
+    const assets = await createDirectMediaUpload(
+      {
+        ...input,
+        body,
+        userId
+      },
+      db
+    );
 
-    try {
-      const assets = await createDirectMediaUpload(
-        {
-          ...input,
-          body,
-          userId
-        },
-        db
-      );
-
-      return c.json({
-        assets
-      });
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        (error.message.includes("image") ||
-          error.message.includes("Uploaded file") ||
-          error.message.includes("media kind"))
-      ) {
-        return c.json({ error: error.message }, 400);
-      }
-
-      throw error;
-    }
+    return c.json({
+      assets
+    });
   });
 
   app.get("/api/media/local-assets", async (c) => {

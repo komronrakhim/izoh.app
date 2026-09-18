@@ -23,7 +23,6 @@ import type { StaffMemberItem } from "~/shared/staff";
 import { isOrganizationSubscriptionActive } from "~/server/domain/subscriptions";
 import { fromPrismaLocale } from "~/shared/i18n";
 import { getMediaPublicUrl } from "~/server/media/public-url";
-import { getOrganizationGuestMenuSummary } from "~/server/domain/menu";
 
 const toStaffMemberItem = (
   staffMember: {
@@ -107,10 +106,8 @@ const getAvatarUrlByAssetId = async (avatarMediaAssetIds: Array<null | string>, 
 
 export const getGuestEntryConfig = async (
   {
-    includeMenuSummary = true,
     startParam
   }: {
-    includeMenuSummary?: boolean;
     startParam: string;
   },
   db: DomainDb = getDomainDb()
@@ -171,9 +168,6 @@ export const getGuestEntryConfig = async (
   ) {
     return {
       channels: [],
-      menu: {
-        available: false
-      },
       organization: {
         description: organization.description,
         id: organization.id,
@@ -243,9 +237,6 @@ export const getGuestEntryConfig = async (
 
   return {
     channels,
-    menu: includeMenuSummary
-      ? await getOrganizationGuestMenuSummary(organization.id, db)
-      : { available: false },
     organization: {
       description: organization.description,
       id: organization.id,

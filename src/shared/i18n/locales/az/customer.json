@@ -260,68 +260,6 @@
       }
     }
   },
-  "menu": {
-    "title": "Menyu",
-    "subtitle": "Kateqoriya seçin və mövcud məhsullara baxın.",
-    "banner": {
-      "title": "Menyu",
-      "subtitle": "Yeməklər, içkilər və qiymətlər"
-    },
-    "item": {
-      "unavailable": "Hazırda mövcud deyil"
-    },
-    "spiceLevels": {
-      "1": "Az acılı",
-      "2": "Acılı",
-      "3": "Çox acılı"
-    },
-    "dietaryTags": {
-      "vegetarian": "Vegetarian",
-      "vegan": "Vegan",
-      "halal": "Halal",
-      "gluten_free": "Qlütensiz",
-      "lactose_free": "Laktozasız"
-    },
-    "marketingTags": {
-      "new": "Yeni",
-      "popular": "Populyar",
-      "chef_choice": "Aşpazın seçimi",
-      "seasonal": "Mövsümi"
-    },
-    "details": {
-      "tagsTitle": "Xüsusiyyətlər",
-      "allergensTitle": "Allergenlər"
-    },
-    "allergens": {
-      "gluten": "Qlüten",
-      "crustaceans": "Xərçəngkimilər",
-      "eggs": "Yumurta",
-      "fish": "Balıq",
-      "peanuts": "Yerfındığı",
-      "soy": "Soya",
-      "milk": "Süd",
-      "tree_nuts": "Qoz-fındıq",
-      "celery": "Kərəviz",
-      "mustard": "Xardal",
-      "sesame": "Küncüt",
-      "sulphites": "Sulfitlər",
-      "lupin": "Lüpin",
-      "molluscs": "Mollyuskalar"
-    },
-    "empty": {
-      "title": "Menyu hələ boşdur",
-      "subtitle": "Hazırda mövcud məhsul yoxdur."
-    },
-    "error": {
-      "title": "Menyunu açmaq mümkün olmadı",
-      "subtitle": "Yenidən cəhd edin.",
-      "action": "Yenidən cəhd et"
-    },
-    "footer": {
-      "title": "Təəssüratınızı bölüşmək istəyirsiniz?",
-      "action": "Məkan haqqında rəy bildirin"
-    }
-  },
   "photos": {
     "add": "Foto",
     "hints": {
