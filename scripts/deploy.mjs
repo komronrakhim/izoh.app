@@ -61,13 +61,7 @@ const main = async () => {
   await run(npmCommand, ["run", "db:generate"]);
 
   if (!skipDb) {
-    const skipMigrations = args.has("--skip-migrations");
-
-    if (!skipMigrations) {
-      await run(process.execPath, ["scripts/remove-menu-data.mjs"]);
-    }
-
-    await applyMigrations(skipMigrations);
+    await applyMigrations(args.has("--skip-migrations"));
   } else {
     console.log("Skipping database migration step by flag.");
   }
