@@ -48,12 +48,15 @@ import { LOGO_MAX_BYTES, isSupportedImageContentType, uploadImageAsset } from "~
 import { queryKeys } from "~/shared/query";
 import { PageTransition } from "~/shared/router/page-transition";
 import {
+  openTmaLink,
   openTmaTelegramLink,
   showTmaPopup,
   useTma,
   useTmaBackButton,
   useTmaMainButton
 } from "~/shared/tma";
+
+const RAKHI_URL = "https://rakhi.mov";
 
 type IconTone =
   | "analytics"
@@ -426,8 +429,29 @@ export const AdminDashboard = () => {
             ]}
           />
 
-          <footer className="flex justify-center px-4 pb-1 pt-2 text-black/38 dark:text-white/38">
+          <footer className="flex flex-col items-center px-4 pb-1 pt-2 text-black/38 dark:text-white/38">
             <LogoWordmark className="w-[42px]" />
+            <a
+              aria-label="Rakhi.mov"
+              className="ios-touch-target mt-0.5 inline-flex items-center gap-1.5 rounded-lg px-2 text-[10px] font-medium leading-none tracking-[0.04em] text-black/55 transition-opacity hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45 active:opacity-60 dark:text-white/55"
+              href={RAKHI_URL}
+              onClick={(event) => {
+                event.preventDefault();
+                openTmaLink(RAKHI_URL);
+              }}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <span aria-hidden="true">By</span>
+              <img
+                alt=""
+                aria-hidden="true"
+                className="h-[15px] w-auto opacity-[0.55] dark:invert"
+                height="724"
+                src="/brand/signature.svg"
+                width="2172"
+              />
+            </a>
           </footer>
         </div>
       </main>
