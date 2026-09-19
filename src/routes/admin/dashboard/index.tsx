@@ -57,6 +57,7 @@ import {
 } from "~/shared/tma";
 
 const RAKHI_URL = "https://rakhi.mov";
+const RAKHI_SIGNATURE_PATH = "/brand/signature.svg";
 
 type IconTone =
   | "analytics"
@@ -129,31 +130,33 @@ const RowSuffix = ({ children, muted = true }: { children?: string; muted?: bool
 );
 
 const AdminBrandFooter = () => (
-  <footer className="flex flex-col items-center px-4 pb-1 pt-2 text-black/38 dark:text-white/38">
-    <LogoWordmark className="w-[42px]" />
-    <a
-      aria-label="By Rakhi.mov"
-      className="ios-touch-target mt-1 inline-flex items-center gap-2 rounded-xl px-2.5 text-muted transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45 active:opacity-60"
-      href={RAKHI_URL}
-      onClick={(event) => {
-        event.preventDefault();
-        openTmaLink(RAKHI_URL);
-      }}
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      <span aria-hidden="true" className="ios-footnote font-semibold tracking-[0.02em]">
-        By
+  <footer className="flex justify-center px-4 pb-1 pt-2 text-black/38 dark:text-white/38">
+    <div className="inline-flex min-h-11 items-center gap-2.5">
+      <LogoWordmark className="w-[42px]" />
+      <span aria-hidden="true" className="text-[15px] font-normal leading-none">
+        ×
       </span>
-      <img
-        alt=""
-        aria-hidden="true"
-        className="h-7 w-auto opacity-80 dark:invert"
-        height="724"
-        src="/brand/signature.svg"
-        width="2172"
-      />
-    </a>
+      <a
+        aria-label="Rakhi.mov"
+        className="ios-touch-target inline-flex items-center justify-center rounded-xl transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45 active:opacity-60"
+        href={RAKHI_URL}
+        onClick={(event) => {
+          event.preventDefault();
+          openTmaLink(RAKHI_URL);
+        }}
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        <span
+          aria-hidden="true"
+          className="h-7 w-[84px] shrink-0 bg-current"
+          style={{
+            WebkitMask: `url(${RAKHI_SIGNATURE_PATH}) center / contain no-repeat`,
+            mask: `url(${RAKHI_SIGNATURE_PATH}) center / contain no-repeat`
+          }}
+        />
+      </a>
+    </div>
   </footer>
 );
 
