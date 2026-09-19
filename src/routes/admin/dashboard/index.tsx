@@ -128,6 +128,35 @@ const RowSuffix = ({ children, muted = true }: { children?: string; muted?: bool
   </span>
 );
 
+const AdminBrandFooter = () => (
+  <footer className="flex flex-col items-center px-4 pb-1 pt-2 text-black/38 dark:text-white/38">
+    <LogoWordmark className="w-[42px]" />
+    <a
+      aria-label="By Rakhi.mov"
+      className="ios-touch-target mt-1 inline-flex items-center gap-2 rounded-xl px-2.5 text-muted transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45 active:opacity-60"
+      href={RAKHI_URL}
+      onClick={(event) => {
+        event.preventDefault();
+        openTmaLink(RAKHI_URL);
+      }}
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      <span aria-hidden="true" className="ios-footnote font-semibold tracking-[0.02em]">
+        By
+      </span>
+      <img
+        alt=""
+        aria-hidden="true"
+        className="h-7 w-auto opacity-80 dark:invert"
+        height="724"
+        src="/brand/signature.svg"
+        width="2172"
+      />
+    </a>
+  </footer>
+);
+
 const QuickActionTile = ({
   disabled,
   icon: Icon,
@@ -429,30 +458,7 @@ export const AdminDashboard = () => {
             ]}
           />
 
-          <footer className="flex flex-col items-center px-4 pb-1 pt-2 text-black/38 dark:text-white/38">
-            <LogoWordmark className="w-[42px]" />
-            <a
-              aria-label="Rakhi.mov"
-              className="ios-touch-target mt-0.5 inline-flex items-center gap-1.5 rounded-lg px-2 text-[10px] font-medium leading-none tracking-[0.04em] text-black/55 transition-opacity hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45 active:opacity-60 dark:text-white/55"
-              href={RAKHI_URL}
-              onClick={(event) => {
-                event.preventDefault();
-                openTmaLink(RAKHI_URL);
-              }}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <span aria-hidden="true">By</span>
-              <img
-                alt=""
-                aria-hidden="true"
-                className="h-[15px] w-auto opacity-[0.55] dark:invert"
-                height="724"
-                src="/brand/signature.svg"
-                width="2172"
-              />
-            </a>
-          </footer>
+          <AdminBrandFooter />
         </div>
       </main>
     </PageTransition>
@@ -978,9 +984,7 @@ export const AdminOrganizationOverview = ({
           ]}
         />
 
-        <footer className="flex justify-center px-4 pb-1 pt-2 text-black/38 dark:text-white/38">
-          <LogoWordmark className="w-[42px]" />
-        </footer>
+        <AdminBrandFooter />
       </div>
     </div>
   );
